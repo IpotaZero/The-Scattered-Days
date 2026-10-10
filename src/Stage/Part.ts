@@ -4,7 +4,8 @@ import { Game } from "../Game/Game"
 
 // ボスの部位(子機)。親について動き、決まった攻撃を一つだけくり返す。親が倒れると一緒に倒れる。
 // 部位を壊せば、その攻撃はなくなる。
-// 部位ごとにこのクラスを継承して、place と attack を書く。delay は最初の攻撃までのフレーム数
+// 部位ごとにこのクラスを継承して、place と attack を書く。delay は最初の攻撃までのフレーム数。
+// charge を渡すと、生まれてから charge フレームの間は充電していて、攻撃もせず、攻撃も効かない(撃つと充電が早まる)。delay は充電が終わってから数える
 export abstract class Part extends Enemy {
     constructor(
         game: Game,
@@ -12,8 +13,9 @@ export abstract class Part extends Enemy {
         life: number,
         r: number,
         delay: number,
+        { charge = 0 }: { charge?: number } = {},
     ) {
-        super(game, life, r)
+        super(game, life, r, { charge })
 
         this.setParent(parent, () => this.place())
         this.scripts.add(() => this.attack(), { loop: Infinity, margin: delay })

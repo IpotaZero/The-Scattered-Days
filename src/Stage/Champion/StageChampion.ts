@@ -308,7 +308,8 @@ class Mandible extends Part {
         private readonly side: number,
         private readonly generation: number,
     ) {
-        super(game, parent, 500, Size.L, 140 + (side > 0 ? 60 : 0))
+        // 体力は左500・右650。生まれてから 240(二代目は300)フレーム充電する
+        super(game, parent, side > 0 ? 650 : 500, Size.L, 30 + (side > 0 ? 60 : 0), { charge: 240 + generation * 60 })
     }
 
     protected place() {
@@ -343,7 +344,14 @@ class SquareWing extends Part {
         private readonly row: number,
         private readonly generation: number,
     ) {
-        super(game, parent, 300, Size.M, 150 + row * 40 + (side > 0 ? 20 : 0))
+        // 体力は左上300・右上460・左下220・右下380
+        super(
+            game,
+            parent,
+            220 + (row === 0 ? 80 : 0) + (side > 0 ? 160 : 0),
+            Size.M,
+            150 + row * 40 + (side > 0 ? 20 : 0),
+        )
     }
 
     protected place() {
@@ -362,7 +370,8 @@ class HexWing extends Part {
         private readonly i: number,
         private readonly generation: number,
     ) {
-        super(game, parent, 300, Size.M, 150 + i * 20)
+        // 体力は 220 から 50 ずつ多くなる(220〜470)
+        super(game, parent, 220 + i * 50, Size.M, 150 + i * 20)
     }
 
     protected place() {
@@ -382,7 +391,8 @@ class Leg extends Part {
         private readonly order: number,
         private readonly generation: number,
     ) {
-        super(game, parent, 150, Size.S, 170)
+        // 体力は胴に近い脚から 120・180・240。生まれてから 420(二代目は480)フレーム充電する
+        super(game, parent, 60 + 60 * Math.abs(x), Size.S, 20, { charge: 420 + generation * 60 })
     }
 
     protected place() {
@@ -412,7 +422,8 @@ class Stinger extends Part {
         parent: Enemy,
         private readonly generation: number,
     ) {
-        super(game, parent, 600, Size.L, 200)
+        // 生まれてから 600(二代目は720)フレーム充電する
+        super(game, parent, 900, Size.L, 30, { charge: 600 + generation * 120 })
     }
 
     protected place() {
@@ -469,7 +480,8 @@ class Worker extends Part {
         private readonly count: number,
         private readonly generation: number,
     ) {
-        super(game, parent, 180, Size.S, 130)
+        // 体力は 120 から 40 ずつ多くなる。生まれてから 480 + 60i(二代目はさらに60)フレーム充電する
+        super(game, parent, 120 + i * 40, Size.S, 20, { charge: 480 + i * 60 + generation * 60 })
     }
 
     protected place() {
@@ -504,7 +516,8 @@ class Escort extends Part {
         parent: Enemy,
         private readonly i: number,
     ) {
-        super(game, parent, 300, Size.M, 60 + i * 10)
+        // 体力は 200 から 40 ずつ多くなる。生まれてから 60 + 40i フレーム充電する
+        super(game, parent, 200 + i * 40, Size.M, 20, { charge: 60 + i * 40 })
     }
 
     protected place() {
