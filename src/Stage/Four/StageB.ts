@@ -80,7 +80,7 @@ class EnemyBoss extends Enemy {
         yield* Array(55)
         yield* this.moveTo(
             vec(this.game.WIDTH * (0.32 + 0.36 * this.random()), this.game.HEIGHT * (0.1 + 0.12 * this.random())),
-            22,
+            28,
         )
     }
 
@@ -88,17 +88,17 @@ class EnemyBoss extends Enemy {
         yield* Array(20)
         yield* this.moveTo(
             vec(this.game.WIDTH * (0.32 + 0.36 * this.random()), this.game.HEIGHT * (0.1 + 0.14 * this.random())),
-            12,
+            15,
         )
 
         yield* remodel(this)
             .format("diamond")
             .color("#ffffff")
             .p(this.p.clone())
-            .speed(2)
+            .speed(1.6)
             .radian(this.random() * T)
             .ex(40)
-            .g((b) => Behavior.ease(b, "speed", 6.5, 30, Ease.In))
+            .g((b) => Behavior.ease(b, "speed", 5.2, 30, Ease.In))
             .fire(this.game.bullets)
     }
 
@@ -108,7 +108,7 @@ class EnemyBoss extends Enemy {
             .r(5)
             .color("#ffffff")
             .p(this.p.clone())
-            .speed(3.5)
+            .speed(2.8)
             .radian(this.random() * T)
             .ex(24)
             .fire(this.game.bullets)
@@ -125,7 +125,7 @@ class EnemyBoss extends Enemy {
             .ex(28)
             .duplicate(3, (b, k) => {
                 b.radian += (k * T) / 84
-                b.speed = 3.5 + k
+                b.speed = 2.8 + k * 0.8
                 return b
             })
             .fire(this.game.bullets)
@@ -166,7 +166,7 @@ namespace Tiger {
             .color("#ffffff")
             .p(start)
             .radian(aim)
-            .speed(24)
+            .speed(19.2)
             .duplicate(6)
             .delayByIndex(3)
             .shift(4, 22)
@@ -184,7 +184,7 @@ namespace Tiger {
                 .r(5)
                 .color("#f0f0f0")
                 .p(me.p.clone())
-                .speed(5.5)
+                .speed(4.4)
                 .radian(T / 4 + sway + (k - 2) * 0.12)
                 .shift(11, 24)
                 .fire(me.game.bullets)
@@ -232,14 +232,14 @@ class HindLeg extends Part {
             .r(6)
             .color("#d0e8ff")
             .p(this.p.clone())
-            .speed(6.5)
+            .speed(5.2)
             .radian(this.side > 0 ? 0 : Math.PI)
             .duplicate(8)
             .delayByIndex(4)
             .nway(3, 0.22)
             .unbounded()
             .g(function* (b) {
-                yield* Behavior.rotating(b, this.side * 0.045, 35)
+                yield* Behavior.rotating(b, this.side * 0.036, 44)
 
                 while (b.p.y < b.game.HEIGHT + 20) yield
                 b.life = 0
@@ -283,10 +283,10 @@ class Cub extends Part {
             .r(5)
             .color("#fff0d0")
             .p(this.p.clone())
-            .speed(1.5)
+            .speed(1.2)
             .radian(this.random() * T)
             .ex(12)
-            .g((b) => Behavior.ease(b, "speed", 5.5, 40, Ease.In))
+            .g((b) => Behavior.ease(b, "speed", 4.4, 40, Ease.In))
             .fire(this.game.bullets)
 
         yield* Array(75)
@@ -312,10 +312,10 @@ class Young extends Part {
             .r(5)
             .color("#f0f0ff")
             .p(this.p.clone())
-            .speed(4)
+            .speed(3.2)
             .radian(this.random() * T)
             .ex(20)
-            .g((b) => Behavior.reaccel(b, 20, 20, 30, 5.5))
+            .g((b) => Behavior.reaccel(b, 20, 20, 30, 4.4))
             .fire(this.game.bullets)
 
         yield* Array(90)
@@ -340,12 +340,12 @@ class YoungClaw extends Part {
             .format("line")
             .color("#ffffff")
             .p(this.p.clone())
-            .speed(3)
+            .speed(2.4)
             .radian(T / 4)
             .duplicate(5)
             .delayByIndex(3)
             .shift(3, 16)
-            .g((b) => Behavior.ease(b, "speed", 9, 30, Ease.In))
+            .g((b) => Behavior.ease(b, "speed", 7.2, 30, Ease.In))
             .fire(this.game.bullets)
 
         yield* Array(70)
