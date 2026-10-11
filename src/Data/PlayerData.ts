@@ -29,10 +29,14 @@ type SerializedPlayerData = {
     noMissClears?: string[]
     mapNodeId?: string
     debugUnlockAll?: boolean
+    seenCutscenes?: CutsceneId[]
 }
 
 // 免状(道場主を倒すと授かる証)のID
 export type BadgeId = string
+
+// 一度だけ流れる一幕(OP・ED)のID
+export type CutsceneId = "opening" | "ending"
 
 /**
  * ステージ間・シーン間で引き継がれるプレイヤーのセーブデータを保持する。
@@ -64,6 +68,9 @@ export class PlayerData {
 
     // 授かった免状
     private readonly badges = new Set<BadgeId>()
+
+    // 最後まで見たか飛ばした一幕
+    private readonly seenCutscenes = new Set<CutsceneId>()
 
     // デバッグ用。trueならクリア状況に関係なく全ステージを解放する(MapGraph.isUnlocked参照)
     debugUnlockAll = false
@@ -116,6 +123,17 @@ export class PlayerData {
 
     getBadges(): ReadonlySet<BadgeId> {
         return this.badges
+    }
+
+    markCutsceneSeen(id: CutsceneId) {
+        if (this.seenCutscenes.has(id)) return
+
+        this.seenCutscenes.add(id)
+        this.save()
+    }
+
+    hasSeenCutscene(id: CutsceneId): boolean {
+        return this.seenCutscenes.has(id)
     }
 
     getLoadout(): Loadout {
@@ -203,6 +221,7 @@ export class PlayerData {
         this.lastLivesSyncedAt = Date.now()
         this.totalScore = 0
         this.badges.clear()
+        this.seenCutscenes.clear()
         this.debugUnlockAll = false
 
         try {
@@ -249,6 +268,9 @@ export class PlayerData {
             data.noMissClears?.forEach((stageId) => this.noMissClears.add(stageId))
             this.mapNodeId = data.mapNodeId
             this.debugUnlockAll = data.debugUnlockAll ?? false
+            // 旧形式の保存データにはこのフィールドが無いので、その場合はどの一幕もまだ見ていないことにする
+            this.seenCutscenes.clear()
+            data.seenCutscenes?.forEach((id) => this.seenCutscenes.add(id))
         } catch {
             // 保存データが壊れている/存在しない場合は初期値のまま進める
         }
@@ -269,6 +291,7 @@ export class PlayerData {
             noMissClears: [...this.noMissClears],
             mapNodeId: this.mapNodeId,
             debugUnlockAll: this.debugUnlockAll,
+            seenCutscenes: [...this.seenCutscenes],
         }
 
         try {

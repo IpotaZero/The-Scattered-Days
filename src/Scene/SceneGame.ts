@@ -2,7 +2,7 @@ import { playerData } from "../Data/PlayerData"
 import { Game } from "../Game/Game"
 import { mainEquipments, subEquipments } from "../Game/Equipment/PlayerEquipment"
 import type { PlayerConfig } from "../Game/Actor/Player"
-import type { MapNode } from "../Map/MapGraph"
+import { MapGraph, type MapNode } from "../Map/MapGraph"
 import { Menu } from "../utils/Menu/Menu"
 import { Scene } from "../utils/Scene/Scene"
 import { App } from "../App"
@@ -29,11 +29,13 @@ export class SceneGame extends Scene {
             se: App.se,
             onWin: () => {
                 this.node.recordClear(playerData, playerData.getLoadout().main, playerData.getLives() === initialLives)
-                this.showResultMenu("--:: 前進 ::--", "Next")
+                this.showResultMenu("--:: 前進 ::--", "Next", () => this.sceneAfterWin())
             },
             onLose: (score) => {
                 playerData.addScore(score)
-                this.showResultMenu("--:: 停滞 ::--", "Back")
+                this.showResultMenu("--:: 停滞 ::--", "Back", () =>
+                    import("./SceneMap").then(({ SceneMap }) => SceneMap.create()),
+                )
             },
             onScoreCollected: (score) => playerData.addScore(score),
             playerConfig: createPlayerConfig(),
@@ -61,9 +63,9 @@ export class SceneGame extends Scene {
         this.game?.draw()
     }
 
-    // クリア/ゲームオーバー時に、マップへ戻れるメニューを重ねて表示する。
-    // マップへ戻るボタンは、勝てば先へ進む「Next」、負ければ引き返す「Back」と呼び分ける
-    private showResultMenu(title: string, mapLabel: string) {
+    // クリア/ゲームオーバー時に、やり直すか次の場面(next)へ進むかを選ぶメニューを重ねて表示する。
+    // 進むボタンは、勝てば「Next」、負ければ引き返す「Back」と呼び分ける
+    private showResultMenu(title: string, nextLabel: string, next: () => Promise<Scene>) {
         if (this.resultMenu) return
 
         this.resultMenu = new Menu(
@@ -82,9 +84,9 @@ export class SceneGame extends Scene {
                         },
                         {
                             type: "select",
-                            label: mapLabel,
+                            label: nextLabel,
                             onSelect: () => {
-                                App.sc.goto(async () => import("./SceneMap").then(({ SceneMap }) => SceneMap.create()))
+                                App.sc.goto(next)
                             },
                         },
                     ],
@@ -97,6 +99,15 @@ export class SceneGame extends Scene {
 
         this.resultMenu.container.classList.add("pause-menu")
         this.root.appendChild(this.resultMenu.container)
+    }
+
+    // 終点を初めてクリアしたときはEDへ、それ以外はマップへ進む
+    private async sceneAfterWin(): Promise<Scene> {
+        const graph = await MapGraph.load()
+        if (this.node.id === graph.goal.id && !playerData.hasSeenCutscene("ending")) {
+            return import("./Cutscene/SceneEnding").then(({ SceneEnding }) => new SceneEnding())
+        }
+        return import("./SceneMap").then(({ SceneMap }) => SceneMap.create())
     }
 }
 

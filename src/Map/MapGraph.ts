@@ -142,6 +142,8 @@ export class MapGraph {
 
     private constructor(
         readonly start: MapNode,
+        // 終点。ここを初めてクリアするとEDが流れる(SceneGame)
+        readonly goal: MapNode,
         readonly nodes: readonly MapNode[],
         readonly edges: readonly MapEdge[],
     ) {
@@ -165,7 +167,8 @@ export class MapGraph {
     }
 
     // テキストカードだけをノードとして読む(グループなどは整理用として無視する)。
-    // 辺のラベルは解放の条件(EdgeCondition.fromLabel)。スタート地点は、入ってくる辺が一本もない唯一のノード
+    // 辺のラベルは解放の条件(EdgeCondition.fromLabel)。スタート地点は、入ってくる辺が一本もない唯一のノード。
+    // 終点は、出ていく辺が一本もない唯一のノード
     static fromCanvas(canvas: JsonCanvas): MapGraph {
         const nodes = canvas.nodes.filter((card) => card.type === "text").map((card) => MapNode.fromCanvas(card))
         const nodesById = new Map(nodes.map((node) => [node.id, node]))
@@ -192,7 +195,13 @@ export class MapGraph {
             throw new Error(`スタート地点(入ってくる辺がないノード)はちょうど1つ必要です: [${labels}]`)
         }
 
-        return new MapGraph(starts[0]!, nodes, edges)
+        const goals = nodes.filter((node) => !edges.some((edge) => edge.from === node))
+        if (goals.length !== 1) {
+            const labels = goals.map((node) => node.label).join(", ")
+            throw new Error(`終点(出ていく辺がないノード)はちょうど1つ必要です: [${labels}]`)
+        }
+
+        return new MapGraph(starts[0]!, goals[0]!, nodes, edges)
     }
 
     node(id: MapNodeId): MapNode {

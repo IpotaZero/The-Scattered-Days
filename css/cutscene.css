@@ -1,0 +1,196 @@
+/* OP・ED(src/Scene/Cutscene/)。色はbase.cssの4色と黒だけを混ぜて作る */
+
+.scene-cutscene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.cutscene-picture {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 一幕の始まりは幕が下りた状態。色と不透明度はSceneCutscene.fadeが書き換える */
+.cutscene-veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--paper);
+}
+
+/* ===== OP: 秋の終わりの午後 ===== */
+
+.cutscene-hills {
+    fill: var(--sage);
+    opacity: 0.3;
+}
+
+.cutscene-ground {
+    fill: var(--sage);
+    opacity: 0.45;
+}
+
+/* 奥の木は紙の色に寄せて薄くする */
+.cutscene-tree {
+    color: color-mix(in srgb, var(--forest) 75%, var(--paper));
+
+    path {
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+    }
+
+    .cutscene-tree-flare {
+        fill: currentColor;
+        stroke: none;
+    }
+}
+
+.cutscene-hollow {
+    fill: color-mix(in srgb, var(--forest) 60%, black);
+}
+
+.cutscene-hive-bee {
+    fill: var(--forest);
+}
+
+.cutscene-leaf {
+    fill: currentColor;
+
+    .cutscene-leaf-vein {
+        fill: none;
+        stroke: var(--paper);
+        stroke-opacity: 0.35;
+        stroke-width: 0.4;
+    }
+
+    .cutscene-leaf-stem {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 0.6;
+        stroke-linecap: round;
+    }
+}
+
+.cutscene-leaf-yellow {
+    color: var(--gold);
+}
+
+.cutscene-leaf-amber {
+    color: color-mix(in srgb, var(--gold) 65%, var(--forest));
+}
+
+.cutscene-leaf-brown {
+    color: color-mix(in srgb, var(--gold) 35%, var(--forest));
+}
+
+.cutscene-leaf-green {
+    color: var(--sage);
+}
+
+.cutscene-grass {
+    color: var(--forest);
+    fill: currentColor;
+}
+
+/* ===== 横から見た蜂(SideBee.ts) ===== */
+
+.side-bee {
+    fill: currentColor;
+
+    .side-bee-leg,
+    .side-bee-line {
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* 奥の脚・奥の触角 */
+    .side-bee-far {
+        opacity: 0.75;
+    }
+
+    .side-bee-wing {
+        opacity: 0.32;
+    }
+
+    /* 羽ばたいている翅の残像。1枚ずつはごく薄く、重なったところが扇のように見える */
+    .side-bee-wing-fan g {
+        opacity: 0.12;
+    }
+
+    .side-bee-stripe {
+        fill: none;
+        stroke: var(--gold);
+        stroke-opacity: 0.4;
+        stroke-width: 2.6;
+    }
+
+    .side-bee-eye {
+        fill: var(--paper);
+        opacity: 0.12;
+    }
+
+    .side-bee-pollen {
+        fill: var(--gold);
+    }
+}
+
+.cutscene-bee {
+    color: color-mix(in srgb, var(--forest) 80%, black);
+}
+
+/* ===== ED: 冬の夕暮れ ===== */
+
+.scene-cutscene-ending {
+    background: linear-gradient(
+        to bottom,
+        var(--night) 10%,
+        color-mix(in srgb, var(--night) 65%, var(--sage)) 50%
+    );
+
+    .cutscene-veil {
+        background: var(--night);
+    }
+
+    .cutscene-bee {
+        color: color-mix(in srgb, var(--forest) 55%, black);
+    }
+}
+
+.cutscene-far-trees .cutscene-tree {
+    color: var(--sage);
+    opacity: 0.35;
+}
+
+.cutscene-trunk {
+    fill: color-mix(in srgb, var(--forest) 60%, black);
+}
+
+.cutscene-bark {
+    fill: none;
+    stroke: var(--paper);
+    stroke-opacity: 0.07;
+    stroke-width: 3;
+}
+
+.cutscene-snow-cap {
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 5;
+    stroke-linecap: round;
+}
+
+.cutscene-snowflake,
+.cutscene-settled-snow {
+    fill: var(--paper);
+}
+
+.cutscene-shadow {
+    fill: var(--night);
+    opacity: 0.25;
+}

@@ -1,5 +1,6 @@
 import { Awaits } from "@ipota/functions"
 import { App } from "../App"
+import { playerData } from "../Data/PlayerData"
 import { Menu } from "../utils/Menu/Menu"
 import { Scene } from "../utils/Scene/Scene"
 import { SvgFile } from "../utils/SvgFile"
@@ -42,7 +43,12 @@ export class SceneTitle extends Scene {
                             label: "Start",
                             onSelect: () => {
                                 App.se.start.play()
-                                App.sc.goto(async () => import("./SceneMap").then(({ SceneMap }) => SceneMap.create()))
+                                // 初めてのときだけ、マップの前にOPを流す
+                                App.sc.goto(async () =>
+                                    playerData.hasSeenCutscene("opening")
+                                        ? import("./SceneMap").then(({ SceneMap }) => SceneMap.create())
+                                        : import("./Cutscene/SceneOpening").then(({ SceneOpening }) => new SceneOpening()),
+                                )
                             },
                         },
                     ],
