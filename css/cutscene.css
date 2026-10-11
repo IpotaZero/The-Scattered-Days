@@ -101,42 +101,22 @@
 .side-bee {
     fill: currentColor;
 
-    .side-bee-leg,
+    /* 脚と触角 */
     .side-bee-line {
         fill: none;
         stroke: currentColor;
+        stroke-width: 2.5;
         stroke-linecap: round;
         stroke-linejoin: round;
     }
 
-    /* 奥の脚・奥の触角 */
-    .side-bee-far {
-        opacity: 0.75;
-    }
-
     .side-bee-wing {
-        opacity: 0.32;
+        opacity: 0.45;
     }
 
     /* 羽ばたいている翅の残像。1枚ずつはごく薄く、重なったところが扇のように見える */
     .side-bee-wing-fan g {
         opacity: 0.12;
-    }
-
-    .side-bee-stripe {
-        fill: none;
-        stroke: var(--gold);
-        stroke-opacity: 0.4;
-        stroke-width: 2.6;
-    }
-
-    .side-bee-eye {
-        fill: var(--paper);
-        opacity: 0.12;
-    }
-
-    .side-bee-pollen {
-        fill: var(--gold);
     }
 }
 

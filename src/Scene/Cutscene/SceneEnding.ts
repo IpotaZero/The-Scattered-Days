@@ -16,7 +16,7 @@ import { Wind } from "./Wind"
  */
 export class SceneEnding extends SceneCutscene {
     private readonly wind = new Wind()
-    private readonly bee = new SideBee(SideBee.STAND, false)
+    private readonly bee = new SideBee(SideBee.STAND)
     private readonly farSnow: SVGGElement
     private readonly midSnow: SVGGElement
     private readonly shadow: SVGGElement
@@ -81,9 +81,9 @@ export class SceneEnding extends SceneCutscene {
         this.nearSnow = this.layer("cutscene-snow", 2)
 
         this.wind.x = 0.12
-        // STANDの形の足先(y=27)が、雪の上(y=150)に着く高さ
+        // STANDの形の足先(y=37)が、雪の上(y=150)に着く高さ
         this.bee.x = -300
-        this.bee.y = 150 - 27 * 1.5
+        this.bee.y = 150 - 37 * 1.5
         this.bee.scale = 1.5
         this.bee.render()
     }
@@ -96,19 +96,19 @@ export class SceneEnding extends SceneCutscene {
         yield* this.fade("var(--night)", 1, 0, 150)
         yield* this.bee.walk(-150, 0.7)
         yield* GenUtils.waitFrames(30)
-        yield* this.bee.antennaeTo(-12, 20)
-        yield* this.bee.antennaeTo(8, 30)
-        yield* this.bee.antennaeTo(0, 20)
+        yield* this.bee.antennaTo(-12, 20)
+        yield* this.bee.antennaTo(8, 30)
+        yield* this.bee.antennaTo(0, 20)
         yield* this.bee.buzz(26, 30)
         yield* GenUtils.waitFrames(50)
         yield* this.bee.walk(10, 0.5)
         yield* GenUtils.waitFrames(70)
 
-        // 横たわる。脚を縮め、体を沈めて頭を雪へ傾け、触角を垂らす
+        // 横たわる。脚を縮め、体の下の縁が雪に着くまで沈めて頭を雪へ傾け、触角を垂らす
         yield* GenUtils.all({
             legs: this.bee.changeLegs(SideBee.STAND, SideBee.CURLED, 150),
-            body: this.bee.moveTo(this.bee.x, this.bee.y + 13, 7, 150),
-            antennae: this.bee.antennaeTo(30, 150),
+            body: this.bee.moveTo(this.bee.x, this.bee.y + 14 * 1.5, 7, 150),
+            antenna: this.bee.antennaTo(30, 150),
         })
 
         yield* GenUtils.all({
@@ -154,17 +154,17 @@ export class SceneEnding extends SceneCutscene {
         }
     }
 
-    // 横たわった蜂の背(胸・たたんだ翅・頭・腹の先の上)に、雪が45フレームごとに一つずつ積もる
+    // 横たわった蜂の背(たたんだ翅・体・頭の上)に、雪が45フレームごとに一つずつ積もる
     private *settle(): Generator<void, void, void> {
         for (const [x, y] of [
-            [12, -19],
-            [4, -20],
-            [-6, -22.5],
-            [-17, -23],
-            [-27, -22],
-            [-36, -17],
-            [28, -12.5],
-            [-46, -4],
+            [-40, -23.5],
+            [-32, -28],
+            [-22, -30],
+            [-12, -30],
+            [-2, -27],
+            [8, -21],
+            [17, -19],
+            [30, -20],
         ].sort(() => Math.random() - 0.5)) {
             const lump = Svg.g("cutscene-settled-snow", `<ellipse cx="${x}" cy="${y}" rx="3.2" ry="1.8" />`)
             lump.style.opacity = "0"

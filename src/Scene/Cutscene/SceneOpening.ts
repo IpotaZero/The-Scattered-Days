@@ -17,7 +17,7 @@ import { Wind } from "./Wind"
  */
 export class SceneOpening extends SceneCutscene {
     private readonly wind = new Wind()
-    private readonly bee = new SideBee(SideBee.HOVER, true)
+    private readonly bee = new SideBee(SideBee.HOVER)
     private readonly midLeaves: SVGGElement
     private readonly grass: SVGGElement
     private readonly nearLeaves: SVGGElement
