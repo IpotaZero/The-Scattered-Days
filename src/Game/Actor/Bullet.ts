@@ -28,7 +28,18 @@ export class Bullet extends Actor {
     // cloneで作り直すのでreadonlyにしない
     scripts = new IteratorQueue()
 
-    appearance: "donut" | "ball" | "line" | "arrow" | "laser" | "beam" | "player" | "score" | Polygon.Type = "donut"
+    appearance:
+        | "donut"
+        | "ball"
+        | "line"
+        | "arrow"
+        /** 画面上の二点を結ぶ線分型の攻撃 */
+        | "laser"
+        /** 砲塔から延びる半直線型の攻撃 */
+        | "beam"
+        | "player"
+        | "score"
+        | Polygon.Type = "donut"
     collision: "circle" | "line" | "arrow" | "rect" | Polygon.Type = "circle"
     type: "friend" | "enemy" | "neutral" | "effect" | "score" = "enemy"
     color: Color = "black"

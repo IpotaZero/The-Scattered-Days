@@ -6,14 +6,22 @@ import { readFile, writeFile } from "node:fs/promises"
 const path = new URL("../assets/MapData/MapData.canvas", import.meta.url)
 const map = JSON.parse(await readFile(path, "utf8"))
 
-const d = 40
+const d = 80
+const d2 = 160
 
 // フォーマット
 map.nodes.forEach((node) => {
-    node.x = Math.floor(node.x / d) * d
-    node.y = Math.floor(node.y / d) * d
-    node.width = Math.round(node.width / d) * d
+    node.width = Math.round(node.width / d2) * d2
     node.height = node.width
+
+    const centerX = node.x + node.width / 2
+    const centerY = node.y + node.height / 2
+
+    const formattedCenterX = Math.floor(centerX / d) * d
+    const formattedCenterY = Math.floor(centerY / d) * d
+
+    node.x = formattedCenterX - node.width / 2
+    node.y = formattedCenterY - node.height / 2
 })
 
 // Obsidianが書き出すのと同じ形にして、差分を小さく保つ

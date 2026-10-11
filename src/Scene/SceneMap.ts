@@ -285,7 +285,7 @@ export class SceneMap extends Scene {
             [
                 {
                     type: "submenu",
-                    label: `流派: ${mainEquipments[playerData.getLoadout().main]?.label ?? playerData.getLoadout().main}`,
+                    label: `針: ${mainEquipments[playerData.getLoadout().main]?.label ?? playerData.getLoadout().main}`,
                     hides: [],
                     onFocus: () => this.hideEquipDescription(),
                     subMenu: () => this.buildMainEquipmentSubMenu(),
@@ -318,7 +318,7 @@ export class SceneMap extends Scene {
     private buildMainEquipmentSubMenu(): MenuOptionBox {
         return {
             elementId: "equip-main-options",
-            title: "--:: 流派を選択 ::--",
+            title: "--:: 針を選択 ::--",
             options: () => this.buildMainEquipmentOptions(),
             // 開いた瞬間、現在装備している主装備にカーソルを合わせる
             initialCursor: () => {

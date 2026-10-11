@@ -39,7 +39,7 @@ namespace Ghost {
         const half = 24 + Math.min(velocity.magnitude() * 14, 90)
 
         yield* remodel(e)
-            .appearance("beam")
+            .appearance("laser")
             .collision("rect")
             .isScorable(false)
             .color(color)

@@ -156,7 +156,7 @@ class EnemyHornet extends Enemy {
         yield* Charge.gather(this, 120, "#ffb040")
         this.isInvincible = false
         this.scripts.add(() => this.fury(generation), { loop: Infinity, id: "body" })
-        if (generation > 0) this.scripts.add(() => this.lightWings(), { loop: Infinity, margin: 60, id: "wings" })
+        if (generation > 0) this.scripts.add(() => this.lightWings(), { margin: 60, id: "wings" })
     }
 
     private *ring(generation: number) {
@@ -186,6 +186,7 @@ class EnemyHornet extends Enemy {
                 .speed(5)
                 .radian(base + turn * 0.6 * Math.sin(f / 25))
                 .ex(7 + generation * 2)
+                .ex(4)
                 .fire(this.game.bullets)
             yield* Array(4)
         }
@@ -196,7 +197,7 @@ class EnemyHornet extends Enemy {
     private *lightWings() {
         yield* remodel(this)
             .beam(0)
-            .color("#e8f0ff")
+            .color("#c87e00")
             .duplicate(8, (b, i) => {
                 b.radian = i < 4 ? -0.35 + (i - 1.5) * 0.1 : Math.PI + 0.35 - (i - 5.5) * 0.1
                 return b
@@ -211,12 +212,10 @@ class EnemyHornet extends Enemy {
                 b.type = "enemy"
                 b.alpha = 1
 
-                for (let f = 0; f < 630; f++) {
+                for (let f = 0; ; f++) {
                     b.radian = base + side * 0.4 * Math.sin(f / 50)
                     yield
                 }
-
-                yield* Behavior.fadeout(b, 30)
             })
             .fire(this.game.bullets)
 
@@ -237,16 +236,12 @@ class EnemyHornet extends Enemy {
                 b.type = "enemy"
                 b.alpha = 1
 
-                for (let f = 0; f < 630; f++) {
+                for (let f = 0; ; f++) {
                     b.radian = base - side * 0.3 * Math.sin(f / 50)
                     yield
                 }
-
-                yield* Behavior.fadeout(b, 30)
             })
             .fire(this.game.bullets)
-
-        yield* Array(900)
     }
 
     snow() {
@@ -309,7 +304,7 @@ class Mandible extends Part {
         private readonly generation: number,
     ) {
         // 体力は左500・右650。生まれてから 240(二代目は300)フレーム充電する
-        super(game, parent, side > 0 ? 650 : 500, Size.L, 30 + (side > 0 ? 60 : 0), { charge: 240 + generation * 60 })
+        super(game, parent, side > 0 ? 650 : 500, Size.L, 30 + (side > 0 ? 60 : 0), { charge: 480 + generation * 60 })
     }
 
     protected place() {
@@ -392,7 +387,7 @@ class Leg extends Part {
         private readonly generation: number,
     ) {
         // 体力は胴に近い脚から 120・180・240。生まれてから 420(二代目は480)フレーム充電する
-        super(game, parent, 60 + 60 * Math.abs(x), Size.S, 20, { charge: 420 + generation * 60 })
+        super(game, parent, 60 + 60 * Math.abs(x), Size.S, 20, { charge: 1600 + generation * 60 })
     }
 
     protected place() {
@@ -423,7 +418,7 @@ class Stinger extends Part {
         private readonly generation: number,
     ) {
         // 生まれてから 600(二代目は720)フレーム充電する
-        super(game, parent, 900, Size.L, 30, { charge: 600 + generation * 120 })
+        super(game, parent, 900, Size.L, 30, { charge: 1200 + generation * 120 })
     }
 
     protected place() {
@@ -481,7 +476,7 @@ class Worker extends Part {
         private readonly generation: number,
     ) {
         // 体力は 120 から 40 ずつ多くなる。生まれてから 480 + 60i(二代目はさらに60)フレーム充電する
-        super(game, parent, 120 + i * 40, Size.S, 20, { charge: 480 + i * 60 + generation * 60 })
+        super(game, parent, 120 + i * 40, Size.S, 20, { charge: 960 + i * 60 + generation * 60 })
     }
 
     protected place() {

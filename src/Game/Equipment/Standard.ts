@@ -28,8 +28,8 @@ const 最大角速度 = T / 50
 // 通常時は広いn-way、低速時は狭いn-way。どちらにも曲がるホーミング弾を、
 // メインの弾とは別の間隔で添える
 export const standard: MainEquipment = {
-    label: "拡散弾",
-    description: "前方に打ち込み。追尾弾を添えた汎用的な流派。",
+    label: "拡散",
+    description: "前方に打ち込み。追尾弾を添えて。",
     *fire(player) {
         // メインの弾とホーミング弾は間隔が違うので、別々のループとして並行に走らせる
         yield* GenUtils.all({
