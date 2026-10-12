@@ -12,12 +12,11 @@ export class ScenePreTitle extends Scene {
         console.log("ScenePreTitle")
 
         this.root.classList.add("scene-pre-title", "paper-scene")
-        // 題辞。冬まで生き残ってしまった蜂の句を、ゲームの最初に一度だけ置く
         this.root.insertAdjacentHTML(
             "beforeend",
             `
-            <div class="pre-title-message">Click or Press Any Key</div>
-        `,
+                <div class="pre-title-message">Click or Press Any Key</div>
+            `,
         )
 
         const textureOverlay = document.createElement("div")
