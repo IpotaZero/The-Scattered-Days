@@ -1,4 +1,3 @@
-import { isSmartPhone } from "../../utils/Functions/isSmartPhone"
 import { Bullet } from "../Actor/Bullet"
 import { CameraTransform } from "../Actor/Camera"
 import { BulletGpuBatchRenderer } from "./BulletGpuBatchRenderer"
@@ -31,6 +30,18 @@ export class BulletDrawer {
     // 弾の色 → 色相を丸めた色。弾の色は毎フレーム同じ文字列が来るので、丸めた結果を覚えておく
     private readonly spriteColors = new Map<Color, Color>()
     private readonly gpu = BulletGpuBatchRenderer.tryCreate()
+    // trueのとき、弾の絵の光(shadowBlur)を省いて描く
+    private lite = false
+
+    // 軽量にするかを切り替える。切り替わったら、GPUのテクスチャを空にし、覚えている弾の絵もすべて忘れる。
+    // 忘れた絵は、次にその弾が出たときに描き直される。draw してから flush するまでの間には呼ばない
+    useLite(lite: boolean) {
+        if (this.lite === lite) return
+
+        this.lite = lite
+        this.gpu?.releaseAtlas()
+        this.sprites.clear()
+    }
 
     // GPUの弾のテクスチャが半分を超えて埋まっていたら、テクスチャを空にし、覚えている弾の絵もすべて忘れる。
     // 忘れた絵は、次にその弾が出たときに描き直される。draw してから flush するまでの間には呼ばない
@@ -470,7 +481,7 @@ export class BulletDrawer {
         ctx.lineWidth = 3
         ctx.stroke()
 
-        if (!isSmartPhone) ctx.shadowBlur = bullet.r / 2
+        if (!this.lite) ctx.shadowBlur = bullet.r / 2
         ctx.strokeStyle = "white"
         ctx.lineWidth = 2
         ctx.stroke()
@@ -500,7 +511,7 @@ export class BulletDrawer {
     // オフスクリーン描画時の回転を削除（メインのdrawで回転させる）
     private drawScore(bullet: Look, halfCanvasSize: number) {
         const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
-        if (!isSmartPhone) {
+        if (!this.lite) {
             ctx.shadowColor = bullet.color
             ctx.shadowBlur = bullet.r * 2
         }
@@ -521,7 +532,7 @@ export class BulletDrawer {
 
     private drawLine(bullet: Look, halfCanvasSize: number) {
         const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
-        if (!isSmartPhone) {
+        if (!this.lite) {
             ctx.shadowColor = bullet.color
             // 光を広げすぎると色が薄まるので、本体付近に集める
             ctx.shadowBlur = bullet.r
@@ -560,7 +571,7 @@ export class BulletDrawer {
         }
 
         path(1)
-        if (!isSmartPhone) {
+        if (!this.lite) {
             ctx.shadowColor = bullet.color
             ctx.shadowBlur = 14
         }
@@ -578,7 +589,7 @@ export class BulletDrawer {
 
     private drawArrow(bullet: Look, halfCanvasSize: number) {
         const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
-        if (!isSmartPhone) {
+        if (!this.lite) {
             ctx.shadowColor = bullet.color
             // 光を広げすぎると色が薄まるので、本体付近に集める
             ctx.shadowBlur = bullet.r

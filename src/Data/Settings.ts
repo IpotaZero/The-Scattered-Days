@@ -81,6 +81,7 @@ type SerializedSettings = {
     drawFps?: DrawFps
     showFps?: boolean
     dragScaleLevel?: number
+    liteBullets?: boolean
 }
 
 // 設定の反映先。音量はBgmManager/SEのマスター、キーコンフィグはDigitalInputとAnalogInput、描画fpsはFrameLimiter、fps表示はFpsMeterへ渡す
@@ -110,6 +111,9 @@ export class Settings {
     // ゲーム開始時にGameへ渡し、タッチのドラッグ量に level / 10 を掛ける
     dragScaleLevel = 10
 
+    // ゲーム開始時にGameへ渡し、trueなら弾の光を省いて軽く描く。スマホは描画が重いので初期値をtrueにする
+    liteBullets = isSmartPhone
+
     constructor(private readonly target: SettingsTarget) {
         this.load()
         this.applyVolume("bgm")
@@ -129,6 +133,11 @@ export class Settings {
     changeDrawFps(fps: DrawFps) {
         this.drawFps = fps
         this.target.drawLimiter.setFPS(this.drawFps)
+        this.save()
+    }
+
+    toggleLiteBullets() {
+        this.liteBullets = !this.liteBullets
         this.save()
     }
 
@@ -208,6 +217,7 @@ export class Settings {
 
             if (data.drawFps === 60 || data.drawFps === 30) this.drawFps = data.drawFps
             if (typeof data.showFps === "boolean") this.showFps = data.showFps
+            if (typeof data.liteBullets === "boolean") this.liteBullets = data.liteBullets
             if (typeof data.dragScaleLevel === "number")
                 this.dragScaleLevel = Math.min(DRAG_SCALE_MAX_LEVEL, Math.max(DRAG_SCALE_MIN_LEVEL, data.dragScaleLevel))
 
@@ -232,6 +242,7 @@ export class Settings {
             drawFps: this.drawFps,
             showFps: this.showFps,
             dragScaleLevel: this.dragScaleLevel,
+            liteBullets: this.liteBullets,
         }
 
         try {

@@ -155,8 +155,13 @@ export class BulletGpuBatchRenderer {
     releaseAtlasIfCrowded() {
         if (!this.atlas.isCrowded()) return false
 
-        this.atlas.clear()
+        this.releaseAtlas()
         return true
+    }
+
+    // アトラスを空にする。queue してから render するまでの間には呼ばない
+    releaseAtlas() {
+        this.atlas.clear()
     }
 
     /**

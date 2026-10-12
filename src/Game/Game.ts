@@ -40,6 +40,8 @@ export type GameConfig = {
     analogInput: AnalogInput.Reader<GameAction>
     // タッチのドラッグ量に掛ける係数
     dragScale: number
+    // trueのとき、弾の光を省いて軽く描く
+    liteBullets: boolean
     se: GameSE
     onWin: () => void
     onLose: (score: number) => void
@@ -120,6 +122,7 @@ export class Game {
         input,
         analogInput,
         dragScale,
+        liteBullets,
         se,
         onWin,
         onLose,
@@ -136,7 +139,8 @@ export class Game {
         this.onLose = onLose
         this.onScoreCollected = onScoreCollected
 
-        // 弾のテクスチャはステージをまたいで使い回す。ステージに入るとき、半分を超えて埋まっていれば空にする
+        // 弾のテクスチャはステージをまたいで使い回す。ステージに入るとき、軽量の切り替えがあったか半分を超えて埋まっていれば空にする
+        Game.bulletDrawer.useLite(liteBullets)
         Game.bulletDrawer.releaseIfCrowded()
 
         this.HEIGHT = this.computeHeight()

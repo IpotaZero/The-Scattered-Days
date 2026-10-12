@@ -34,7 +34,7 @@ const ACTION_LABELS: Record<InputAction, string> = {
 }
 
 /**
- * 音量・描画fps・fps表示・キーコンフィグ・デバッグ用の全ステージ解放・セーブデータの削除をまとめた設定メニュー。
+ * 音量・描画fps・fps表示・弾の軽量描画・ドラッグ係数・キーコンフィグ・デバッグ用の全ステージ解放・セーブデータの削除をまとめた設定メニュー。
  * 呼び出し側のMenuのサブメニューとして開く。MenuのbaseHtmlには SettingsMenu.HTML を含めておくこと。
  */
 export class SettingsMenu {
@@ -74,6 +74,16 @@ export class SettingsMenu {
                         label: this.showFpsLabel(),
                         onSelect: () => {
                             App.settings.toggleShowFps()
+                            this.menu.render()
+                        },
+                    },
+                ],
+                [
+                    {
+                        type: "select",
+                        label: this.liteBulletsLabel(),
+                        onSelect: () => {
+                            App.settings.toggleLiteBullets()
                             this.menu.render()
                         },
                     },
@@ -254,6 +264,16 @@ export class SettingsMenu {
         el.innerHTML = `
             <span>fps表示</span>
             <span>${App.settings.showFps ? "ON" : "OFF"}</span>
+        `
+        return el
+    }
+
+    private liteBulletsLabel(): HTMLElement {
+        const el = document.createElement("span")
+        el.className = "settings-row"
+        el.innerHTML = `
+            <span>弾の軽量描画</span>
+            <span>${App.settings.liteBullets ? "ON" : "OFF"}</span>
         `
         return el
     }

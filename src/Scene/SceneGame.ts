@@ -27,6 +27,7 @@ export class SceneGame extends Scene {
             input: App.input,
             analogInput: App.analogInput,
             dragScale: App.settings.dragScaleLevel / 10,
+            liteBullets: App.settings.liteBullets,
             se: App.se,
             onWin: () => {
                 this.node.recordClear(playerData, playerData.getLoadout().main, playerData.getLives() === initialLives)

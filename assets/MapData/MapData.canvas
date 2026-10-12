@@ -13,9 +13,6 @@
 		{"id":"478791923fb120a2","type":"text","text":"霧隠道場・門下生\nStageMistA","x":4160,"y":-2000,"width":160,"height":160},
 		{"id":"22d09d02a6ba8bc9","type":"text","text":"霧隠道場・高弟\nStageMistB","x":4400,"y":-2000,"width":160,"height":160},
 		{"id":"6b9ed5a8d80252c9","type":"text","text":"霧隠道場・師範代\nStageMistC","x":4640,"y":-2000,"width":160,"height":160},
-		{"id":"35c5577f1a6c4709","type":"text","text":"師匠の庵\nStageTest","x":0,"y":-80,"width":160,"height":160},
-		{"id":"31f7d87e5e5e2323","type":"text","text":"霜月道場・高弟\nStageRikka","x":640,"y":-80,"width":160,"height":160},
-		{"id":"3b69dc58c8ff5df6","type":"text","text":"霜月道場・師範代\nStageTriangle","x":880,"y":-80,"width":160,"height":160},
 		{"id":"54199e7166e6f1be","type":"text","text":"砂塵道場・師範代\nStageSandC","x":4640,"y":-880,"width":160,"height":160},
 		{"id":"c9504a1b3bf6d77a","type":"text","text":"砂塵道場・高弟\nStageSandB","x":4400,"y":-880,"width":160,"height":160},
 		{"id":"9f3742e71653f66f","type":"text","text":"砂塵道場・門下生\nStageSandA","x":4160,"y":-880,"width":160,"height":160},
@@ -25,7 +22,6 @@
 		{"id":"da5a0325d6b1823e","type":"text","text":"流星道場・高弟\nStageMeteorB","x":6480,"y":-880,"width":160,"height":160},
 		{"id":"7cdea32cffb53b26","type":"text","text":"流星道場・師範代\nStageMeteorC","x":6720,"y":-880,"width":160,"height":160},
 		{"id":"03e5df0075419b20","type":"text","text":"霧隠道場・道場主\nStageMist\nbadge:霧隠","x":4880,"y":-2160,"width":480,"height":480},
-		{"id":"f840811f7f798aeb","type":"text","text":"霜月道場・門下生\nStageFrozenBreath","x":400,"y":-80,"width":160,"height":160},
 		{"id":"7673bf8340f21db7","type":"text","text":"陽炎道場・門下生\nStageHazeA","x":4160,"y":960,"width":160,"height":160},
 		{"id":"3f068863a930d057","type":"text","text":"陽炎道場・高弟\nStageHazeB","x":4400,"y":960,"width":160,"height":160},
 		{"id":"9c20658750cdab8d","type":"text","text":"陽炎道場・師範代\nStageHazeC","x":4640,"y":960,"width":160,"height":160},
@@ -40,8 +36,12 @@
 		{"id":"830af84d77e4673c","type":"text","text":"網掛道場・高弟\nStageWebB","x":2480,"y":960,"width":160,"height":160},
 		{"id":"166d9f9191ad1a93","type":"text","text":"網掛道場・師範代\nStageWebC","x":2720,"y":960,"width":160,"height":160},
 		{"id":"70041c417988cd82","type":"text","text":"網掛道場・道場主\nStageWebD\nbadge:網掛","x":2960,"y":800,"width":480,"height":480},
-		{"id":"751ab8850da9b699","type":"text","text":"霜月道場・道場主\nStageFrost\nbadge:霜月","x":1120,"y":-240,"width":480,"height":480},
-		{"id":"ca68c9295dde0dbf","type":"text","text":"チャンピオン・大雀蜂\nStageChampion","x":9760,"y":320,"width":480,"height":480}
+		{"id":"ca68c9295dde0dbf","type":"text","text":"チャンピオン・大雀蜂\nStageChampion","x":9760,"y":320,"width":480,"height":480},
+		{"id":"35c5577f1a6c4709","type":"text","text":"師匠の庵\nStageTest","x":0,"y":0,"width":160,"height":160},
+		{"id":"f840811f7f798aeb","type":"text","text":"霜月道場・門下生\nStageFrozenBreath","x":400,"y":0,"width":160,"height":160},
+		{"id":"31f7d87e5e5e2323","type":"text","text":"霜月道場・高弟\nStageRikka","x":640,"y":0,"width":160,"height":160},
+		{"id":"3b69dc58c8ff5df6","type":"text","text":"霜月道場・師範代\nStageTriangle","x":880,"y":0,"width":160,"height":160},
+		{"id":"751ab8850da9b699","type":"text","text":"霜月道場・道場主\nStageFrost\nbadge:霜月","x":1120,"y":-160,"width":480,"height":480}
 	],
 	"edges":[
 		{"id":"3a6309e33f10111f","fromNode":"f840811f7f798aeb","fromSide":"right","toNode":"31f7d87e5e5e2323","toSide":"left"},
