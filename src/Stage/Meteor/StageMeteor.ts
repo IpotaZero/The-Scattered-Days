@@ -129,7 +129,7 @@ class EnemyHotaru extends Enemy {
     // 拍ごとに、胴のまわりがぼうっと光る
     private *pulse() {
         yield* Hotaru.waitBeat(this)
-        yield* Hotaru.glow(this, 150, 60)
+        yield* Hotaru.glow(this, 110, 60)
     }
 
     private *ring() {
