@@ -74,11 +74,11 @@ class SnakeHead extends Enemy {
         yield* this.chase()
     }
 
-    // 毎フレーム、頭と同じ所に、頭より少し小さい色の移ろう輪の弾を置く。弾は2フレームで消える
+    // 毎フレーム、頭と同じ所に、頭より少し小さい輪の弾を置く。弾は2フレームで消える。輪の色相は60フレームごとに30°ずつ移る
     private *body() {
         yield
         yield* remodel(this)
-            .colorful(this.frame / 2)
+            .colorful(Math.floor(this.frame / 60) * 30)
             .r(52)
             .speed(0)
             .p(this.p.clone())
@@ -214,7 +214,7 @@ class SnakeSegment extends Enemy {
     }
 
     // 前に調べた所から0.81より多く動いていたら、その場に色の移ろう輪の弾を置き、60フレーム休む。
-    // 輪は30フレームかけて大きくなり、30フレーム留まって、30フレームかけて消える。
+    // 輪は30フレームかけて薄い姿から濃くなり(その間は当たらない)、30フレーム留まって、30フレームかけて消える。
     // 休んだあとは、輪を置いた所から動いた分で調べるので、動き続けている間は61フレームごとに輪を置く
     private *trail() {
         let before = this.p.clone()
@@ -228,12 +228,12 @@ class SnakeSegment extends Enemy {
 
             yield* remodel(this)
                 .colorful(this.frame + this.index * 30)
-                .r(1)
+                .r(28)
                 .speed(0)
                 .p(this.p.clone())
+                .appear(30)
                 .g(function* (b) {
-                    yield* Behavior.ease(b, "r", 23, 30)
-                    yield* Array(30)
+                    yield* Array(60)
                     yield* Behavior.fadeout(b, 30)
                 })
                 .fire(this.game.bullets)
@@ -326,17 +326,18 @@ class DetachedTail extends Enemy {
     }
 
     // 色の移ろう大きな輪の弾を11方向へ撃ち、120フレーム休む。
-    // 弾は20フレームかけて大きくなりながら進み、40フレームかけて止まり、40フレームかけて速さ3.65まで加速する
+    // 弾は20フレームかけて薄い姿から濃くなりながら進み(その間は当たらない)、40フレームかけて止まり、40フレームかけて速さ3.65まで加速する
     private *spread() {
         yield* remodel(this)
             .colorful(this.frame / 2 + 120)
-            .r(1)
+            .r(28)
             .p(this.p.clone())
             .speed(2.43)
             .radian((T * this.frame) / 480)
             .ex(11)
+            .appear(20)
             .g(function* (b) {
-                yield* Behavior.ease(b, "r", 23, 20)
+                yield* Array(20)
                 yield* Behavior.stop(b, 40)
                 yield* Behavior.accel(b, 40, 3.65)
             })
