@@ -114,17 +114,13 @@ export class Menu {
 
     update() {
         if (this.input.isRepeatPushed("up", 50, 500)) {
-            this.se.playCursor()
-            this.moveRow(-1)
+            if (this.moveRow(-1)) this.se.playCursor()
         } else if (this.input.isRepeatPushed("down", 50, 500)) {
-            this.se.playCursor()
-            this.moveRow(1)
+            if (this.moveRow(1)) this.se.playCursor()
         } else if (this.input.isRepeatPushed("left", 50, 500)) {
-            this.se.playCursor()
-            this.moveCol(-1)
+            if (this.moveCol(-1)) this.se.playCursor()
         } else if (this.input.isRepeatPushed("right", 50, 500)) {
-            this.se.playCursor()
-            this.moveCol(1)
+            if (this.moveCol(1)) this.se.playCursor()
         } else if (this.input.isPushed("ok")) {
             this.select()
         } else if (this.input.isPushed("cancel")) {
@@ -339,28 +335,34 @@ export class Menu {
         }
     }
 
-    moveRow(diff: number) {
+    // カーソルが動いたらtrue、行が1つしかなく動かなかったらfalseを返す
+    moveRow(diff: number): boolean {
         const layer = this.getCurrentLayer()
         const options = layer.options
-        if (options.length === 0) return
+        if (options.length === 0) return false
 
-        let row = (this.cursor.row + diff + options.length) % options.length
+        const row = (this.cursor.row + diff + options.length) % options.length
+        if (row === this.cursor.row) return false
 
         this.cursor = { row, col: this.clampCol(row, this.cursor.col) }
         this.updateSelectedClass()
         this.updateScrollContainer(layer, this.cursor.row, this.scrollRows)
         this.getCurrentOption()?.onFocus?.()
+        return true
     }
 
-    moveCol(diff: number) {
+    // カーソルが動いたらtrue、列が1つしかなく動かなかったらfalseを返す
+    moveCol(diff: number): boolean {
         const row = this.getCurrentLayer().options[this.cursor.row]
-        if (!row) return
+        if (!row) return false
 
-        let col = (this.cursor.col + diff + row.length) % row.length
+        const col = (this.cursor.col + diff + row.length) % row.length
+        if (col === this.cursor.col) return false
 
         this.cursor = { row: this.cursor.row, col }
         this.updateSelectedClass()
         this.getCurrentOption()?.onFocus?.()
+        return true
     }
 
     private clampCol(row: number, col: number): number {
