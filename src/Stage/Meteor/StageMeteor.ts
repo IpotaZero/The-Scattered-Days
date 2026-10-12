@@ -11,6 +11,50 @@ import { Part } from "../Part"
 import { Meteor } from "./Meteor"
 import { Charge } from "../Charge"
 import { Size } from "../Size"
+import { Bullet } from "../../Game/Actor/Bullet"
+
+// 蛍の光。胴の frame にそろって、150フレームごとに一度光る
+namespace Hotaru {
+    // 次の拍(胴の frame が150で割り切れるとき)まで待つ。呼んだフレームがちょうど拍でも、次の拍まで待つ
+    export function* waitBeat(clock: Enemy) {
+        do yield
+        while (clock.frame % 150 !== 0)
+    }
+
+    // frames フレームの間、拍に合わせて明滅する。
+    // 拍から15フレームでだんだん明るくなり、そこから55フレーム光っている間だけ当たる。15フレームで暗くなり、次の拍まで暗いまま。暗い間は当たらない
+    export function* blink(b: Bullet, clock: Enemy, frames: number) {
+        for (let f = 0; f < frames; f++) {
+            const t = clock.frame % 150
+            b.type = 15 <= t && t < 70 ? "enemy" : "neutral"
+            b.alpha = t < 15 ? 0.15 + t * 0.03 : t < 70 ? 1 : t < 85 ? 1 - (t - 70) * 0.057 : 0.15
+            yield
+        }
+    }
+
+    // e のまわりが半径 r でぼうっと光り、frames フレームかけて消える。光は e について動き、当たり判定はない
+    export function* glow(e: Enemy, r: number, frames: number) {
+        yield* remodel(e)
+            .format("big-ball")
+            .r(r)
+            .type("effect")
+            .isScorable(false)
+            .color("#d8ff90")
+            .alpha(0.2)
+            .speed(0)
+            .p(e.p.clone())
+            .g(function* (b) {
+                for (let f = 0; f < frames; f++) {
+                    b.p = e.p.clone()
+                    b.alpha = 0.2 * (1 - f / frames)
+                    yield
+                }
+
+                b.life = 0
+            })
+            .fire(e.game.bullets)
+    }
+}
 
 export default class extends Stage {
     *G() {
@@ -63,6 +107,7 @@ class EnemyHotaru extends Enemy {
 
         this.scripts.remove("body")
         yield* Charge.gather(this, 150, "#d8ff90")
+        this.scripts.add(() => this.pulse(), { loop: Infinity })
 
         const bigs = [-165, -55, 55, 165].map((x, i) => {
             const big = new BigFirefly(this.game, this, x, i)
@@ -81,7 +126,15 @@ class EnemyHotaru extends Enemy {
         this.scripts.add(() => this.lastLight(), { loop: Infinity, margin: 30, id: "body" })
     }
 
+    // 拍ごとに、胴のまわりがぼうっと光る
+    private *pulse() {
+        yield* Hotaru.waitBeat(this)
+        yield* Hotaru.glow(this, 150, 60)
+    }
+
     private *ring() {
+        yield* Hotaru.waitBeat(this)
+        yield* Array(15)
         yield* remodel(this)
             .format("small-ball")
             .r(5)
@@ -91,11 +144,10 @@ class EnemyHotaru extends Enemy {
             .radian(this.random() * T)
             .ex(20)
             .fire(this.game.bullets)
-
-        yield* Array(160)
     }
 
     private *meteorFan() {
+        yield* Hotaru.waitBeat(this)
         const sway = (this.random() - 0.5) * 0.6
 
         for (const k of [0, 1, 2, 3]) {
@@ -111,11 +163,10 @@ class EnemyHotaru extends Enemy {
                 { margin: k * 6 },
             )
         }
-
-        yield* Array(150)
     }
 
     private *lastLight() {
+        yield* Hotaru.waitBeat(this)
         const aim = this.game.player.p.sub(this.p).radian()
 
         for (const k of [0, -1, 1]) {
@@ -143,14 +194,19 @@ class EnemyHotaru extends Enemy {
             .ex(30)
             .g((b) => Behavior.reaccel(b, 20, 20, 30, 5.5))
             .fire(this.game.bullets)
-
-        yield* Array(100)
     }
 }
 
 class Lantern extends Part {
     constructor(game: Game, parent: Enemy) {
         super(game, parent, 900, Size.L, 150)
+        this.scripts.add(() => this.pulse(), { loop: Infinity })
+    }
+
+    // 拍ごとに、発光器のまわりがぼうっと光る
+    private *pulse() {
+        yield* Hotaru.waitBeat(this.parent)
+        yield* Hotaru.glow(this, 110, 60)
     }
 
     protected place() {
@@ -158,6 +214,7 @@ class Lantern extends Part {
     }
 
     protected *attack() {
+        yield* Hotaru.waitBeat(this.parent)
         const aim = this.game.player.p.sub(this.p).radian()
 
         for (const k of [0, -1, 1]) {
@@ -173,8 +230,6 @@ class Lantern extends Part {
                 { margin: (k + 1) * 8 },
             )
         }
-
-        yield* Array(170)
     }
 }
 
@@ -220,8 +275,12 @@ class Firefly extends Part {
         return vec.arg(this.frame / 120 + (T * this.i) / 8).scale(160)
     }
 
+    // 拍から i * 6 フレーム遅れて光り、まわりに光を四つ放つ。光は60フレームかけて速さ1.8まで加速し、向きをゆらゆら変えながら漂う。
+    // 光は拍に合わせて明滅し、360フレームたつと30フレームかけて消える
     protected *attack() {
-        yield* Array(this.i * 10)
+        yield* Hotaru.waitBeat(this.parent)
+        yield* Array(this.i * 6)
+        yield* Hotaru.glow(this, 50, 40)
 
         yield* remodel(this)
             .format("small-ball")
@@ -230,18 +289,25 @@ class Firefly extends Part {
             .p(this.p.clone())
             .speed(0)
             .radian(this.random() * T)
-            .ex(7)
+            .ex(4)
             .forEach((b) => {
                 b.p = b.p.add(vec.arg(b.radian).scale(14))
             })
-            .appear(10)
             .g(function* (b) {
-                yield* Array(25)
-                yield* Behavior.accel(b, 20, 5.5)
+                yield* Hotaru.blink(b, this.parent, 360)
+                yield* Behavior.fadeout(b, 30)
+            })
+            .g((b) => Behavior.accel(b, 60, 1.8))
+            .g(function* (b) {
+                const base = b.radian
+                const phase = this.random() * T
+
+                for (let f = 0; ; f++) {
+                    b.radian = base + Math.sin(f / 50 + phase) * 0.8
+                    yield
+                }
             })
             .fire(this.game.bullets)
-
-        yield* Array(240 - this.i * 10)
     }
 }
 
@@ -250,7 +316,7 @@ class BigFirefly extends Part {
         game: Game,
         parent: Enemy,
         private readonly x: number,
-        i: number,
+        private readonly i: number,
     ) {
         super(game, parent, 280, Size.M, 60 + i * 20)
     }
@@ -259,7 +325,12 @@ class BigFirefly extends Part {
         return vec(this.x, 200)
     }
 
+    // 一拍おきに(隣の大蛍とは交互に)、拍から15フレームたつと、左から右へ光を一つずつ灯して横一列の帯を作る。帯は少しして雨のように降る
     protected *attack() {
+        yield* Hotaru.waitBeat(this.parent)
+        if (Math.floor(this.parent.frame / 150) % 2 === this.i % 2) return
+        yield* Array(15)
+
         for (let f = 0; f < 60; f += 4) {
             yield* remodel(this)
                 .format("small-ball")
@@ -276,8 +347,6 @@ class BigFirefly extends Part {
                 .fire(this.game.bullets)
             yield* Array(4)
         }
-
-        yield* Array(160)
     }
 }
 
