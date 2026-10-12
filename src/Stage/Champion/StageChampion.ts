@@ -186,7 +186,7 @@ class EnemyHornet extends Enemy {
                 .speed(5)
                 .radian(base + turn * 0.6 * Math.sin(f / 25))
                 .ex(7 + generation * 2)
-                .ex(4)
+                .ex(2)
                 .fire(this.game.bullets)
             yield* Array(4)
         }
