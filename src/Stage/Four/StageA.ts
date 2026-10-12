@@ -1,5 +1,5 @@
 import { vec, Vec } from "@ipota/vec"
-import { Ease } from "@ipota/functions"
+import { Ease, GenUtils } from "@ipota/functions"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
@@ -148,7 +148,10 @@ class SnakeHead extends Enemy {
         }
     }
 
-    // 弾撒きをやめ、自機までの95%の所へ飛びかかっては、自機の方へ左右30°に開いた二本のビームを伸ばし、閉じる。これを4回くり返す。
+    // 弾撒きをやめ、自機までの95%の所へ飛びかかっては噛みつく。これを4回くり返す。
+    // 噛みつき: 自機の方へ左右30°に開いた二本のビーム(牙)が、30フレームかけて薄い姿から現れる(その間は当たらない)。
+    // 牙は50フレームかけて、一度さらに開いてから一気に閉じ、色は水色から紫へ移る。閉じた瞬間に画面が揺れ、牙は30フレームかけて消える。
+    // 閉じた所から、色とりどりの菱形の破片が40個ずつ15フレームおきに3回、ばらばらの向きへ飛び散り、120フレームかけて速さ8から1まで落ちて消える。
     // そのあと自機から遠ざかる向きへ離れ、弾撒きを再開する
     private *chase() {
         this.scripts.remove("spray")
@@ -159,16 +162,39 @@ class SnakeHead extends Enemy {
             const aim = this.game.player.p.sub(this.p).radian()
 
             yield* remodel(this)
-                .beam(0)
+                .beam(260)
                 .r(10)
-                .color("#00ffff")
-                .duplicate(2, (b, i) => {
-                    b.radian = aim + ((2 * i - 1) * T) / 12
-                    return b
-                })
+                .color("hsl(180,100%,50%)")
+                .type("neutral")
+                .alpha(0)
+                .radian(aim)
+                .nway(2, T / 6)
                 .g(function* (b) {
-                    yield* Behavior.ease(b, "length", 260, 30, Ease.Out)
-                    yield* Behavior.ease(b, "radian", aim, 10, Ease.Out)
+                    yield* Behavior.fadein(b, 30)
+
+                    yield* GenUtils.all({
+                        color: Behavior.hue(b, 180, 300, 50),
+                        fang: Behavior.ease(b, "radian", aim, 50, Ease.InBack),
+                    })
+
+                    this.game.camera.shake(6, 16)
+
+                    yield* Behavior.fadeout(b, 30)
+                })
+                .fire(this.game.bullets)
+
+            yield* Array(80)
+
+            yield* remodel(this)
+                .format("diamond")
+                .p(this.p.clone())
+                .duplicate(3)
+                .delayByIndex(15)
+                .duplicate(40)
+                .scatter({ radian: [0, T], hue: [0, 360] })
+                .speed(8)
+                .g(function* (b) {
+                    yield* Behavior.accel(b, 120, 1)
                     yield* Behavior.fadeout(b, 30)
                 })
                 .fire(this.game.bullets)
