@@ -49,7 +49,7 @@ export default class extends Stage {
 
 class SnakeHead extends Enemy {
     constructor(game: Game) {
-        super(game, 800, Size.BOSS, { renderer: new EnemyRendererBoss() })
+        super(game, 1600, Size.BOSS, { renderer: new EnemyRendererBoss() })
         this.isInvincible = true
         this.p = this.center().add(vec(0, -this.game.HEIGHT * 2))
 
@@ -197,7 +197,7 @@ class SnakeSegment extends Enemy {
         private readonly prev: Enemy,
         private readonly index: number,
     ) {
-        super(game, 340 - index * 14, Size.L - index * 2, { renderer: new EnemyRendererCore() })
+        super(game, 800 - index * 14, Size.L - index * 2, { renderer: new EnemyRendererCore() })
         this.isInvincible = true
         this.p = prev.p.clone()
 
