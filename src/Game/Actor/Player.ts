@@ -104,8 +104,7 @@ export class Player extends Actor {
         )
 
         if (this.life < 0) {
-            this.game.lose()
-            this.scripts.add(() => this.explode(), { id: "explode" })
+            this.die()
         } else {
             this.scripts.add(() => this.hitField(), { id: "hitField" })
         }
@@ -119,11 +118,16 @@ export class Player extends Actor {
         this.game.se.hit.play()
         this.game.camera.shake(HIT_SHAKE_INTENSITY, HIT_SHAKE_FRAME)
 
-        this.scripts.add(() => this.explode(), { id: "explode" })
-        this.game.lose()
+        this.die()
     }
 
-    // 自爆時に三角形の破片を撒き散らす。当たり判定を持たないeffect弾として実装
+    // ゲームオーバーにする。以後Gameは自機を更新しないので、破片はGameのスクリプトとして撒く
+    private die() {
+        this.game.lose()
+        this.game.scripts.add(() => this.explode())
+    }
+
+    // 三角形の破片を撒き散らす。当たり判定を持たないeffect弾として実装
     private *explode() {
         yield* remodel(this)
             .p(this.p.clone())
@@ -170,9 +174,6 @@ export class Player extends Actor {
     }
 
     private move() {
-        // ゲームオーバー後は爆発演出だけ進めればよく、移動もパーティクルも出さない
-        if (this.game.isGameOver) return
-
         const input = this.game.input
 
         // タッチドラッグ中は、指の移動量(ワールド座標のベクトル)をそのまま速度として使う

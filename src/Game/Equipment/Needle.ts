@@ -33,7 +33,7 @@ export const needle: SubEquipment = {
     price: 5000,
     *action(player) {
         while (true) {
-            if (player.game.input.isPushed("action") && !player.game.isGameOver) {
+            if (player.game.input.isPushed("action")) {
                 player.scripts.add(() => shoot(player))
                 yield* actionCooldown(player, クールダウンフレーム)
             }

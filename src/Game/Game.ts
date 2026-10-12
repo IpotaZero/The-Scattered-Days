@@ -83,7 +83,7 @@ export class Game {
         return this.state === "playing"
     }
 
-    // クリア後の演出中も含め、ゲームオーバーでない限り攻撃を続けさせるためのフラグ
+    // ゲームオーバー後は自機の更新・描画が止まる(クリア後は止まらない)
     get isGameOver(): boolean {
         return this.state === "game-over"
     }
@@ -324,7 +324,9 @@ export class Game {
         })
     }
 
+    // ゲームオーバー後は自機を更新しない。装備のスクリプト(射撃・技・クールタイム)もそこで止まる
     private updatePlayer(): void {
+        if (this.isGameOver) return
         this.player.update()
     }
 

@@ -84,19 +84,17 @@ const 球弾威力 = 1
 // ビームの間(自機の正面)を埋める、速く小さい球弾
 function* 球弾を撃ち続ける(player: Player): Generator<void, void, void> {
     while (true) {
-        if (!player.game.isGameOver) {
-            yield* remodel(player)
-                .p(player.p.clone())
-                .radian(-T / 4)
-                .type("friend")
-                .color("white")
-                .alpha(0.7)
-                .appearance("ball")
-                .r(球弾半径)
-                .damage(球弾威力)
-                .speed(球弾速度)
-                .fire(player.game.bullets)
-        }
+        yield* remodel(player)
+            .p(player.p.clone())
+            .radian(-T / 4)
+            .type("friend")
+            .color("white")
+            .alpha(0.7)
+            .appearance("ball")
+            .r(球弾半径)
+            .damage(球弾威力)
+            .speed(球弾速度)
+            .fire(player.game.bullets)
 
         yield* GenUtils.waitFrames(球弾間隔)
     }
@@ -112,21 +110,19 @@ const リング弾展開角度 = T / 10
 // 低速で広がっていく、輪っか状のリング弾。球弾より遅くまとまった見た目にする
 function* リング弾を撃ち続ける(player: Player): Generator<void, void, void> {
     while (true) {
-        if (!player.game.isGameOver) {
-            yield* remodel(player)
-                .p(player.p.add(vec(0, -24)))
-                .radian(-T / 4)
-                .type("friend")
-                .color("white")
-                .alpha(0.4)
-                .appearance("wedge")
-                .r(16)
-                .damage(リング弾威力)
-                .speed(0)
-                .shift(リング弾数, 60)
-                .g((me) => Behavior.accel(me, 30, 24))
-                .fire(player.game.bullets)
-        }
+        yield* remodel(player)
+            .p(player.p.add(vec(0, -24)))
+            .radian(-T / 4)
+            .type("friend")
+            .color("white")
+            .alpha(0.4)
+            .appearance("wedge")
+            .r(16)
+            .damage(リング弾威力)
+            .speed(0)
+            .shift(リング弾数, 60)
+            .g((me) => Behavior.accel(me, 30, 24))
+            .fire(player.game.bullets)
 
         yield* GenUtils.waitFrames(リング弾間隔)
     }

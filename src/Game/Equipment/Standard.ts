@@ -41,22 +41,20 @@ export const standard: MainEquipment = {
 
 function* mainShotLoop(player: Player): Generator<void, void, void> {
     while (true) {
-        if (!player.game.isGameOver) {
-            const spread = player.game.input.isPressed("slow") ? 集中時展開角度 : 通常時展開角度
+        const spread = player.game.input.isPressed("slow") ? 集中時展開角度 : 通常時展開角度
 
-            yield* remodel(player)
-                .p(player.p.clone())
-                .radian(-T / 4)
-                .appearance("player")
-                .type("friend")
-                .color("white")
-                .alpha(0.5)
-                .r(弾半径)
-                .damage(弾威力)
-                .nway(弾数, spread)
-                .speed(弾速)
-                .fire(player.game.bullets)
-        }
+        yield* remodel(player)
+            .p(player.p.clone())
+            .radian(-T / 4)
+            .appearance("player")
+            .type("friend")
+            .color("white")
+            .alpha(0.5)
+            .r(弾半径)
+            .damage(弾威力)
+            .nway(弾数, spread)
+            .speed(弾速)
+            .fire(player.game.bullets)
 
         yield* GenUtils.waitFrames(連射間隔)
     }
@@ -65,23 +63,21 @@ function* mainShotLoop(player: Player): Generator<void, void, void> {
 // ホーミング弾は通常/低速どちらでも同じものを、メインの弾とは別の間隔で撃つ
 function* homingShotLoop(player: Player): Generator<void, void, void> {
     while (true) {
-        if (!player.game.isGameOver) {
-            yield* remodel(player)
-                .p(player.p.clone())
-                .radian(-T / 4)
-                .appearance("wedge")
-                .type("friend")
-                .color("white")
-                .alpha(0.2)
-                .r(20)
-                .damage(ホーミング弾威力)
-                .speed(ホーミング弾速)
-                .nway(ホーミング弾数, ホーミング展開角度)
-                .g(function* (me) {
-                    yield* homingSteering(player, me)
-                })
-                .fire(player.game.bullets)
-        }
+        yield* remodel(player)
+            .p(player.p.clone())
+            .radian(-T / 4)
+            .appearance("wedge")
+            .type("friend")
+            .color("white")
+            .alpha(0.2)
+            .r(20)
+            .damage(ホーミング弾威力)
+            .speed(ホーミング弾速)
+            .nway(ホーミング弾数, ホーミング展開角度)
+            .g(function* (me) {
+                yield* homingSteering(player, me)
+            })
+            .fire(player.game.bullets)
 
         yield* GenUtils.waitFrames(12)
     }
