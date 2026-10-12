@@ -11,9 +11,13 @@ const PAN_MS = 250
 // 地図を映すカメラ。ワールド本体と、方眼・紙の質感などの背景(layers)をすべて同じtransformで動かすので、背景がワールドから遅れることがない。
 // 指一本のスワイプで動かし、指二本のピンチで拡大縮小する(拡大率はzoomRangeの中に収める)
 export class MapCamera {
+    // 最後にピンチで決まった拡大率。アプリを開いている間だけ残り(セーブデータには入らない)、
+    // ステージから地図へ戻って新しく作られたMapCameraはこの拡大率から始まる
+    private static lastZoom = 1
+
     // ワールド座標系でのカメラ位置(=画面中央に表示されるワールド座標)
     private pos: Point = { x: 0, y: 0 }
-    private zoom = 1
+    private zoom: number
 
     // 画面に触れている指(マウスなら左ボタン)ごとの現在位置(client座標)
     private readonly pointers = new Map<number, Point>()
@@ -39,6 +43,8 @@ export class MapCamera {
         // スワイプ・ピンチを受け付けてよいか(全体図などが被さっている間は動かさない)
         private readonly movable: () => boolean,
     ) {
+        this.zoom = MapCamera.clamp(MapCamera.lastZoom, zoomRange.min, zoomRange.max)
+
         // 背景はカメラが動ける範囲+いちばん縮小したときに映る広さを覆う大きさにする(map.cssの.map-backdrop参照)
         root.style.setProperty("--world-min-x", `${bounds.minX}px`)
         root.style.setProperty("--world-min-y", `${bounds.minY}px`)
@@ -104,6 +110,7 @@ export class MapCamera {
             y: pos.y + (this.gesture.center.y - screenCenter.y) / zoom,
         }
         this.zoom = spread > 0 ? MapCamera.clamp((zoom * this.spread()) / spread, this.zoomRange.min, this.zoomRange.max) : zoom
+        MapCamera.lastZoom = this.zoom
         this.pos = this.clampToBounds({
             x: anchor.x - (center.x - screenCenter.x) / this.zoom,
             y: anchor.y - (center.y - screenCenter.y) / this.zoom,
