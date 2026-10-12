@@ -542,7 +542,8 @@
     }
 
     #equip-sub-options,
-    #equip-learn {
+    #equip-learn,
+    #equip-life {
         flex-direction: column;
         width: 100%;
         max-width: 20em;

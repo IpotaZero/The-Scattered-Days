@@ -1,7 +1,7 @@
 import { App } from "../App"
 import { Dom } from "../Dom"
 import { EquipmentId } from "../Data/Equipment"
-import { playerData } from "../Data/PlayerData"
+import { LIFE_PRICE, playerData } from "../Data/PlayerData"
 import { mainEquipments, subEquipments } from "../Game/Equipment/PlayerEquipment"
 import { MapEdge, MapGraph, MapNode, MapNodeId } from "../Map/MapGraph"
 import { MapMinimap } from "../Map/MapMinimap"
@@ -18,7 +18,7 @@ import { SvgFile } from "../utils/SvgFile"
 
 type Direction = "up" | "down" | "left" | "right"
 
-// 全体図・型の変更画面を閉じるときのフェードアウトにかける時間
+// 全体図・型と残機の画面を閉じるときのフェードアウトにかける時間
 const OVERLAY_FADE_OUT_MS = 200
 
 const DIRECTION_VECTORS: Record<Direction, { x: number; y: number }> = {
@@ -73,7 +73,7 @@ export class SceneMap extends Scene {
             </div>
             <div class="map-controls">
                 ${isSmartPhone ? "" : `<div data-control="toggle-minimap"><span class="nowrap">全体図</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.slow)})`}</div>`}
-                <div data-control="open-equip"><span class="nowrap">型の変更</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
+                <div data-control="open-equip"><span class="nowrap">型と残機</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
                 <div data-control="back-to-title"><span class="nowrap">タイトルへ戻る</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.cancel)})`}</div>
             </div>
             <div class="texture-overlay map-backdrop map-camera-layer"></div>
@@ -255,11 +255,12 @@ export class SceneMap extends Scene {
              <div id="equip-main-options" class="fadeout"></div>
              <div id="equip-sub-options" class="fadeout"></div>
              <div id="equip-learn" class="fadeout"></div>
+             <div id="equip-life" class="fadeout"></div>
              <div class="equip-description"></div>
              <div class="texture-overlay"></div>`,
             {
                 elementId: "equip-root",
-                title: "--:: 型の変更 ::--",
+                title: "--:: 型と残機 ::--",
                 options: () => this.buildEquipRootOptions(),
             },
             App.input,
@@ -279,7 +280,7 @@ export class SceneMap extends Scene {
         this.equipDescriptionEl = undefined
     }
 
-    // ルート: 「主装備: ○○」「副装備: ○○」の2行。それぞれ選ぶとサブメニューが開く
+    // ルート: 「針: ○○」「技: ○○」「残機: n / 8」の3行。針と技は選ぶとサブメニューが開き、残機は選ぶと回復するかを尋ねる
     private buildEquipRootOptions(): MenuOption[][] {
         return [
             [
@@ -295,12 +296,13 @@ export class SceneMap extends Scene {
                 {
                     type: "submenu",
                     label: `技: ${this.getSubEquipmentLabel()}`,
-                    // 技は数が多く、型の変更と並べると画面からはみ出すので、選んでいる間は隠す
+                    // 技の一覧を開いている間はルートを隠す(並べると画面からはみ出す)
                     hides: ["equip-root"],
                     onFocus: () => this.hideEquipDescription(),
                     subMenu: () => this.buildSubEquipmentSubMenu(),
                 },
             ],
+            [this.buildLifeOption()],
             [
                 {
                     type: "select",
@@ -313,6 +315,35 @@ export class SceneMap extends Scene {
                 },
             ],
         ]
+    }
+
+    // 残機が満タンか花粉が足りなければ選べない。選ぶと回復するかを尋ね、「はい」で花粉を払って残機を1つ回復し、ルートへ戻る
+    private buildLifeOption(): MenuOption {
+        const price = `<span class="equip-price">花粉 ${LIFE_PRICE.toLocaleString()}</span>`
+
+        return {
+            type: "submenu",
+            label: `残機: ${playerData.getLives()} / ${playerData.getMaxLives()}　${price}`,
+            hides: ["equip-root"],
+            disabled: () => !playerData.canBuyLife(),
+            onFocus: () => this.showEquipDescription("花粉を払って残機を1つ回復する。"),
+            subMenu: () =>
+                MenuPreset.buildConfirmBox(
+                    this.equipMenu!,
+                    () => {
+                        // 確認を開いている間に実時間で満タンまで回復していたら、何も払わずに戻る
+                        if (playerData.canBuyLife()) playerData.buyLife()
+                        this.updateScoreDisplay()
+                        this.updateLivesDisplay()
+                        this.equipMenu?.back(1)
+                    },
+                    {
+                        title: "--:: 回復する? ::--",
+                        elementId: "equip-life",
+                        confirmLabel: `はい　${price}`,
+                    },
+                ),
+        }
     }
 
     private buildMainEquipmentSubMenu(): MenuOptionBox {

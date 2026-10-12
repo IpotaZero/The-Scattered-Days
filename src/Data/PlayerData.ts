@@ -12,6 +12,9 @@ const MAX_LIVES = 8
 const LIFE_RECOVERY_INTERVAL_MS = 120000
 const DEBUG_LIFE_RECOVERY_INTERVAL_MS = 5
 
+// 残機を1つ回復するのに払う花粉
+export const LIFE_PRICE = 1000
+
 // v2: Loadoutのsub装備を3枠から1枠に変更したため、古い保存形式と区別するためキーを変えている
 const STORAGE_KEY = "danmaku-kari.playerData.v2"
 
@@ -181,6 +184,20 @@ export class PlayerData {
 
         this.totalScore -= price
         this.ownedSubEquipmentIds.add(id)
+        this.save()
+    }
+
+    // 残機が満タンでなく、花粉がLIFE_PRICE以上あればtrue
+    canBuyLife(): boolean {
+        return this.lives < MAX_LIVES && this.totalScore >= LIFE_PRICE
+    }
+
+    // 花粉をLIFE_PRICEだけ払って残機を1つ回復する。実時間での回復の進み具合はそのまま残る
+    buyLife() {
+        if (!this.canBuyLife()) throw new Error("残機が満タンか、花粉が足りません")
+
+        this.totalScore -= LIFE_PRICE
+        this.lives++
         this.save()
     }
 
