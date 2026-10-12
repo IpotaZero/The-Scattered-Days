@@ -5,22 +5,40 @@ import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Stage } from "../Stage"
 import { T } from "../../T"
-import { Curves } from "../../utils/Functions/Curves"
 import { EnemyRendererBoss } from "../../Game/Actor/EnemyRendererBoss"
-import { Charge } from "../Charge"
+import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
 import { Size } from "../Size"
 
-// 頭のまわりを、三つの子頭がそれぞれ違う半径・向き・速さで回る。
-// 子頭は動いた跡に幽霊の体(進む向きを横切る光の線)を残す。光の線は速く動いているほど長く、10フレームかけて現れてからしばらく残り、消える。
-// 三本の幽霊の体が、頭のまわりで絡み合いながら流れる。
-// 子頭は撃たれている間だけ回る速さが四分の一まで落ち、幽霊の体も短くなる。撃たれなくなると元の速さに戻る。
-// 子頭の体力は350・500・650。三つとも落とすまで頭に攻撃は効かない。頭はときどき遅い輪を放つ。
-// 子頭をすべて落とすと、頭は力を溜めてから攻撃が効くようになり、画面を大きく速く動いて、自分も長い幽霊の体を引く。
+// 前作の StageDust(蛇)を移したもの。前作は30fps・幅630の画面だったので、時間は2倍、速さと大きさは0.81倍にしてある。
+// 頭は六つの節を引き連れて、画面の中と外を大きく泳ぐ。泳ぎ方は「左右に薙ぐ」「八の字」「渦」「自機に飛びかかる」の順にくり返す。
+// 頭は触れると当たる。飛びかかっている間を除いて、色の移ろう小さな弾をばらばらの向きへ撒き続ける。
+// 飛びかかるたびに、自機の方へ開いた二本のビームを伸ばしてから閉じる。
+// 節は動いていると、その場に色の移ろう大きな輪の弾を置いていく。輪は大きくなり、少し留まって消える。
+// 節には尻尾の側から一つずつしか攻撃が効かない。節を一つ落とすたびに、頭のまわりを回る分身が一つ増える。
+// 分身には攻撃が効かず、白い玉(縮みきると矢を放つ)と、大きな輪の弾の11方向撃ちを交互に使う。
+// 節をすべて落とすと頭に攻撃が効くようになる。頭を落とすと分身も消える。
 
 export default class extends Stage {
     *G() {
-        const boss = new EnemyBoss(this.game)
-        this.game.enemies.push(boss, ...boss.heads)
+        yield* Array(60)
+
+        const head = new SnakeHead(this.game)
+        const segments: SnakeSegment[] = []
+        for (let i = 0; i < 6; i++) {
+            segments.push(new SnakeSegment(this.game, i === 0 ? head : segments[i - 1], i))
+        }
+        this.game.enemies.push(head, ...segments)
+
+        yield* Array(300)
+        head.start()
+
+        for (const segment of [...segments].reverse()) {
+            segment.isInvincible = false
+            yield* this.waitDead([segment])
+            this.game.enemies.push(new DetachedTail(this.game, head))
+        }
+
+        head.isInvincible = false
 
         yield* this.waitAllEnemiesDead()
         this.scorenizeAllBullets()
@@ -29,158 +47,301 @@ export default class extends Stage {
     }
 }
 
-namespace Ghost {
-    // e のいる所に、velocity の向きを横切る光の線を一本残す。線の長さは速さで決まる。
-    // 線は10フレームかけて現れ(その間は当たらない)、life フレーム残ってから20フレームかけて消える
-    export function* rib(e: Enemy, velocity: Vec, life: number, color: Color) {
-        if (velocity.magnitude() < 0.5) return
-
-        const across = velocity.radian() + T / 4
-        const half = 24 + Math.min(velocity.magnitude() * 14, 90)
-
-        yield* remodel(e)
-            .appearance("laser")
-            .collision("rect")
-            .isScorable(false)
-            .color(color)
-            .r(4)
-            .speed(0)
-            .radian(across)
-            .length(half * 2)
-            .p(e.p.sub(vec.arg(across).scale(half)))
-            .appear(10)
-            .g(function* (b) {
-                yield* Array(life)
-                yield* Behavior.fadeout(b, 20)
-            })
-            .fire(e.game.bullets)
-    }
-}
-
-class EnemyBoss extends Enemy {
-    readonly heads: SubHead[]
-
+class SnakeHead extends Enemy {
     constructor(game: Game) {
-        super(game, 1500, Size.BOSS, { renderer: new EnemyRendererBoss() })
+        super(game, 800, Size.BOSS, { renderer: new EnemyRendererBoss() })
         this.isInvincible = true
-        this.p = vec(this.game.WIDTH / 2, -200)
+        this.p = this.center().add(vec(0, -this.game.HEIGHT * 2))
 
-        this.heads = [
-            new SubHead(game, this, 350, 100, 0.022, 0, "#d0ffa0"),
-            new SubHead(game, this, 500, 150, -0.016, T / 3, "#a0ffd0"),
-            new SubHead(game, this, 650, 200, 0.012, (T * 2) / 3, "#e0ffc0"),
-        ]
-
-        this.scripts.add(() => this.enter())
-        this.scripts.add(() => this.phases())
+        this.scripts.add(() => this.moveTo(this.center(), 240))
     }
 
-    private home() {
-        return vec(this.game.WIDTH / 2, this.game.HEIGHT * 0.33)
+    private center() {
+        return vec(this.game.WIDTH / 2, this.game.HEIGHT / 2)
     }
 
-    private *enter() {
-        yield* this.moveTo(this.home(), 150)
-        this.scripts.add(() => this.drift(), { id: "move" })
-        this.scripts.add(() => this.ring(14, 2.5, 150), { loop: Infinity, margin: 60, id: "ring" })
+    // 泳ぎ始め、体の当たり判定と弾撒きを始める
+    start() {
+        this.scripts.add(() => this.body(), { loop: Infinity })
+        this.scripts.add(() => this.spray(), { loop: Infinity, id: "spray" })
+        this.scripts.add(() => this.swim(), { loop: Infinity })
     }
 
-    // 画面の中ほどを、ゆっくり大きく漂う
-    private *drift() {
-        const path = Curves.lissajous(this.game.WIDTH * 0.2, this.game.HEIGHT * 0.2, 2, 3)
-
-        for (let f = 0; ; f++) {
-            this.p = path(f / 360).add(this.home())
-            yield
-        }
+    private *swim() {
+        yield* this.sweep()
+        yield* this.figure8()
+        yield* this.spiral()
+        yield* this.chase()
     }
 
-    // 画面を大きく速くうねる
-    private *rampage() {
-        const path = Curves.lissajous(this.game.WIDTH * 0.7, this.game.HEIGHT * 0.4, 3, 2)
-
-        for (let f = 0; ; f++) {
-            this.p = path(f / 160).add(this.home())
-            yield
-        }
-    }
-
-    private *phases() {
-        while (this.heads.some((p) => p.life > 0)) yield
-
-        // 子頭をすべて落とすと、力を溜めてから攻撃が効くようになり、大きく速くうねって、自分も幽霊の体を引く
-        this.scripts.remove("move")
-        this.scripts.remove("ring")
-        yield* this.moveTo(this.home(), 60)
-        yield* Charge.gather(this, 120, "#d0ffa0")
-        this.isInvincible = false
-        this.scripts.add(() => this.rampage(), { id: "move" })
-        this.scripts.add(() => this.trail(), { loop: Infinity, id: "trail" })
-        this.scripts.add(() => this.ring(20, 3, 110), { loop: Infinity, margin: 60, id: "ring" })
-    }
-
-    // 3フレームごとに、動いた向きを横切る光の線を残す。線は90フレーム残る
-    private *trail() {
-        const before = this.p.clone()
-        yield* Array(3)
-        yield* Ghost.rib(this, this.p.sub(before).scale(1 / 3), 90, "#d0ffa0")
-    }
-
-    // count 個の弾の輪を speed の速さで放ち、interval フレーム待つ
-    private *ring(count: number, speed: number, interval: number) {
+    // 毎フレーム、頭と同じ所に、頭より少し小さい色の移ろう輪の弾を置く。弾は2フレームで消える
+    private *body() {
+        yield
         yield* remodel(this)
-            .format("small-ball")
-            .r(5)
-            .color("#e0ffc0")
+            .colorful(this.frame / 2)
+            .r(52)
+            .speed(0)
             .p(this.p.clone())
-            .speed(speed)
-            .radian(this.random() * T)
-            .ex(count)
+            .delete(1)
             .fire(this.game.bullets)
+    }
 
-        yield* Array(interval)
+    // 2フレームごとに、色の移ろう小さな弾を一発、ばらばらの向きへ撃つ
+    private *spray() {
+        yield* Array(2)
+        yield* remodel(this)
+            .colorful(this.frame)
+            .appearance("ball")
+            .r(5)
+            .speed(3.24)
+            .radian((this.frame / 2) ** 2)
+            .p(this.p.clone())
+            .fire(this.game.bullets)
+    }
+
+    // frame フレームかけて end へ動く。緩急は easing で決まる
+    private *glide(end: Vec, frame: number, easing: (t: number) => number) {
+        const start = this.p
+
+        for (let i = 1; i < frame + 1; i++) {
+            this.p = start.add(end.sub(start).scale(easing(i / frame)))
+            yield
+        }
+    }
+
+    // 右端へ寄り、右下から左上へ斜めに横切り、左端を下り、真ん中へ戻る
+    private *sweep() {
+        yield* this.glide(this.center().add(vec(this.game.WIDTH * 0.42, 0)), 120, Ease.InOut)
+        yield* this.glide(this.center().add(vec(this.game.WIDTH * 0.42, this.game.HEIGHT * 0.2)), 60, Ease.InOut)
+        yield* this.glide(this.center().add(vec(-this.game.WIDTH * 0.42, -this.game.HEIGHT * 0.2)), 120, Ease.InOut)
+        yield* this.glide(this.center().add(vec(-this.game.WIDTH * 0.42, 0)), 240, Ease.InOut)
+        yield* this.glide(this.center(), 120, Ease.InOut)
+    }
+
+    // 縦に長い八の字を一周する。上下の端では画面の外まで出る
+    private *figure8() {
+        for (let i = 0; i <= 20; i++) {
+            yield* this.moveTo(
+                this.center().add(
+                    vec(
+                        Math.sin((i / 20) * T) * this.game.WIDTH * 0.38,
+                        (-0.2 + Math.sin((i / 20) * T * 2) * 0.8) * this.game.HEIGHT,
+                    ),
+                ),
+                30,
+            )
+        }
+    }
+
+    // 画面の外から真ん中へ渦を巻いて入り、また渦を巻いて画面の外へ出ていく
+    private *spiral() {
+        for (let i = 0; i <= 10; i++) {
+            const angle = (i / 10) * T * 3
+            const radius = (1 - i / 10) * this.game.WIDTH * 0.8
+            yield* this.moveTo(this.center().add(vec(Math.cos(angle) * radius, Math.sin(angle) * radius * 0.6)), 60)
+        }
+
+        for (let i = 0; i <= 10; i++) {
+            const angle = (i / 10) * T * 2
+            const radius = (i / 10) * this.game.HEIGHT * 0.8
+            yield* this.moveTo(this.center().add(vec(Math.cos(angle) * radius, Math.sin(angle) * radius * 0.5)), 60)
+        }
+    }
+
+    // 弾撒きをやめ、自機までの95%の所へ飛びかかっては、自機の方へ左右30°に開いた二本のビームを伸ばし、閉じる。これを4回くり返す。
+    // そのあと自機から遠ざかる向きへ離れ、弾撒きを再開する
+    private *chase() {
+        this.scripts.remove("spray")
+
+        for (let k = 0; k < 4; k++) {
+            yield* this.moveTo(this.p.add(this.game.player.p.sub(this.p).scale(0.95)), 60)
+
+            const aim = this.game.player.p.sub(this.p).radian()
+
+            yield* remodel(this)
+                .beam(0)
+                .r(10)
+                .color("#00ffff")
+                .duplicate(2, (b, i) => {
+                    b.radian = aim + ((2 * i - 1) * T) / 12
+                    return b
+                })
+                .g(function* (b) {
+                    yield* Behavior.ease(b, "length", 260, 30, Ease.Out)
+                    yield* Behavior.ease(b, "radian", aim, 10, Ease.Out)
+                    yield* Behavior.fadeout(b, 30)
+                })
+                .fire(this.game.bullets)
+
+            yield* Array(70)
+        }
+
+        const away = this.p.add(vec.arg(this.p.sub(this.game.player.p).radian()).scale(this.game.WIDTH * 0.72))
+        yield* this.moveTo(
+            vec(
+                Math.max(this.game.WIDTH * 0.08, Math.min(this.game.WIDTH * 0.92, away.x)),
+                Math.max(this.game.HEIGHT * 0.05, Math.min(this.game.HEIGHT * 0.5, away.y)),
+            ),
+            180,
+        )
+        yield* Array(60)
+
+        this.scripts.add(() => this.spray(), { loop: Infinity, id: "spray" })
     }
 }
 
-// 子頭。頭のまわりの、縦の半径 radius・横の半径 radius の0.85倍の楕円を、1フレームに turn ずつ回る。現れてから60フレームかけて、頭の中心から円の上まで広がる。
-// 撃たれている間は回る速さが四分の一まで落ち、撃たれなくなると少しずつ元の速さに戻る。
-// 3フレームごとに、動いた向きを横切る光の線(幽霊の体)を残す。線は70フレーム残る
-class SubHead extends Enemy {
+// 節。一つ前の節(先頭の節は頭)から49以上離れると、離れた分の13%ずつ毎フレーム近づく。頭に近い節ほど大きく、体力も多い
+class SnakeSegment extends Enemy {
     constructor(
         game: Game,
-        head: Enemy,
-        life: number,
-        radius: number,
-        turn: number,
-        phase: number,
-        private readonly color: Color,
+        private readonly prev: Enemy,
+        private readonly index: number,
     ) {
-        super(game, life, Size.M)
-        this.p = head.p.clone()
+        super(game, 340 - index * 14, Size.L - index * 2, { renderer: new EnemyRendererCore() })
+        this.isInvincible = true
+        this.p = prev.p.clone()
 
-        this.scripts.add(() => this.orbit(head, radius, turn, phase))
-        this.scripts.add(() => this.trail(), { loop: Infinity, margin: 120 })
+        this.scripts.add(() => this.follow(), { loop: Infinity })
+        this.scripts.add(() => this.trail(), { margin: 60 })
     }
 
-    private *orbit(head: Enemy, radius: number, turn: number, phase: number) {
-        let angle = phase
-        let pace = 1
+    private *follow() {
+        const diff = this.prev.p.sub(this.p)
+        const distance = diff.magnitude()
 
-        for (let f = 0; head.life > 0; f++) {
-            pace += ((this.damaged ? 0.25 : 1) - pace) * 0.1
-            angle += turn * pace
-            this.p = head.p.add(
-                vec(Math.cos(angle) * 0.85, Math.sin(angle)).scale(radius * Ease.Out(Math.min(1, f / 60))),
-            )
+        if (distance > 49) this.p = this.p.add(diff.scale(((distance - 49) / distance) * 0.134))
+        yield
+    }
+
+    // 前に調べた所から0.81より多く動いていたら、その場に色の移ろう輪の弾を置き、60フレーム休む。
+    // 輪は30フレームかけて大きくなり、30フレーム留まって、30フレームかけて消える。
+    // 休んだあとは、輪を置いた所から動いた分で調べるので、動き続けている間は61フレームごとに輪を置く
+    private *trail() {
+        let before = this.p.clone()
+
+        while (true) {
+            yield
+
+            const moved = this.p.sub(before).magnitude()
+            before = this.p.clone()
+            if (moved <= 0.81) continue
+
+            yield* remodel(this)
+                .colorful(this.frame + this.index * 30)
+                .r(1)
+                .speed(0)
+                .p(this.p.clone())
+                .g(function* (b) {
+                    yield* Behavior.ease(b, "r", 23, 30)
+                    yield* Array(30)
+                    yield* Behavior.fadeout(b, 30)
+                })
+                .fire(this.game.bullets)
+
+            yield* Array(60)
+        }
+    }
+}
+
+// 分身。攻撃が効かない。頭のまわりの、横の半径が122〜228の間で波打つ楕円(縦は横の0.7倍)を、300フレームで一周する。
+// 現れてから60フレームかけて大きくなる
+class DetachedTail extends Enemy {
+    constructor(game: Game, head: Enemy) {
+        super(game, 400, Size.S)
+        this.isInvincible = true
+
+        this.setParent(head, () => this.orbit())
+        this.scripts.add(() => this.grow())
+        this.scripts.add(() => this.attack(), { loop: Infinity, margin: 60 })
+    }
+
+    private orbit() {
+        const radius = 175 + Math.sin(this.frame / 180) * 53
+        const angle = (this.frame / 300) * T
+        return vec(Math.cos(angle) * radius, Math.sin(angle) * radius * 0.7)
+    }
+
+    private *grow() {
+        for (let i = 1; i < 61; i++) {
+            this.r = (i / 60) * Size.S
             yield
         }
-
-        this.life = 0
     }
 
-    private *trail() {
-        const before = this.p.clone()
-        yield* Array(3)
-        yield* Ghost.rib(this, this.p.sub(before).scale(1 / 3), 70, this.color)
+    private *attack() {
+        yield* this.egg()
+        yield* this.spread()
+    }
+
+    // その場に白い玉を置き、240フレーム休む。玉は120フレーム留まってから60フレームかけて縮み、縮みきると矢を放って消える
+    private *egg() {
+        yield* remodel(this)
+            .appearance("ball")
+            .color("#ffffff")
+            .r(23)
+            .speed(0)
+            .p(this.p.clone())
+            .g(function* (b) {
+                yield* Array(120)
+                yield* Behavior.ease(b, "r", 1, 60, Ease.In)
+                this.scripts.add(() => this.hatch(b.p.clone()))
+                b.life = 0
+            })
+            .fire(this.game.bullets)
+
+        yield* Array(240)
+    }
+
+    // p から、いま自機のいる所へ向けて五方向に矢を放つ。8フレームおきに4回。
+    // 矢は4フレームごとに9.72ずつ跳ぶように進み、向きは0.25ラジアン刻みで左右に揺れる
+    private *hatch(p: Vec) {
+        const target = this.game.player.p.clone()
+
+        for (let k = 0; k < 4; k++) {
+            yield* remodel(this)
+                .format("arrow")
+                .r(23)
+                .color("#ffffff")
+                .p(p)
+                .aim({ p: target })
+                .speed(0)
+                .ex(5)
+                .g(function* (b) {
+                    const base = b.radian
+                    for (let i = 0; i < 400; i++) {
+                        b.radian = Math.floor((base + Math.sin(i / 20) * 0.4) * 4) / 4
+                        yield
+                    }
+                })
+                .g(function* (b) {
+                    while (true) {
+                        b.p = b.p.add(vec.arg(b.radian).scale(9.72))
+                        yield* Array(4)
+                    }
+                })
+                .fire(this.game.bullets)
+
+            yield* Array(8)
+        }
+    }
+
+    // 色の移ろう大きな輪の弾を11方向へ撃ち、120フレーム休む。
+    // 弾は20フレームかけて大きくなりながら進み、40フレームかけて止まり、40フレームかけて速さ3.65まで加速する
+    private *spread() {
+        yield* remodel(this)
+            .colorful(this.frame / 2 + 120)
+            .r(1)
+            .p(this.p.clone())
+            .speed(2.43)
+            .radian((T * this.frame) / 480)
+            .ex(11)
+            .g(function* (b) {
+                yield* Behavior.ease(b, "r", 23, 20)
+                yield* Behavior.stop(b, 40)
+                yield* Behavior.accel(b, 40, 3.65)
+            })
+            .fire(this.game.bullets)
+
+        yield* Array(120)
     }
 }
