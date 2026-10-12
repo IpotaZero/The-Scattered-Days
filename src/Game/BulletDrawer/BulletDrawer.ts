@@ -79,7 +79,18 @@ export class BulletDrawer {
         const rotation = this.getEffectiveRotation(bullet)
 
         if (
-            this.gpu?.queue(sprite.key, sprite.canvas, bullet.p.x, bullet.p.y, rotation, bullet.alpha, halfSize, halfSize, 0, 1)
+            this.gpu?.queue(
+                sprite.key,
+                sprite.canvas,
+                bullet.p.x,
+                bullet.p.y,
+                rotation,
+                bullet.alpha,
+                halfSize,
+                halfSize,
+                0,
+                1,
+            )
         ) {
             return
         }
@@ -87,61 +98,71 @@ export class BulletDrawer {
         this.drawSpriteDirectly(bullet, ctx, sprite.canvas, halfSize, rotation)
     }
 
-    // ビーム・レーザー(当たり判定がrect)。本体と、ビームなら根元の光を描く。GPUに積めなければCanvas2Dへ直接描く
+    // ビーム・レーザー(当たり判定がrect)。本体と、ビームなら根元の光を描く。GPUに積めなければCanvas2Dへ描く。
+    // 長さ0の長方形は、光も含めて何も描かれない
     private drawRect(bullet: Bullet, ctx: CanvasRenderingContext2D) {
-        if (!this.queueRectBody(bullet)) this.drawRectBodyDirectly(bullet, ctx)
-        if (bullet.appearance === "beam" && !this.queueBeamFlare(bullet)) this.drawBeamFlareDirectly(bullet, ctx)
+        if (bullet.length > 0) {
+            const body = this.getSprite(bullet.appearance, bullet.color, bullet.r)
+            if (!this.queueRectBody(bullet, body)) this.drawRectBodyDirectly(bullet, body, ctx)
+        }
+
+        if (bullet.appearance === "beam") {
+            // 根元の光の色は弾の色によらないので、色は一つに決めて使い回す
+            const flare = this.getSprite("beam-flare", "aqua", bullet.r)
+            if (!this.queueBeamFlare(bullet, flare)) this.drawBeamFlareDirectly(bullet, flare, ctx)
+        }
     }
 
     // 長さは弾ごとにまちまちなので、本体のスプライトを 始端・中ほど・終端 の3つに切り分け、中ほどだけを長さに合わせて引き伸ばす。
-    // スプライトは長さ 4m の中の m から 3m に本体を描いてある(m は光のための余白)。中ほどにはその真ん中の1列を使う
-    private queueRectBody(bullet: Bullet): boolean {
-        const gpu = this.gpu
-        if (!gpu) return false
-        // 長さ0の長方形は、光も含めて何も描かれない(Canvas2Dと同じ)
-        if (bullet.length <= 0) return true
-
-        const sprite = this.getSprite(bullet.appearance, bullet.color, bullet.r)
-        const scale = bullet.r / sprite.r
-        const margin = sprite.r * RECT_MARGIN * scale
-        const halfHeight = (sprite.canvas.height / 2) * scale
+    // スプライトは長さ 4m の中の m から 3m に本体を描いてある(m は光のための余白)。中ほどにはその真ん中の1列を使う。
+    // 切り分けた一つごとに、弾の位置から向きの方向へ from から to までを、スプライトの横方向 uFrom から uTo で paint に描かせる。
+    // paint が一つでも描けなければ、残りは描かずに false を返す
+    private sliceRectBody(
+        bullet: Bullet,
+        sprite: Sprite,
+        paint: (from: number, to: number, uFrom: number, uTo: number) => boolean,
+    ): boolean {
+        const margin = sprite.r * RECT_MARGIN * (bullet.r / sprite.r)
         // 本体が短くて中ほどがないときは、両端を本体の真ん中で突き合わせる
         const cap = Math.min(margin, bullet.length / 2)
         const capU = (margin + cap) / (margin * 4)
+
+        return (
+            paint(-margin, cap, 0, capU) &&
+            (bullet.length <= margin * 2 || paint(margin, bullet.length - margin, 0.5, 0.5)) &&
+            paint(bullet.length - cap, bullet.length + margin, 1 - capU, 1)
+        )
+    }
+
+    private queueRectBody(bullet: Bullet, sprite: Sprite): boolean {
+        const gpu = this.gpu
+        if (!gpu) return false
+
+        const halfHeight = (sprite.canvas.height / 2) * (bullet.r / sprite.r)
         const cos = Math.cos(bullet.radian)
         const sin = Math.sin(bullet.radian)
 
-        // 弾の位置から向きの方向へ from から to までを、スプライトの横方向 uFrom から uTo で描く
-        const queue = (from: number, to: number, uFrom: number, uTo: number) => {
-            const center = (from + to) / 2
-            return gpu.queue(
+        // 3つとも同じスプライトなので、積めるかどうかはそろう
+        return this.sliceRectBody(bullet, sprite, (from, to, uFrom, uTo) =>
+            gpu.queue(
                 sprite.key,
                 sprite.canvas,
-                bullet.p.x + cos * center,
-                bullet.p.y + sin * center,
+                bullet.p.x + (cos * (from + to)) / 2,
+                bullet.p.y + (sin * (from + to)) / 2,
                 bullet.radian,
                 bullet.alpha,
                 (to - from) / 2,
                 halfHeight,
                 uFrom,
                 uTo,
-            )
-        }
-
-        // 3つとも同じスプライトなので、積めるかどうかはそろう
-        return (
-            queue(-margin, cap, 0, capU) &&
-            (bullet.length <= margin * 2 || queue(margin, bullet.length - margin, 0.5, 0.5)) &&
-            queue(bullet.length - cap, bullet.length + margin, 1 - capU, 1)
+            ),
         )
     }
 
     // 根元の光のスプライトは、まとう光の分も含めて、向きの方向に -5r から 14r、直角の方向に -10r から 10r を描いてある
-    private queueBeamFlare(bullet: Bullet): boolean {
+    private queueBeamFlare(bullet: Bullet, sprite: Sprite): boolean {
         if (!this.gpu) return false
 
-        // 根元の光の色は弾の色によらないので、色は一つに決めて使い回す
-        const sprite = this.getSprite("beam-flare", "aqua", bullet.r)
         const scale = bullet.r / sprite.r
         const center = 4.5 * bullet.r
 
@@ -182,7 +203,11 @@ export class BulletDrawer {
 
         let sprite = byR.get(r)
         if (!sprite) {
-            sprite = { key: [kind, color, r].join(","), canvas: this.drawToOffscreen({ appearance: kind, color, r }), r }
+            sprite = {
+                key: [kind, color, r].join(","),
+                canvas: this.drawToOffscreen({ appearance: kind, color, r }),
+                r,
+            }
             byR.set(r, sprite)
         }
 
@@ -396,23 +421,42 @@ export class BulletDrawer {
         return canvas
     }
 
-    // WebGLが使えない環境や、アトラスが満杯だったときの救済策
-    private drawRectBodyDirectly(bullet: Bullet, ctx: CanvasRenderingContext2D) {
+    // WebGLが使えない環境や、アトラスが満杯だったときの救済策。GPUと同じく、本体のスプライトを3つに切り分けて drawImage で描く
+    private drawRectBodyDirectly(bullet: Bullet, sprite: Sprite, ctx: CanvasRenderingContext2D) {
+        const width = sprite.canvas.width
+        const height = sprite.canvas.height
+        const halfHeight = (height / 2) * (bullet.r / sprite.r)
+
         ctx.save()
         ctx.globalAlpha = bullet.alpha
         ctx.translate(bullet.p.x, bullet.p.y)
         ctx.rotate(bullet.radian)
-        this.paintRectBody(ctx, bullet.color, bullet.r, bullet.length)
+        this.sliceRectBody(bullet, sprite, (from, to, uFrom, uTo) => {
+            // 中ほどは幅のない1列なので、少なくとも1ピクセルの幅で切り出す
+            const sw = Math.max((uTo - uFrom) * width, 1)
+            const sx = ((uFrom + uTo) / 2) * width - sw / 2
+            ctx.drawImage(sprite.canvas, sx, 0, sw, height, from, -halfHeight, to - from, halfHeight * 2)
+            return true
+        })
         ctx.restore()
     }
 
-    private drawBeamFlareDirectly(bullet: Bullet, ctx: CanvasRenderingContext2D) {
+    // WebGLが使えない環境や、アトラスが満杯だったときの救済策。根元の光のスプライトを drawImage で描く
+    private drawBeamFlareDirectly(bullet: Bullet, sprite: Sprite, ctx: CanvasRenderingContext2D) {
+        const scale = bullet.r / sprite.r
+
         ctx.save()
         ctx.globalCompositeOperation = "lighter"
         ctx.globalAlpha = bullet.alpha * this.beamFlicker()
         ctx.translate(bullet.p.x, bullet.p.y)
         ctx.rotate(bullet.radian)
-        this.paintBeamFlare(ctx, bullet.r)
+        ctx.drawImage(
+            sprite.canvas,
+            -5 * bullet.r,
+            -10 * bullet.r,
+            sprite.canvas.width * scale,
+            sprite.canvas.height * scale,
+        )
         ctx.restore()
     }
 
