@@ -46,7 +46,7 @@
 .option {
     position: relative;
     width: fit-content;
-    border-radius: 0.1em;
+    border-radius: 0.05em;
 
     &.selected {
         opacity: 1;

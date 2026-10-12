@@ -36,7 +36,7 @@
 
     .menu {
         #root {
-            font-size: 1.5em;
+            font-size: 1.6em;
             
             padding: 0.5em;
             border-radius: 0.1em;
@@ -55,10 +55,13 @@
             .option {
                 background-color: #1118;
                 border: white 1px solid;
-                padding: 0.2em 0.5em;
-                width: 4.2em;
+                padding: 0.15em 0 0.18em;
+                width: 6em;
                 text-align: center;
-                font-size: 1.5em;
+
+                span{
+                    font-size: 1.2em;
+                }
             }
         }
     }

@@ -159,7 +159,7 @@ namespace Tiger {
             })
             .fire(me.game.bullets)
 
-        yield* Array(28)
+        yield* Array(60)
 
         yield* remodel(me)
             .format("line")
@@ -172,7 +172,7 @@ namespace Tiger {
             .shift(4, 22)
             .fire(me.game.bullets)
 
-        yield* Array(62)
+        yield* Array(90)
     }
 
     export function* stripes(me: Enemy) {
@@ -188,7 +188,7 @@ namespace Tiger {
                 .radian(T / 4 + sway + (k - 2) * 0.12)
                 .shift(11, 24)
                 .fire(me.game.bullets)
-            yield* Array(14)
+            yield* Array(30)
         }
 
         yield* Array(140)
