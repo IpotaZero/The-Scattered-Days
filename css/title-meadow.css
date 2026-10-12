@@ -68,6 +68,8 @@
 .meadow-bugs {
     position: absolute;
     inset: 0;
+    /* 虫の横移動の終点(100cqw)を、この要素の幅にする */
+    container-type: size;
 }
 
 /* 奥の虫は小さく淡く、手前の虫は墨色でくっきり。2層で奥行きを出す */
@@ -111,12 +113,13 @@
     animation: meadow-bug-bob var(--bob) ease-in-out infinite alternate;
 }
 
+/* 虫の大きさ(-100%)と余白(1rem)ぶん左の外から、画面の幅と余白ぶん右の外まで動く。端では虫全体が画面の外にある */
 @keyframes meadow-bug-cross {
     from {
-        transform: translateX(-10vw);
+        transform: translateX(calc(-100% - 1rem));
     }
     to {
-        transform: translateX(110vw);
+        transform: translateX(calc(100cqw + 1rem));
     }
 }
 
