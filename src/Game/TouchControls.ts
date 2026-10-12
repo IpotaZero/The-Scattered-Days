@@ -4,7 +4,7 @@ import type { GameAction } from "./Game"
 
 /**
  * タッチ操作をDigitalInput.Reader/AnalogInput.Readerに見せかけるアダプタ。
- * 1本指ドラッグ = 移動(指の移動量をワールド座標のベクトルとしてそのまま速度に使う)+集中モード常時ON、
+ * 1本指ドラッグ = 移動(指の移動量をワールド座標に直し、dragScaleを掛けて速度に使う)+集中モード常時ON、
  * 2本指タップ = action、3本指タッチ = suicide。
  * キーボード/ゲームパッドの入力(base)にはORで重ねるので、両方同時に使っても壊れない。
  *
@@ -30,6 +30,8 @@ export class TouchControls implements DigitalInput.Reader<GameAction>, AnalogInp
         private readonly base: DigitalInput.Reader<GameAction>,
         private readonly analogBase: AnalogInput.Reader<GameAction>,
         private readonly canvas: HTMLCanvasElement,
+        // 指の移動量(ワールド座標)にこれを掛けたものが自機の移動量になる
+        private readonly dragScale: number,
     ) {
         this.tracker = new TouchTracker(canvas)
     }
@@ -73,7 +75,7 @@ export class TouchControls implements DigitalInput.Reader<GameAction>, AnalogInp
         // canvasの内部解像度とCSS表示サイズの比率で、画面px単位のずれをワールド座標に変換する
         const scale = this.canvas.width / this.canvas.getBoundingClientRect().width
         const pos = vec(current.clientX, current.clientY)
-        const vector = pos.sub(this.dragPrevPos!).scale(scale)
+        const vector = pos.sub(this.dragPrevPos!).scale(scale * this.dragScale)
         this.dragPrevPos = pos
         return vector
     }

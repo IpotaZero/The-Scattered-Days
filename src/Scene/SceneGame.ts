@@ -26,6 +26,7 @@ export class SceneGame extends Scene {
             createStage: (game) => this.node.stage(game),
             input: App.input,
             analogInput: App.analogInput,
+            dragScale: App.settings.dragScaleLevel / 10,
             se: App.se,
             onWin: () => {
                 this.node.recordClear(playerData, playerData.getLoadout().main, playerData.getLives() === initialLives)

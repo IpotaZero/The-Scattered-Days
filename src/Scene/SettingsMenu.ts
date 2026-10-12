@@ -1,7 +1,14 @@
 import { KeyConfig, StandardGamepadMap, type Source } from "@ipota/input"
 import { App } from "../App"
 import { playerData } from "../Data/PlayerData"
-import { InputAction, THRESHOLD_MAX_LEVEL, VOLUME_MAX_LEVEL, VolumeKind } from "../Data/Settings"
+import {
+    DRAG_SCALE_MAX_LEVEL,
+    DRAG_SCALE_MIN_LEVEL,
+    InputAction,
+    THRESHOLD_MAX_LEVEL,
+    VOLUME_MAX_LEVEL,
+    VolumeKind,
+} from "../Data/Settings"
 import { InputCode } from "../utils/InputCode"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import type { Menu, MenuOption, MenuOptionBox } from "../utils/Menu/Menu"
@@ -70,6 +77,17 @@ export class SettingsMenu {
                             this.menu.render()
                         },
                     },
+                ],
+                [
+                    this.dragScaleArrow(-1),
+                    {
+                        type: "select",
+                        label: this.dragScaleLabel(),
+                        // 名前と係数を表示するだけで、選んでも何も起きない
+                        sound: "none",
+                        onSelect: () => {},
+                    },
+                    this.dragScaleArrow(1),
                 ],
                 // スマホは画面が狭くてキーコンフィグが見切れるうえ、キーボードやゲームパッドもまず使わないので出さない
                 ...(isSmartPhone
@@ -167,14 +185,44 @@ export class SettingsMenu {
         ]
     }
 
-    private volumeArrow(kind: VolumeKind, diff: -1 | 1): MenuOption {
-        const label = document.createElement("span")
-        label.className = "settings-arrow"
-        label.textContent = diff < 0 ? "←" : "→"
+    // 矢印や×など、文字幅だけの列に置くラベル
+    private narrowLabel(text: string): HTMLElement {
+        const el = document.createElement("span")
+        el.className = "settings-arrow"
+        el.textContent = text
+        return el
+    }
 
+    // 選ぶとドラッグ係数が0.1変わる。0.5未満・2.0超えになる側は選べない
+    private dragScaleArrow(diff: -1 | 1): MenuOption {
         return {
             type: "select",
-            label,
+            label: this.narrowLabel(diff < 0 ? "←" : "→"),
+            disabled: () => {
+                const next = App.settings.dragScaleLevel + diff
+                return next < DRAG_SCALE_MIN_LEVEL || DRAG_SCALE_MAX_LEVEL < next
+            },
+            onSelect: () => {
+                App.settings.changeDragScaleLevel(App.settings.dragScaleLevel + diff)
+                this.menu.render()
+            },
+        }
+    }
+
+    private dragScaleLabel(): HTMLElement {
+        const el = document.createElement("span")
+        el.className = "settings-row"
+        el.innerHTML = `
+            <span>ドラッグ移動</span>
+            <span>×${(App.settings.dragScaleLevel / 10).toFixed(1)}</span>
+        `
+        return el
+    }
+
+    private volumeArrow(kind: VolumeKind, diff: -1 | 1): MenuOption {
+        return {
+            type: "select",
+            label: this.narrowLabel(diff < 0 ? "←" : "→"),
             // 変更後の音量で鳴らしたいので、Menuには鳴らさせず変更してから自前で鳴らす
             sound: "none",
             // これ以上変えられない側の矢印は選べないようにする
@@ -313,7 +361,7 @@ export class SettingsMenu {
                                   onSelect: () => {},
                               },
                               this.thresholdArrow(action, code, 1),
-                              this.removeKeyOption(action, code, this.removeMark()),
+                              this.removeKeyOption(action, code, this.narrowLabel("×")),
                           ]
                         : [this.removeKeyOption(action, code, this.keyBindLabel(code))],
                 ),
@@ -344,22 +392,12 @@ export class SettingsMenu {
         }
     }
 
-    private removeMark(): HTMLElement {
-        const el = document.createElement("span")
-        el.className = "settings-arrow"
-        el.textContent = "×"
-        return el
-    }
 
     // 閾値を1段階ずつ変える矢印。音量の矢印と同じ見た目にする
     private thresholdArrow(action: InputAction, code: InputCode.GamepadSource, diff: -1 | 1): MenuOption {
-        const label = document.createElement("span")
-        label.className = "settings-arrow"
-        label.textContent = diff < 0 ? "←" : "→"
-
         return {
             type: "select",
-            label,
+            label: this.narrowLabel(diff < 0 ? "←" : "→"),
             disabled: () => {
                 if (this.waiting !== undefined) return true
                 const next = App.settings.thresholdLevel(code) + diff

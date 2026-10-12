@@ -37,6 +37,8 @@ export type GameConfig = {
     input: DigitalInput.Reader<GameAction>
     // 自機の移動に使う。倒し具合(0~1)を速さにする
     analogInput: AnalogInput.Reader<GameAction>
+    // タッチのドラッグ量に掛ける係数
+    dragScale: number
     se: GameSE
     onWin: () => void
     onLose: (score: number) => void
@@ -113,7 +115,7 @@ export class Game {
     private readonly onScoreCollected: (score: number) => void
     private readonly setFPS: (fps: number) => void
 
-    private constructor({ input, analogInput, se, onWin, onLose, onScoreCollected, playerConfig, setFPS, scenery }: GameConfig) {
+    private constructor({ input, analogInput, dragScale, se, onWin, onLose, onScoreCollected, playerConfig, setFPS, scenery }: GameConfig) {
 
         this.scenery = scenery
 
@@ -137,7 +139,7 @@ export class Game {
 
         this.resizeObserver.observe(Dom.container)
 
-        this.touchControls = new TouchControls(input, analogInput, this.canvas)
+        this.touchControls = new TouchControls(input, analogInput, this.canvas, dragScale)
         this.input = this.touchControls
 
         this.textBox = new TextBox(this.input, () => {})

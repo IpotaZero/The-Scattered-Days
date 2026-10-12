@@ -14,6 +14,10 @@ const DEFAULT_VOLUME_LEVEL = 8
 // ゲームパッドの閾値は0.1刻みの1~9段階(0.1~0.9)で持つ。0だと倒していなくても押しっぱなしになってしまう
 export const THRESHOLD_MAX_LEVEL = 9
 
+// ドラッグの移動量に掛ける係数は0.1刻みの5~20段階で持つ。実際の係数は level / 10 (0.5~2.0)
+export const DRAG_SCALE_MIN_LEVEL = 5
+export const DRAG_SCALE_MAX_LEVEL = 20
+
 export const DEFAULT_KEY_CONFIG: KeyConfigMap = {
     up: [
         { type: "keyboard", code: "ArrowUp" },
@@ -76,6 +80,7 @@ type SerializedSettings = {
     keyConfig?: Partial<KeyConfigMap>
     drawFps?: DrawFps
     showFps?: boolean
+    dragScaleLevel?: number
 }
 
 // 設定の反映先。音量はBgmManager/SEのマスター、キーコンフィグはDigitalInputとAnalogInput、描画fpsはFrameLimiter、fps表示はFpsMeterへ渡す
@@ -102,6 +107,9 @@ export class Settings {
 
     showFps = false
 
+    // ゲーム開始時にGameへ渡し、タッチのドラッグ量に level / 10 を掛ける
+    dragScaleLevel = 10
+
     constructor(private readonly target: SettingsTarget) {
         this.load()
         this.applyVolume("bgm")
@@ -121,6 +129,11 @@ export class Settings {
     changeDrawFps(fps: DrawFps) {
         this.drawFps = fps
         this.target.drawLimiter.setFPS(this.drawFps)
+        this.save()
+    }
+
+    changeDragScaleLevel(level: number) {
+        this.dragScaleLevel = Math.min(DRAG_SCALE_MAX_LEVEL, Math.max(DRAG_SCALE_MIN_LEVEL, level))
         this.save()
     }
 
@@ -195,6 +208,8 @@ export class Settings {
 
             if (data.drawFps === 60 || data.drawFps === 30) this.drawFps = data.drawFps
             if (typeof data.showFps === "boolean") this.showFps = data.showFps
+            if (typeof data.dragScaleLevel === "number")
+                this.dragScaleLevel = Math.min(DRAG_SCALE_MAX_LEVEL, Math.max(DRAG_SCALE_MIN_LEVEL, data.dragScaleLevel))
 
             // 保存後にアクションが増えても、欠けているアクションはデフォルトで補う。
             // 旧形式(@ipota/inputのSourceが文字列だった頃)で保存されたアクションもデフォルトに戻す
@@ -216,6 +231,7 @@ export class Settings {
             keyConfig: this.keyConfig,
             drawFps: this.drawFps,
             showFps: this.showFps,
+            dragScaleLevel: this.dragScaleLevel,
         }
 
         try {

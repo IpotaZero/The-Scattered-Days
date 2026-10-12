@@ -176,7 +176,7 @@ export class Player extends Actor {
     private move() {
         const input = this.game.input
 
-        // タッチドラッグ中は、指の移動量(ワールド座標のベクトル)をそのまま速度として使う
+        // タッチドラッグ中は、指の移動量(ワールド座標のベクトル)にドラッグ係数を掛けたものを速度にする
         const touchMoveVector = input.getTouchMoveVector?.()
 
         if (touchMoveVector) {
