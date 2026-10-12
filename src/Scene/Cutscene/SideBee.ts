@@ -1,11 +1,8 @@
 import { Ease } from "@ipota/functions"
 import { Svg } from "./Svg"
 
-// 脚1本の、付け根から順に腿・脛の向き(度)。0が頭の向き、90が真下
-type Leg = readonly [number, number]
-
-// 3本(前脚・中脚・後脚)の脚の形
-export type LegPose = { readonly front: Leg; readonly mid: Leg; readonly hind: Leg }
+// 3本(前脚・中脚・後脚)の脚の、付け根からの向き(度)。0が頭の向き、90が真下。脚はまっすぐな線で描く
+export type LegPose = { readonly front: number; readonly mid: number; readonly hind: number }
 
 // 翅。付け根を(0,0)として、上(-y)へ伸ばして描く
 const WING = `<ellipse cx="0" cy="-24" rx="13" ry="24" />`
@@ -17,17 +14,17 @@ const WING = `<ellipse cx="0" cy="-24" rx="13" ry="24" />`
  */
 export class SideBee {
     // 脚を下ろしたまま飛んでいるときの形
-    static readonly HOVER: LegPose = { front: [70, 110], mid: [100, 95], hind: [130, 110] }
+    static readonly HOVER: LegPose = { front: 80, mid: 100, hind: 115 }
     // 地面に立っているときの形
-    static readonly STAND: LegPose = { front: [45, 95], mid: [155, 120], hind: [165, 125] }
-    // 脚を縮めて体の下に抱えた形
-    static readonly CURLED: LegPose = { front: [20, -60], mid: [30, -40], hind: [20, -30] }
+    static readonly STAND: LegPose = { front: 73, mid: 120, hind: 135 }
+    // 脚を前へ倒して、体の下にそろえた形
+    static readonly TUCKED: LegPose = { front: 0, mid: 15, hind: 25 }
 
-    // 脚の付け根の位置と、腿・脛の長さ
+    // 脚の付け根の位置と長さ
     private static readonly LEGS = {
-        front: { root: [16, 14], lengths: [12, 14] },
-        mid: { root: [6, 18], lengths: [13, 15] },
-        hind: { root: [-4, 20], lengths: [14, 17] },
+        front: { root: [16, 14], length: 24 },
+        mid: { root: [6, 18], length: 22 },
+        hind: { root: [-4, 20], length: 24 },
     } as const
 
     readonly el: SVGGElement
@@ -74,21 +71,19 @@ export class SideBee {
     }
 
     static blend(a: LegPose, b: LegPose, t: number): LegPose {
-        const leg = (p: Leg, q: Leg): Leg => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]
-        return { front: leg(a.front, b.front), mid: leg(a.mid, b.mid), hind: leg(a.hind, b.hind) }
+        return {
+            front: a.front + (b.front - a.front) * t,
+            mid: a.mid + (b.mid - a.mid) * t,
+            hind: a.hind + (b.hind - a.hind) * t,
+        }
     }
 
-    // 歩いている間の脚の形。前脚と後脚、中脚は逆の拍子で前後に振り、前へ振っている間は脚を上げる。strideが0ならSTANDのまま
+    // 歩いている間の脚の形。前脚と後脚、中脚は逆の拍子で、STANDの向きから前後に16度ずつ振る。strideが0ならSTANDのまま
     private static gait(phase: number, stride: number): LegPose {
-        const swing = (leg: Leg, offset: number): Leg => {
-            const s = Math.sin(phase + offset) * stride
-            const lift = Math.max(0, Math.cos(phase + offset)) * stride
-            return [leg[0] - s * 14, leg[1] - s * 8 - lift * 14]
-        }
         return {
-            front: swing(SideBee.STAND.front, 0),
-            mid: swing(SideBee.STAND.mid, Math.PI),
-            hind: swing(SideBee.STAND.hind, 0),
+            front: SideBee.STAND.front - Math.sin(phase) * stride * 16,
+            mid: SideBee.STAND.mid + Math.sin(phase) * stride * 16,
+            hind: SideBee.STAND.hind - Math.sin(phase) * stride * 16,
         }
     }
 
@@ -96,20 +91,15 @@ export class SideBee {
         Svg.place(this.el, this.x, this.y, this.deg, this.scale * this.facing, this.scale)
     }
 
-    // 付け根から腿・脛を順につなぐ
     legsTo(pose: LegPose) {
         const parts = ["front", "mid", "hind"] as const
         parts.forEach((part, i) => {
-            const { root, lengths } = SideBee.LEGS[part]
-            let x = root[0]
-            let y = root[1]
-            let d = `M${x} ${y}`
-            pose[part].forEach((deg, j) => {
-                x += Math.cos((deg * Math.PI) / 180) * lengths[j]!
-                y += Math.sin((deg * Math.PI) / 180) * lengths[j]!
-                d += ` L${x} ${y}`
-            })
-            this.legs[i]!.setAttribute("d", d)
+            const { root, length } = SideBee.LEGS[part]
+            const r = (pose[part] * Math.PI) / 180
+            this.legs[i]!.setAttribute(
+                "d",
+                `M${root[0]} ${root[1]} L${root[0] + Math.cos(r) * length} ${root[1] + Math.sin(r) * length}`,
+            )
         })
     }
 

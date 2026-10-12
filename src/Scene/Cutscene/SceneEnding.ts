@@ -11,7 +11,7 @@ import { Wind } from "./Wind"
 /**
  * ED。冬の夕暮れ。雪の降る中、右に立つ大きな木の根元へ、蜂が左から雪の上をゆっくり歩いてくる。
  * 途中で一度立ち止まって触角を動かし翅を震わせるが、飛ばずにまた歩き出す。
- * 根元までたどり着くと、脚を縮めて横たわる。蜂の背に雪が一つずつ積もり、手前の雪がだんだん蜂の下のほうを埋める。
+ * 根元までたどり着くと、脚を前へ倒して横たわる。蜂の背に雪が一つずつ積もり、手前の雪がだんだん蜂の下のほうを埋める。
  * やがて画面が雪の白になり、タイトルへ移る。
  */
 export class SceneEnding extends SceneCutscene {
@@ -104,9 +104,9 @@ export class SceneEnding extends SceneCutscene {
         yield* this.bee.walk(10, 0.5)
         yield* GenUtils.waitFrames(70)
 
-        // 横たわる。脚を縮め、体の下の縁が雪に着くまで沈めて頭を雪へ傾け、触角を垂らす
+        // 横たわる。脚を前へ倒し、体の下の縁が雪に着くまで沈めて頭を雪へ傾け、触角を垂らす
         yield* GenUtils.all({
-            legs: this.bee.changeLegs(SideBee.STAND, SideBee.CURLED, 150),
+            legs: this.bee.changeLegs(SideBee.STAND, SideBee.TUCKED, 150),
             body: this.bee.moveTo(this.bee.x, this.bee.y + 14 * 1.5, 7, 150),
             antenna: this.bee.antennaTo(30, 150),
         })
