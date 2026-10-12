@@ -268,17 +268,20 @@ export class Game {
                         b.life = 0
                     }
                 } else if (this.bulletCollision.isColliding(b, grazeCircle)) {
+                    if (this.frame % 3 === 0) {
+                        // グレイズ中の弾の位置から、自機と反対向きへ橙色の三角形を1つ飛ばす
+                        this.scripts.add(() =>
+                            TriangleParticle.scatter(
+                                this,
+                                b.p.clone(),
+                                b.p.sub(this.player.p).radian(),
+                                Math.random() * 4 + 4,
+                                "#ffb758",
+                            ),
+                        )
+                    }
+
                     grazeCount++
-                    // グレイズ中の弾の位置から、自機と反対向きへ橙色の三角形を1つ飛ばす
-                    this.scripts.add(() =>
-                        TriangleParticle.scatter(
-                            this,
-                            b.p.clone(),
-                            b.p.sub(this.player.p).radian(),
-                            Math.random() * 8 + 8,
-                            "#ffb758",
-                        ),
-                    )
                 }
             })
 

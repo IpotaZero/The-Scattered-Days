@@ -16,6 +16,9 @@ export class BulletSpriteAtlas {
 
     private readonly slots = new Map<string, AtlasUv>()
 
+    // 置き場所がなかったキー。同じキーの注意は1度だけconsoleに出る
+    private readonly overflowedKeys = new Set<string>()
+
     private cursorX = 0
     private cursorY = 0
     private rowHeight = 0
@@ -51,7 +54,10 @@ export class BulletSpriteAtlas {
         if (cached) return cached
 
         const pos = this.pack(source.width, source.height)
-        if (!pos) return null
+        if (!pos) {
+            this.warnOverflow(key, source)
+            return null
+        }
 
         const gl = this.gl
         gl.bindTexture(gl.TEXTURE_2D, this.texture)
@@ -66,6 +72,17 @@ export class BulletSpriteAtlas {
         }
         this.slots.set(key, uv)
         return uv
+    }
+
+    // 溢れたスプライトは毎フレーム get() に来るので、キーごとに最初の1回だけ出す
+    private warnOverflow(key: string, source: HTMLCanvasElement) {
+        if (this.overflowedKeys.has(key)) return
+        this.overflowedKeys.add(key)
+
+        console.warn(
+            `弾のテクスチャ(${BulletSpriteAtlas.SIZE}px四方)が溢れたため、この弾はCanvas2Dで直接描かれます: ` +
+                `${key} (${source.width}x${source.height}px, 登録済み${this.slots.size}枚)`,
+        )
     }
 
     private pack(w: number, h: number): { x: number; y: number } | null {

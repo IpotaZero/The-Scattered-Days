@@ -114,7 +114,7 @@ function* stab(player: Player, tip: Vec, radian: number): Generator<void, void, 
             // 画面全体の閃光
             if (i <= 閃光フレーム) {
                 ctx.globalAlpha = 0.5 * (1 - i / 閃光フレーム)
-                ctx.fillStyle = "#ffffff"
+                ctx.fillStyle = "#ffffff80"
                 // 画面の揺れで端に隙間ができないよう、少し大きめに塗る
                 ctx.fillRect(-揺れの強さ, -揺れの強さ, game.WIDTH + 揺れの強さ * 2, game.HEIGHT + 揺れの強さ * 2)
             }

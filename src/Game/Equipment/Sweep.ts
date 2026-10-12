@@ -9,7 +9,7 @@ import type { SubEquipment } from "./types"
 // 画面の弾をすべて花粉に変えるかわりに、次に使えるまでがとても長い。
 // どの提示で切るかを選ぶことが、この技の遊びになる。
 const 広がりフレーム = 40
-const クールダウンフレーム = 1440
+const クールダウンフレーム = 900
 
 export const sweep: SubEquipment = {
     label: "一掃",
