@@ -8,11 +8,9 @@ import {
 
 const MAX_LIVES = 8
 
-// 残機が1回復するのにかかる時間(ms)
-// 製作中のため爆速
-//
-// export const LIFE_RECOVERY_INTERVAL_MS = 120000
-export const LIFE_RECOVERY_INTERVAL_MS = 5
+// 残機が1回復するのにかかる時間(ms)。デバッグモード中は爆速になる
+const LIFE_RECOVERY_INTERVAL_MS = 120000
+const DEBUG_LIFE_RECOVERY_INTERVAL_MS = 5
 
 // v2: Loadoutのsub装備を3枠から1枠に変更したため、古い保存形式と区別するためキーを変えている
 const STORAGE_KEY = "danmaku-kari.playerData.v2"
@@ -72,8 +70,8 @@ export class PlayerData {
     // 最後まで見たか飛ばした一幕
     private readonly seenCutscenes = new Set<CutsceneId>()
 
-    // デバッグ用。trueならクリア状況に関係なく全ステージを解放する(MapGraph.isUnlocked参照)
-    debugUnlockAll = false
+    // デバッグ用。trueならクリア状況に関係なく全ステージを解放し(MapGraph.isUnlocked参照)、残機の回復を爆速にする
+    debugMode = false
 
     constructor() {
         this.load()
@@ -102,7 +100,7 @@ export class PlayerData {
     }
 
     toggleDebugUnlockAll() {
-        this.debugUnlockAll = !this.debugUnlockAll
+        this.debugMode = !this.debugMode
         this.save()
     }
 
@@ -189,7 +187,7 @@ export class PlayerData {
     // 次に残機が1回復するまでの残り時間(ms)。満タンなら0
     getLifeRecoveryRemainingMs(now: number = Date.now()): number {
         if (this.lives >= MAX_LIVES) return 0
-        return Math.max(0, LIFE_RECOVERY_INTERVAL_MS - (now - this.lastLivesSyncedAt))
+        return Math.max(0, this.lifeRecoveryIntervalMs() - (now - this.lastLivesSyncedAt))
     }
 
     // 経過した実時間に応じて残機を回復させる。呼ぶたびに現在時刻を基準に計算し直す
@@ -199,12 +197,16 @@ export class PlayerData {
             return
         }
 
-        const recovered = Math.floor((now - this.lastLivesSyncedAt) / LIFE_RECOVERY_INTERVAL_MS)
+        const recovered = Math.floor((now - this.lastLivesSyncedAt) / this.lifeRecoveryIntervalMs())
         if (recovered <= 0) return
 
         this.lives = Math.min(MAX_LIVES, this.lives + recovered)
-        this.lastLivesSyncedAt += recovered * LIFE_RECOVERY_INTERVAL_MS
+        this.lastLivesSyncedAt += recovered * this.lifeRecoveryIntervalMs()
         this.save()
+    }
+
+    private lifeRecoveryIntervalMs(): number {
+        return this.debugMode ? DEBUG_LIFE_RECOVERY_INTERVAL_MS : LIFE_RECOVERY_INTERVAL_MS
     }
 
     // セーブデータを消し、初めて遊ぶときと同じ状態に戻す
@@ -222,7 +224,7 @@ export class PlayerData {
         this.totalScore = 0
         this.badges.clear()
         this.seenCutscenes.clear()
-        this.debugUnlockAll = false
+        this.debugMode = false
 
         try {
             localStorage.removeItem(STORAGE_KEY)
@@ -267,7 +269,7 @@ export class PlayerData {
             this.noMissClears.clear()
             data.noMissClears?.forEach((stageId) => this.noMissClears.add(stageId))
             this.mapNodeId = data.mapNodeId
-            this.debugUnlockAll = data.debugUnlockAll ?? false
+            this.debugMode = data.debugUnlockAll ?? false
             // 旧形式の保存データにはこのフィールドが無いので、その場合はどの一幕もまだ見ていないことにする
             this.seenCutscenes.clear()
             data.seenCutscenes?.forEach((id) => this.seenCutscenes.add(id))
@@ -290,7 +292,7 @@ export class PlayerData {
             badges: [...this.badges],
             noMissClears: [...this.noMissClears],
             mapNodeId: this.mapNodeId,
-            debugUnlockAll: this.debugUnlockAll,
+            debugUnlockAll: this.debugMode,
             seenCutscenes: [...this.seenCutscenes],
         }
 

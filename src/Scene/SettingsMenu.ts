@@ -203,8 +203,8 @@ export class SettingsMenu {
         const el = document.createElement("span")
         el.className = "settings-row"
         el.innerHTML = `
-            <span>全ステージ解放(デバッグ)</span>
-            <span>${playerData.debugUnlockAll ? "ON" : "OFF"}</span>
+            <span>デバッグモード</span>
+            <span>${playerData.debugMode ? "ON" : "OFF"}</span>
         `
         return el
     }

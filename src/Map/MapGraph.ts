@@ -219,12 +219,12 @@ export class MapGraph {
 
     // 辺を通れるか。両端が解放済みでも、開いていない辺(fromが未クリアなど)は通れない(デバッグ用の全解放中は無条件)
     isPassable(edge: MapEdge, playerData: PlayerData): boolean {
-        return playerData.debugUnlockAll || edge.isOpen(playerData)
+        return playerData.debugMode || edge.isOpen(playerData)
     }
 
     // スタート地点は常に解放。それ以外は、入ってくる辺のうち1つでも開いていれば解放される(デバッグ用の全解放中は無条件)
     isUnlocked(node: MapNode, playerData: PlayerData): boolean {
-        if (node === this.start || playerData.debugUnlockAll) return true
+        if (node === this.start || playerData.debugMode) return true
 
         return this.edges.filter((edge) => edge.to === node).some((edge) => edge.isOpen(playerData))
     }
