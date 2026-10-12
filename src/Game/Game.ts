@@ -14,6 +14,7 @@ import { TouchControls } from "./TouchControls"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import { Dom } from "../Dom"
 import { Scenery } from "../World/Scenery"
+import { TriangleParticle } from "./Actor/TriangleParticle"
 
 const FPS = 60
 
@@ -23,8 +24,8 @@ export type GameAction = "right" | "left" | "up" | "down" | "slow" | "suicide" |
 // TouchControls以外(キーボード/ゲームパッド)は実装しないため、未実装を許すoptionalにしている
 export type GameInput = DigitalInput.Reader<GameAction> &
     AnalogInput.Reader<GameAction> & {
-    getTouchMoveVector?(): Vec | undefined
-}
+        getTouchMoveVector?(): Vec | undefined
+    }
 
 // ゲーム中に鳴らすSE。App.seをそのまま渡せるよう、play()できることだけを要求する
 export type GameSE = Record<
@@ -115,8 +116,18 @@ export class Game {
     private readonly onScoreCollected: (score: number) => void
     private readonly setFPS: (fps: number) => void
 
-    private constructor({ input, analogInput, dragScale, se, onWin, onLose, onScoreCollected, playerConfig, setFPS, scenery }: GameConfig) {
-
+    private constructor({
+        input,
+        analogInput,
+        dragScale,
+        se,
+        onWin,
+        onLose,
+        onScoreCollected,
+        playerConfig,
+        setFPS,
+        scenery,
+    }: GameConfig) {
         this.scenery = scenery
 
         this.setFPS = setFPS
@@ -258,6 +269,16 @@ export class Game {
                     }
                 } else if (this.bulletCollision.isColliding(b, grazeCircle)) {
                     grazeCount++
+                    // グレイズ中の弾の位置から、自機と反対向きへ橙色の三角形を1つ飛ばす
+                    this.scripts.add(() =>
+                        TriangleParticle.scatter(
+                            this,
+                            b.p.clone(),
+                            b.p.sub(this.player.p).radian(),
+                            Math.random() * 8 + 8,
+                            "#ffb758",
+                        ),
+                    )
                 }
             })
 
@@ -288,6 +309,11 @@ export class Game {
                     if (b.collision !== "rect") b.life = 0
 
                     e.hit(b.damage)
+
+                    // 当たった弾の位置から、弾が来た向きへ白色の三角形を1つ飛ばす
+                    this.scripts.add(() =>
+                        TriangleParticle.scatter(this, b.p.clone(), b.radian + Math.PI, Math.random() * 2 + 2, "#fff8"),
+                    )
                 }
             })
         })

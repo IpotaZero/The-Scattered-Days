@@ -8,6 +8,7 @@ import { Behavior, remodel } from "../Remodel"
 import { Ease } from "@ipota/functions"
 import type { MainEquipment, SubEquipment } from "../Equipment/PlayerEquipment"
 import { PlayerRenderer } from "./PlayerRenderer"
+import { TriangleParticle } from "./TriangleParticle"
 
 const HIT_SHAKE_INTENSITY = 12
 const HIT_SHAKE_FRAME = 60
@@ -213,44 +214,19 @@ export class Player extends Actor {
         this.p = vec(Math.min(Math.max(next.x, 0), this.game.WIDTH), Math.min(Math.max(next.y, 0), this.game.HEIGHT))
     }
 
-    // 移動中に周りへ撒き散らす、縮小しながら消えていく三角形の粒子。ブースト中はより多く・長く残す
+    // 移動中、自機の周り(横GRAZE_R*16 × 縦GRAZE_R*4の範囲)に三角形の粒子を撒く。ブースト中は2つずつ、速く・長く残す
     private emitMoveParticles() {
         const isBoosted = this.isBoosted()
-        const count = isBoosted ? 2 : 1
 
-        for (let i = 0; i < count; i++) {
-            this.scripts.add(() => this.moveParticle(isBoosted))
-        }
-    }
-
-    private *moveParticle(isBoosted: boolean) {
-        const maxFrame = isBoosted ? 30 : 20
-        const speed = isBoosted ? 8 : 4
-
-        const offset = vec((Math.random() - 0.5) * this.GRAZE_R * 16, (Math.random() - 0.5) * this.GRAZE_R * 4)
-        let p = this.p.add(offset)
-        let v = vec((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed)
-
-        const size = Math.random() * 2 + 3
-        let angle = Math.random() * T
-        const angularVelocity = (Math.random() - 0.5) * 0.1
-
-        for (let i = 0; i < maxFrame; i++) {
-            const alpha = (1 - i / maxFrame) * 0.15
-            // 描画はyield後のdraw()で行われるので、この後書き換わるp/angleはここで固定しておく
-            const drawP = p
-            const drawAngle = angle
-
-            this.game.drawInWorld((ctx) => {
-                ctx.globalAlpha = alpha
-                Ctx.polygon(ctx, 3, 1, drawP, size, "#e0e0e0", { theta: drawAngle })
-            })
-
-            p = p.add(v)
-            v = v.scale(0.96)
-            angle += angularVelocity
-
-            yield
+        for (let i = 0; i < (isBoosted ? 2 : 1); i++) {
+            this.scripts.add(() =>
+                TriangleParticle.drift(
+                    this.game,
+                    this.p.add(vec((Math.random() - 0.5) * this.GRAZE_R * 8, (Math.random() - 0.5) * this.GRAZE_R * 4)),
+                    vec((Math.random() - 0.5) * (isBoosted ? 8 : 4), (Math.random() - 0.5) * (isBoosted ? 8 : 4)),
+                    isBoosted ? 30 : 20,
+                ),
+            )
         }
     }
 }
