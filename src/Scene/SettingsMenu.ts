@@ -213,7 +213,7 @@ export class SettingsMenu {
         const el = document.createElement("span")
         el.className = "settings-row"
         el.innerHTML = `
-            <span>ドラッグ移動</span>
+            <span>ドラッグ</span>
             <span>×${(App.settings.dragScaleLevel / 10).toFixed(1)}</span>
         `
         return el
@@ -391,7 +391,6 @@ export class SettingsMenu {
             },
         }
     }
-
 
     // 閾値を1段階ずつ変える矢印。音量の矢印と同じ見た目にする
     private thresholdArrow(action: InputAction, code: InputCode.GamepadSource, diff: -1 | 1): MenuOption {

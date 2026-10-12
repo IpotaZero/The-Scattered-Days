@@ -13,31 +13,31 @@ import { Size } from "../Size"
 
 export default class extends Stage {
     *G() {
-        // const first = new EnemyHornet(this.game, 0, vec(-200, -200))
-        // this.game.enemies.push(first, ...first.parts)
+        const first = new EnemyHornet(this.game, 0, vec(-200, -200))
+        this.game.enemies.push(first, ...first.parts)
 
-        // let from = first.p.clone()
-        // while (first.life > 0) {
-        //     from = first.p.clone()
-        //     yield
-        // }
+        let from = first.p.clone()
+        while (first.life > 0) {
+            from = first.p.clone()
+            yield
+        }
 
-        // yield* this.waitAllEnemiesDead()
+        yield* this.waitAllEnemiesDead()
 
-        // this.scorenizeAllBullets()
-        // this.flash("#eef6ffc0", 40)
-        // this.scripts.add(() => this.quietSnow(), { loop: Infinity })
+        this.scorenizeAllBullets()
+        this.flash("#eef6ffc0", 40)
+        this.scripts.add(() => this.quietSnow(), { loop: Infinity })
 
-        // yield* Array(40)
-        // this.game.enemies.push(new EnemyEgg(this.game, from))
-        // yield* this.waitAllEnemiesDead()
+        yield* Array(40)
+        this.game.enemies.push(new EnemyEgg(this.game, from))
+        yield* this.waitAllEnemiesDead()
 
-        // const second = new EnemyHornet(this.game, 1, from)
-        // this.game.enemies.push(second, ...second.parts)
-        // second.snow()
+        const second = new EnemyHornet(this.game, 1, from)
+        this.game.enemies.push(second, ...second.parts)
+        second.snow()
 
-        // yield* this.waitAllEnemiesDead()
-        // this.scorenizeAllBullets()
+        yield* this.waitAllEnemiesDead()
+        this.scorenizeAllBullets()
 
         yield* Array(300)
     }

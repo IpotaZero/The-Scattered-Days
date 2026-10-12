@@ -8,7 +8,7 @@
     margin: 0;
     padding: 0;
 
-    font-size: 20pt;
+    font-size: 18pt;
     font-family: "dot", serif;
 
     user-select: none;
@@ -109,7 +109,7 @@ body {
 div,
 span {
     display: flex;
-    justify-content: center;    
+    justify-content: center;
 }
 
 .fadeout {
