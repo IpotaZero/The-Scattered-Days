@@ -101,7 +101,7 @@ export class SceneGame extends Scene {
         this.root.appendChild(this.resultMenu.container)
     }
 
-    // 終点を初めてクリアしたときはEDへ、それ以外はマップへ進む
+    // 終点を初めてクリアしたときはED・クレジットを流してタイトルへ、それ以外はマップへ進む
     private async sceneAfterWin(): Promise<Scene> {
         const graph = await MapGraph.load()
         if (this.node.id === graph.goal.id && !playerData.hasSeenCutscene("ending")) {
@@ -109,7 +109,10 @@ export class SceneGame extends Scene {
                 ({ SceneEnding }) =>
                     new SceneEnding(() => {
                         playerData.markCutsceneSeen("ending")
-                        return import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle())
+                        return import("./Cutscene/SceneCredits").then(
+                            ({ SceneCredits }) =>
+                                new SceneCredits(() => import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle())),
+                        )
                     }),
             )
         }

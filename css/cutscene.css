@@ -170,3 +170,38 @@
     fill: var(--night);
     opacity: 0.25;
 }
+
+/* ===== クレジット ===== */
+
+/* 画面の下の外から始まる。位置はSceneCredits.scriptが書き換える */
+.credits-roll {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 3em;
+    padding: 2em 1em;
+
+    transform: translateY(100dvh);
+    text-align: center;
+}
+
+.credits-title {
+    font-size: 1.6em;
+    letter-spacing: 0.1em;
+    margin-bottom: 2em;
+}
+
+.credits-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.credits-role {
+    font-size: 0.7em;
+    opacity: 0.6;
+    letter-spacing: 0.2em;
+}

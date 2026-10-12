@@ -106,6 +106,8 @@ export class SceneTitle extends Scene {
     }
 
     private async startBGM() {
+        if (App.bm.getCurrentBgmSrc() === "assets/bgm/title.mp3") return
+
         await Promise.all([App.bm.load({ src: "assets/bgm/title.mp3", trackVolume: 0.5 }), Awaits.sleep(1000)])
         await App.bm.play()
     }

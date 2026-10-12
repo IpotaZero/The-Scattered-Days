@@ -32,6 +32,9 @@
 }
 
 .menu-scroll-indicator {
+    align-self: stretch;
+    text-align: center;
+    cursor: pointer;
 }
 
 .option-row {

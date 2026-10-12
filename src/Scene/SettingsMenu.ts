@@ -128,6 +128,17 @@ export class SettingsMenu {
                             )
                         },
                     },
+                    {
+                        type: "select",
+                        label: "Credits",
+                        onSelect: () => {
+                            App.sc.goto(async () =>
+                                import("./Cutscene/SceneCredits").then(
+                                    ({ SceneCredits }) => new SceneCredits(async () => new SceneTitle()),
+                                ),
+                            )
+                        },
+                    },
                 ],
                 [
                     {

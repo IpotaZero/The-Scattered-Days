@@ -1,12 +1,12 @@
 import { Ease, GenUtils } from "@ipota/functions"
 import { App } from "../../App"
-import { CutsceneId } from "../../Data/PlayerData"
 import { IteratorQueue } from "../../Game/IteratorQueue"
 import { Scene } from "../../utils/Scene/Scene"
 import { Svg } from "./Svg"
 
 /**
- * 文字を使わず、SVGの絵を動かして見せる一幕(OP・ED)。絵は派生クラスのコンストラクタでlayer()に描いておく。
+ * SVGの絵を動かして見せる一幕(OP・ED・クレジット)。絵は派生クラスのコンストラクタでlayer()に描いておく。
+ * 派生クラスがコンストラクタでrootに足した要素は、絵より手前・幕より奥に重なる。
  * 絵は(0,0)を中心とした1000×1000の正方形に描き、画面の縦横比に合わせて上下か左右がはみ出る。
  * 16:9の画面ではyが-281~281くらいまで、縦長のスマホではxが-230~230くらいまでしか映らない。
  * script()が終わるか、始まって1秒たってからok・cancel・クリックが押されると、nextが返す場面へ移る。
@@ -21,7 +21,7 @@ export abstract class SceneCutscene extends Scene {
     private readonly veil = document.createElement("div")
 
     constructor(
-        private readonly id: CutsceneId,
+        private readonly id: string,
         private readonly next: () => Promise<Scene>,
     ) {
         super()
@@ -46,7 +46,8 @@ export abstract class SceneCutscene extends Scene {
 
         const textureOverlay = document.createElement("div")
         textureOverlay.className = "texture-overlay"
-        this.root.append(this.svg, this.veil, textureOverlay)
+        this.root.prepend(this.svg)
+        this.root.append(this.veil, textureOverlay)
 
         this.queue.add(() => this.play())
         this.queue.add(() => this.skippable())

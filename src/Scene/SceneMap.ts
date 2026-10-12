@@ -72,9 +72,9 @@ export class SceneMap extends Scene {
                 <div class="map-score"></div>
             </div>
             <div class="map-controls">
-                ${isSmartPhone ? "" : `<div data-control="toggle-minimap"><span class="nowrap">全体図</span>: slow(${InputCode.primaryLabel(App.settings.keyConfig.slow)})</div>`}
-                <div data-control="open-equip"><span class="nowrap">型の変更</span>: action(${InputCode.primaryLabel(App.settings.keyConfig.action)})</div>
-                <div data-control="back-to-title"><span class="nowrap">タイトルへ戻る</span>: cancel(${InputCode.primaryLabel(App.settings.keyConfig.cancel)})</div>
+                ${isSmartPhone ? "" : `<div data-control="toggle-minimap"><span class="nowrap">全体図</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.slow)})`}</div>`}
+                <div data-control="open-equip"><span class="nowrap">型の変更</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
+                <div data-control="back-to-title"><span class="nowrap">タイトルへ戻る</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.cancel)})`}</div>
             </div>
             <div class="texture-overlay map-backdrop map-camera-layer"></div>
         `

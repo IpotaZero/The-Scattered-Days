@@ -143,12 +143,31 @@ export class Menu {
         return undefined
     }
 
-    private handleContainerClick(e: MouseEvent) {
-        const cell = this.findOptionCell(e.target)
-        if (!cell) return
+    // 現在のレイヤーのスクロールインジケーターなら、上(-1)か下(1)を返す
+    private findScrollDiff(target: EventTarget | null): -1 | 1 | undefined {
+        const indicatorEl = (target as HTMLElement | null)?.closest<HTMLElement>(".menu-scroll-indicator")
+        if (!indicatorEl) return undefined
 
-        this.moveCursorTo(cell.row, cell.col)
-        this.select()
+        if (indicatorEl === this.scrollRows[0]) return -1
+        if (indicatorEl === this.scrollRows.at(-1)) return 1
+        return undefined
+    }
+
+    // 選択肢なら選択、スクロールインジケーターなら1行スクロールする
+    private activate(target: EventTarget | null) {
+        const cell = this.findOptionCell(target)
+        if (cell) {
+            this.moveCursorTo(cell.row, cell.col)
+            this.select()
+            return
+        }
+
+        const scrollDiff = this.findScrollDiff(target)
+        if (scrollDiff && this.scrollBy(scrollDiff)) this.se.playCursor()
+    }
+
+    private handleContainerClick(e: MouseEvent) {
+        this.activate(e.target)
     }
 
     private handleContainerHover(e: MouseEvent) {
@@ -190,20 +209,18 @@ export class Menu {
         this.hoverTouch(touch)
     }
 
-    // 明確なタップ(ほとんど動かさずに離した)の場合のみ決定する。なぞって離した場合はカーソル移動だけにとどめる。
-    // どちらの場合もtouchendをpreventDefaultして、後続の疑似click(二重決定)を止める
+    // ほとんど動かさずに離した(タップ)場合のみ、指の位置にある選択肢の選択やインジケーターのスクロールを行う。
+    // touchendをpreventDefaultするので、この後に疑似clickは発火しない
     private handleContainerTouchEnd(e: TouchEvent) {
         e.preventDefault()
 
         const isTap = this.tapStart !== undefined
         this.tapStart = undefined
-        if (!isTap) return
 
-        const cell = this.findOptionCellAtTouch(e.changedTouches[0])
-        if (!cell) return
+        const touch = e.changedTouches[0]
+        if (!isTap || !touch) return
 
-        this.moveCursorTo(cell.row, cell.col)
-        this.select()
+        this.activate(document.elementFromPoint(touch.clientX, touch.clientY))
     }
 
     // 既にカーソルが乗っている場合は何もしない(選択枠再描画やonFocus再発火を防ぐ)
@@ -337,18 +354,34 @@ export class Menu {
 
     // カーソルが動いたらtrue、行が1つしかなく動かなかったらfalseを返す
     moveRow(diff: number): boolean {
-        const layer = this.getCurrentLayer()
-        const options = layer.options
+        const options = this.getCurrentLayer().options
         if (options.length === 0) return false
 
-        const row = (this.cursor.row + diff + options.length) % options.length
+        return this.moveToRow((this.cursor.row + diff + options.length) % options.length)
+    }
+
+    private moveToRow(row: number): boolean {
         if (row === this.cursor.row) return false
 
+        const layer = this.getCurrentLayer()
         this.cursor = { row, col: this.clampCol(row, this.cursor.col) }
         this.updateSelectedClass()
         this.updateScrollContainer(layer, this.cursor.row, this.scrollRows)
         this.getCurrentOption()?.onFocus?.()
         return true
+    }
+
+    // 表示範囲がdiff行(-1か1)ずれる位置までカーソルを動かす。
+    // 表示範囲の端でカーソルが中央に届いていないときは、カーソルが中央の行まで一気に動く。
+    // 全行が表示されている場合や、カーソルが動かなかった場合はfalseを返す
+    private scrollBy(diff: -1 | 1): boolean {
+        const layer = this.getCurrentLayer()
+        const count = visibleRowCount(layer)
+        if (count === undefined) return false
+
+        const centerRow = calculateScrollTop(layer, this.cursor.row) + diff + Math.floor((count - 1) / 2)
+
+        return this.moveToRow(diff > 0 ? Math.max(this.cursor.row + 1, centerRow) : Math.min(this.cursor.row - 1, centerRow))
     }
 
     // カーソルが動いたらtrue、列が1つしかなく動かなかったらfalseを返す
