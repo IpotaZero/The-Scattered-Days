@@ -73,7 +73,7 @@ export class SceneMap extends Scene {
             </div>
             <div class="map-controls">
                 ${isSmartPhone ? "" : `<div data-control="toggle-minimap"><span class="nowrap">全体図</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.slow)})`}</div>`}
-                <div data-control="open-equip"><span class="nowrap">型と残機</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
+                <div data-control="open-equip"><span class="nowrap">型の変更</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
                 <div data-control="back-to-title"><span class="nowrap">タイトルへ戻る</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.cancel)})`}</div>
             </div>
             <div class="texture-overlay map-backdrop map-camera-layer"></div>
@@ -260,7 +260,7 @@ export class SceneMap extends Scene {
              <div class="texture-overlay"></div>`,
             {
                 elementId: "equip-root",
-                title: "--:: 型と残機 ::--",
+                title: "--:: 型 ::--",
                 options: () => this.buildEquipRootOptions(),
             },
             App.input,
@@ -302,7 +302,7 @@ export class SceneMap extends Scene {
                     subMenu: () => this.buildSubEquipmentSubMenu(),
                 },
             ],
-            [this.buildLifeOption()],
+            // [this.buildLifeOption()],
             [
                 {
                     type: "select",
