@@ -9,6 +9,7 @@ export type AtlasUv = {
  * 弾のスプライト（見た目ごとに1枚のオフスクリーンcanvas）を
  * 1枚の大きなテクスチャに敷き詰めて使い回すためのクラス。
  * 同じキー（appearance, color, r）はテクスチャへの再アップロードをしない。
+ * スプライトは横に並べる段に置く。段の高さは√2倍ずつの刻みのどれかで、同じ刻みのスプライトだけを並べる。
  */
 export class BulletSpriteAtlas {
     // ステージをまたいで使い回すので、色違いの弾が増えても溢れにくいよう大きめにとる
@@ -19,15 +20,24 @@ export class BulletSpriteAtlas {
     // 置き場所がなかったキー。同じキーの注意は1度だけconsoleに出る
     private readonly overflowedKeys = new Set<string>()
 
-    private cursorX = 0
-    private cursorY = 0
-    private rowHeight = 0
+    private readonly shelves: { y: number; height: number; x: number }[] = []
+    private nextShelfY = 0
 
     constructor(
         private readonly gl: WebGL2RenderingContext,
         readonly texture: WebGLTexture,
     ) {
-        gl.bindTexture(gl.TEXTURE_2D, texture)
+        this.allocate()
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    }
+
+    // テクスチャを透明な SIZE 四方で作り直す
+    private allocate() {
+        const gl = this.gl
+        gl.bindTexture(gl.TEXTURE_2D, this.texture)
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
@@ -39,10 +49,21 @@ export class BulletSpriteAtlas {
             gl.UNSIGNED_BYTE,
             null,
         )
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    }
+
+    // 段が高さの半分を超えて積まれているか
+    isCrowded() {
+        return this.nextShelfY > BulletSpriteAtlas.SIZE / 2
+    }
+
+    // 置いたスプライトをすべて忘れ、テクスチャを透明にする。忘れたスプライトは、次に get() に来たときに置き直される。
+    // queue してから描くまでの間に呼ぶと、その間に積んだ弾は消えたスプライトの場所を描いてしまう
+    clear() {
+        this.slots.clear()
+        this.overflowedKeys.clear()
+        this.shelves.length = 0
+        this.nextShelfY = 0
+        this.allocate()
     }
 
     /**
@@ -85,17 +106,30 @@ export class BulletSpriteAtlas {
         )
     }
 
+    // 高さ h を√2倍ずつの刻みに切り上げた段のうち、横に空きのある段の右端に置く。
+    // そのような段がなければ新しい段を積み、それも積めなければ、h より高い段の空きに置く
     private pack(w: number, h: number): { x: number; y: number } | null {
-        if (this.cursorX + w > BulletSpriteAtlas.SIZE) {
-            this.cursorX = 0
-            this.cursorY += this.rowHeight
-            this.rowHeight = 0
-        }
-        if (this.cursorY + h > BulletSpriteAtlas.SIZE) return null
+        if (w > BulletSpriteAtlas.SIZE) return null
 
-        const pos = { x: this.cursorX, y: this.cursorY }
-        this.cursorX += w
-        this.rowHeight = Math.max(this.rowHeight, h)
+        const height = Math.ceil(2 ** (Math.ceil(Math.log2(Math.max(h, 1)) * 2) / 2))
+        const shelf =
+            this.shelves.find((s) => s.height === height && s.x + w <= BulletSpriteAtlas.SIZE) ??
+            this.stackShelf(height) ??
+            this.shelves.find((s) => h <= s.height && s.x + w <= BulletSpriteAtlas.SIZE)
+        if (!shelf) return null
+
+        const pos = { x: shelf.x, y: shelf.y }
+        shelf.x += w
         return pos
+    }
+
+    // 高さ height の空の段を一番上に積む。テクスチャの高さを超えるなら積まない
+    private stackShelf(height: number) {
+        if (this.nextShelfY + height > BulletSpriteAtlas.SIZE) return undefined
+
+        const shelf = { y: this.nextShelfY, height, x: 0 }
+        this.shelves.push(shelf)
+        this.nextShelfY += height
+        return shelf
     }
 }

@@ -136,6 +136,9 @@ export class Game {
         this.onLose = onLose
         this.onScoreCollected = onScoreCollected
 
+        // 弾のテクスチャはステージをまたいで使い回す。ステージに入るとき、半分を超えて埋まっていれば空にする
+        Game.bulletDrawer.releaseIfCrowded()
+
         this.HEIGHT = this.computeHeight()
 
         this.canvas = document.createElement("canvas")

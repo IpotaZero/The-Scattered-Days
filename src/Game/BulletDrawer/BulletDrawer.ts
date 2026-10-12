@@ -32,6 +32,14 @@ export class BulletDrawer {
     private readonly spriteColors = new Map<Color, Color>()
     private readonly gpu = BulletGpuBatchRenderer.tryCreate()
 
+    // GPUの弾のテクスチャが半分を超えて埋まっていたら、テクスチャを空にし、覚えている弾の絵もすべて忘れる。
+    // 忘れた絵は、次にその弾が出たときに描き直される。draw してから flush するまでの間には呼ばない
+    releaseIfCrowded() {
+        if (!this.gpu?.releaseAtlasIfCrowded()) return
+
+        this.sprites.clear()
+    }
+
     // シャドーのために余白を設ける
     private getHalfCanvasSize(bullet: Look) {
         switch (bullet.appearance) {

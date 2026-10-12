@@ -151,6 +151,14 @@ export class BulletGpuBatchRenderer {
         return true
     }
 
+    // アトラスが半分を超えて埋まっていたら空にし、空にしたかを返す。queue してから render するまでの間には呼ばない
+    releaseAtlasIfCrowded() {
+        if (!this.atlas.isCrowded()) return false
+
+        this.atlas.clear()
+        return true
+    }
+
     /**
      * 積んだ弾をまとめて描画し、結果のキャンバスを返す（1体も無ければnull）。
      * 呼ぶたびに次フレーム分のキューをリセットする。
