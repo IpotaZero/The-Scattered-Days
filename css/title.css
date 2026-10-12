@@ -260,6 +260,12 @@
             gap: 0.35em;
         }
 
+        /* .optionの余白に.option-labelの下余白0.1emを足し、1pxの透明な枠を持たせて、選択肢1行と同じ高さにする */
+        .menu-scroll-indicator {
+            padding: 0.25em 0.6em 0.4em;
+            border: 1px solid transparent;
+        }
+
         .option {
             padding: 0.25em 0.6em 0.3em;
             letter-spacing: 0.1em;

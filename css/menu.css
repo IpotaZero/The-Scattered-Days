@@ -32,8 +32,6 @@
 }
 
 .menu-scroll-indicator {
-    font-size: 0.8em;
-    opacity: 0.6;
 }
 
 .option-row {
@@ -59,13 +57,11 @@
     }
 }
 
-.menu{
-    div:has(span.selected) .option{
+.menu {
+    div:has(span.selected) .option {
         cursor: pointer;
     }
 }
-
-
 
 .option-label {
     position: relative;

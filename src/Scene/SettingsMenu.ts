@@ -278,6 +278,7 @@ export class SettingsMenu {
         return {
             elementId: "settings-keybind",
             title: ACTION_LABELS[action],
+            maxVisibleRows: 10,
             options: () => [
                 [
                     {
@@ -297,6 +298,7 @@ export class SettingsMenu {
                                   label: this.thresholdLabel(code),
                                   // 名前とゲージを見せるだけで、選んでも何もしない
                                   sound: "none",
+                                  disabled: () => !!this.waiting,
                                   onSelect: () => {},
                               },
                               this.thresholdArrow(action, code, 1),
