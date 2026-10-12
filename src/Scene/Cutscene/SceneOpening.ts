@@ -1,7 +1,6 @@
 import { GenUtils } from "@ipota/functions"
 import { seededRandom } from "../../utils/Functions/seededRandom"
 import { Scene } from "../../utils/Scene/Scene"
-import { Silhouette } from "../../utils/Silhouette"
 import { Leaf } from "./Leaf"
 import { SceneCutscene } from "./SceneCutscene"
 import { SideBee } from "./SideBee"
@@ -18,7 +17,8 @@ export class SceneOpening extends SceneCutscene {
     private readonly wind = new Wind()
     private readonly bee = new SideBee(SideBee.HOVER)
     private readonly midLeaves: SVGGElement
-    private readonly grass: SVGGElement
+    // 草むらの帯。手前の帯ほど大きく、帯の真ん中の高さ(base)を軸に傾く
+    private readonly grassRows: { el: SVGGElement; base: number }[]
     private readonly nearLeaves: SVGGElement
 
     // 終わるか飛ばされると、nextが返す場面へ移る
@@ -74,9 +74,34 @@ export class SceneOpening extends SceneCutscene {
 
         this.midLeaves = this.layer("cutscene-leaves", 1)
         this.layer("cutscene-bee", 0).append(this.bee.el)
-        // 草はswayGrassで、根元(y=290、画面の下の外)を軸に傾く
-        this.grass = this.layer("cutscene-grass", 1)
-        this.grass.innerHTML = Silhouette.grass(90, 70, 0)
+        // 草むらは奥(y=285)から画面の下の外(y=605)まで、8つの帯に分けて生やす。手前の帯ほど草が高く太く、色が濃い。
+        // 16:9では一番奥の帯の穂先だけが映り、縦長の画面では手前の帯まで映る。草の間から見える地面は、手前ほど濃い
+        const grass = this.layer("cutscene-grass", 1)
+        grass.innerHTML = `
+            <defs>
+                <linearGradient id="cutscene-soil" gradientUnits="userSpaceOnUse" x1="0" y1="285" x2="0" y2="380">
+                    <stop offset="0" style="stop-color: color-mix(in srgb, var(--forest) 55%, var(--sage)); stop-opacity: 0" />
+                    <stop offset="1" style="stop-color: color-mix(in srgb, var(--forest) 55%, var(--sage)); stop-opacity: 1" />
+                </linearGradient>
+            </defs>
+            <rect x="-600" y="285" width="1200" height="335" fill="url(#cutscene-soil)" />
+        `
+        this.grassRows = [0, 1, 2, 3, 4, 5, 6, 7].map((k) => {
+            const base = 285 + k * 40
+            let blades = ""
+            for (let i = 0; i < 70 + k * 12; i++) {
+                const x = Math.random() * 1200 - 600
+                const y = base + Math.random() * 40
+                const h = (40 + (y - 250) * 0.45) * (0.6 + Math.random() * 0.8)
+                const w = 2.5 + (y - 250) * 0.02 + Math.random() * 2
+                const lean = (Math.random() - 0.5) * h * 0.6
+                blades += `M${x - w} ${y} Q${x - w + lean * 0.3} ${y - h * 0.6} ${x + lean} ${y - h} Q${x + w + lean * 0.3} ${y - h * 0.6} ${x + w} ${y} Z `
+            }
+            const el = Svg.g("cutscene-grass-row", `<path d="${blades}" />`)
+            el.style.fill = `color-mix(in srgb, var(--forest) ${45 + k * 8}%, var(--sage))`
+            grass.append(el)
+            return { el, base: base + 20 }
+        })
         this.nearLeaves = this.layer("cutscene-leaves", 3)
 
         this.wind.x = -0.3
@@ -162,11 +187,13 @@ export class SceneOpening extends SceneCutscene {
         }
     }
 
-    // 草は風下へなびき、風がなくてもわずかに揺れる
+    // 草は風下へなびき、風がなくてもわずかに揺れる。手前の帯ほど大きく傾く
     private *swayGrass(): Generator<void, void, void> {
         for (let i = 0; ; i++) {
             const skew = -this.wind.x * 3 + Math.sin(i * 0.05) * 1.5
-            this.grass.setAttribute("transform", `translate(0 290) skewX(${skew}) translate(-800 -200)`)
+            this.grassRows.forEach(({ el, base }, k) => {
+                el.setAttribute("transform", `translate(0 ${base}) skewX(${skew * (1 + k * 0.1)}) translate(0 ${-base})`)
+            })
             yield
         }
     }

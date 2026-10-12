@@ -91,10 +91,6 @@
     color: var(--sage);
 }
 
-.cutscene-grass {
-    color: var(--forest);
-    fill: currentColor;
-}
 
 /* ===== 横から見た蜂(SideBee.ts) ===== */
 
