@@ -43,15 +43,18 @@ export class Tree {
             return content
         }
 
-        // 太い枝ほど3本に分かれやすい。分かれた枝は少しずつ真上へ向き直る
+        // 太い枝ほど3本に分かれやすい。分かれる角度は0.1~0.8ラジアンでばらつき、さらに全体が±0.2ラジアンずれる。
+        // 分かれた枝は少しずつ真上へ向き直る
         const spreads = depth > 3 && this.random() < 0.35 ? [-1, 0, 1] : [-1, 1]
+        const tilt = (this.random() - 0.5) * 0.4
         for (const spread of spreads) {
-            const childAngle = angle + spread * (0.3 + this.random() * 0.3) + (-Math.PI / 2 - angle) * 0.15
+            const childAngle =
+                angle + tilt + spread * (0.1 + this.random() * 0.7) + (-Math.PI / 2 - angle) * 0.15
             content += this.grow(
                 ex,
                 ey,
                 childAngle,
-                length * (0.68 + this.random() * 0.1),
+                length * (0.5 + this.random() * 0.4),
                 width * 0.68,
                 depth - 1,
                 (this.random() - 0.5) * 0.15,

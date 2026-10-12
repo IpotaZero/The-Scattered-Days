@@ -43,12 +43,25 @@ export class SceneTitle extends Scene {
                             label: "Start",
                             onSelect: () => {
                                 App.se.start.play()
+
                                 // 初めてのときだけ、マップの前にOPを流す
-                                App.sc.goto(async () =>
-                                    playerData.hasSeenCutscene("opening")
-                                        ? import("./SceneMap").then(({ SceneMap }) => SceneMap.create())
-                                        : import("./Cutscene/SceneOpening").then(({ SceneOpening }) => new SceneOpening()),
-                                )
+                                if (playerData.hasSeenCutscene("opening")) {
+                                    App.sc.goto(async () =>
+                                        import("./SceneMap").then(({ SceneMap }) => SceneMap.create()),
+                                    )
+                                } else {
+                                    App.sc.goto(async () =>
+                                        import("./Cutscene/SceneOpening").then(
+                                            ({ SceneOpening }) =>
+                                                new SceneOpening(() => {
+                                                    playerData.markCutsceneSeen("opening")
+                                                    return import("./SceneMap").then(({ SceneMap }) =>
+                                                        SceneMap.create(),
+                                                    )
+                                                }),
+                                        ),
+                                    )
+                                }
                             },
                         },
                     ],

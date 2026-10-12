@@ -1,6 +1,6 @@
 import { Ease, GenUtils } from "@ipota/functions"
 import { App } from "../../App"
-import { CutsceneId, playerData } from "../../Data/PlayerData"
+import { CutsceneId } from "../../Data/PlayerData"
 import { IteratorQueue } from "../../Game/IteratorQueue"
 import { Scene } from "../../utils/Scene/Scene"
 import { Svg } from "./Svg"
@@ -9,8 +9,7 @@ import { Svg } from "./Svg"
  * 文字を使わず、SVGの絵を動かして見せる一幕(OP・ED)。絵は派生クラスのコンストラクタでlayer()に描いておく。
  * 絵は(0,0)を中心とした1000×1000の正方形に描き、画面の縦横比に合わせて上下か左右がはみ出る。
  * 16:9の画面ではyが-281~281くらいまで、縦長のスマホではxが-230~230くらいまでしか映らない。
- * script()が終わるか、始まって1秒たってからok・cancel・クリックが押されると、
- * 見たことをplayerDataに記録してnext()の場面へ移る。
+ * script()が終わるか、始まって1秒たってからok・cancel・クリックが押されると、nextが返す場面へ移る。
  */
 export abstract class SceneCutscene extends Scene {
     private readonly svg = document.createElementNS(Svg.NS, "svg")
@@ -21,7 +20,10 @@ export abstract class SceneCutscene extends Scene {
     // 絵全体の上に重ねる幕。不透明にすると絵が見えなくなる
     private readonly veil = document.createElement("div")
 
-    constructor(private readonly id: CutsceneId) {
+    constructor(
+        private readonly id: CutsceneId,
+        private readonly next: () => Promise<Scene>,
+    ) {
         super()
 
         this.root.classList.add("scene-cutscene", `scene-cutscene-${id}`)
@@ -59,8 +61,6 @@ export abstract class SceneCutscene extends Scene {
     // 一幕の流れ。終わると次の場面へ移る
     protected abstract script(): Generator<void, void, void>
 
-    protected abstract next(): Promise<Scene>
-
     // 層(<g>)を絵の一番手前に足す。あとから足した層ほど手前に描かれる。blurは1~3でぼかしの強さ、0ならぼかさない
     protected layer(className: string, blur: number): SVGGElement {
         const layer = Svg.g(className, "")
@@ -92,7 +92,6 @@ export abstract class SceneCutscene extends Scene {
     }
 
     private finish() {
-        playerData.markCutsceneSeen(this.id)
-        App.sc.goto(() => this.next())
+        App.sc.goto(this.next)
     }
 }

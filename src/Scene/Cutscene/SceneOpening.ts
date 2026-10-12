@@ -13,7 +13,6 @@ import { Wind } from "./Wind"
  * OP。秋の終わりの午後。奥に巣穴のある木が立ち、手前には大きな蜂が浮かんで木のほうを向いている。
  * 左へ吹く風がだんだん強まり、木の葉が散っていく。巣穴のまわりを飛んでいた小さな蜂は巣穴へ戻る。
  * いちばん強い風が吹くと、手前を大きな葉が次々に横切り、手前の蜂は振り返って左上へ飛び去る。
- * 終わるとマップへ移る。
  */
 export class SceneOpening extends SceneCutscene {
     private readonly wind = new Wind()
@@ -22,8 +21,9 @@ export class SceneOpening extends SceneCutscene {
     private readonly grass: SVGGElement
     private readonly nearLeaves: SVGGElement
 
-    constructor() {
-        super("opening")
+    // 終わるか飛ばされると、nextが返す場面へ移る
+    constructor(next: () => Promise<Scene>) {
+        super("opening", next)
         this.root.classList.add("paper-scene")
 
         this.layer("cutscene-land", 0).innerHTML = `
@@ -38,8 +38,8 @@ export class SceneOpening extends SceneCutscene {
             <path class="cutscene-ground" d="M-600 200 C-300 185 0 195 140 205 S450 196 600 190 L600 600 L-600 600 Z" />
         `
 
-        // 幹は根元(140,205)からほぼ真上へy=61まで伸び、y=112のあたりでx=136を通る。そこに巣穴をあける。枝先はy=-288~-116に広がる
-        const tree = new Tree(140, 205, 400, 6, seededRandom(7))
+        // 幹は根元(140,205)からほぼ真上へy=61まで伸び、y=112のあたりでx=136を通る。そこに巣穴をあける。枝先はy=-263~-95に広がる
+        const tree = new Tree(140, 205, 400, 6, seededRandom(6))
         tree.el.insertAdjacentHTML("beforeend", `<ellipse class="cutscene-hollow" cx="136" cy="112" rx="7" ry="10" />`)
         this.layer("cutscene-hive-tree", 0).append(tree.el)
 
@@ -105,10 +105,6 @@ export class SceneOpening extends SceneCutscene {
         yield* this.wind.change(-0.8, 150)
         yield* GenUtils.waitFrames(30)
         yield* this.fade("var(--paper)", 0, 1, 120)
-    }
-
-    protected next(): Promise<Scene> {
-        return import("../SceneMap").then(({ SceneMap }) => SceneMap.create())
     }
 
     // 巣穴のまわりを飛び回る。風の強さが2.5を超えると、巣穴へ入って見えなくなる

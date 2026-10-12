@@ -12,7 +12,7 @@ import { Wind } from "./Wind"
  * ED。冬の夕暮れ。雪の降る中、右に立つ大きな木の根元へ、蜂が左から雪の上をゆっくり歩いてくる。
  * 途中で一度立ち止まって触角を動かし翅を震わせるが、飛ばずにまた歩き出す。
  * 根元までたどり着くと、脚を前へ倒して横たわる。蜂の背に雪が一つずつ積もり、手前の雪がだんだん蜂の下のほうを埋める。
- * やがて画面が雪の白になり、タイトルへ移る。
+ * やがて画面が雪の白になる。
  */
 export class SceneEnding extends SceneCutscene {
     private readonly wind = new Wind()
@@ -23,8 +23,9 @@ export class SceneEnding extends SceneCutscene {
     private readonly drift: SVGPathElement
     private readonly nearSnow: SVGGElement
 
-    constructor() {
-        super("ending")
+    // 終わるか飛ばされると、nextが返す場面へ移る
+    constructor(next: () => Promise<Scene>) {
+        super("ending", next)
 
         // 雪の原は地平線(y=-40)から手前へ向かって明るくなる
         this.layer("cutscene-defs", 0).innerHTML = `
@@ -94,14 +95,14 @@ export class SceneEnding extends SceneCutscene {
         this.queue.add(() => this.snowing())
 
         yield* this.fade("var(--night)", 1, 0, 150)
-        yield* this.bee.walk(-150, 0.7)
+        yield* this.bee.walk(-150, 0.3)
         yield* GenUtils.waitFrames(30)
         yield* this.bee.antennaTo(-12, 20)
         yield* this.bee.antennaTo(8, 30)
         yield* this.bee.antennaTo(0, 20)
         yield* this.bee.buzz(26, 30)
         yield* GenUtils.waitFrames(50)
-        yield* this.bee.walk(10, 0.5)
+        yield* this.bee.walk(10, 0.2)
         yield* GenUtils.waitFrames(70)
 
         // 横たわる。脚を前へ倒し、体の下の縁が雪に着くまで沈めて頭を雪へ傾け、触角を垂らす
@@ -116,10 +117,6 @@ export class SceneEnding extends SceneCutscene {
             pileUp: this.pileUp(),
             end: GenUtils.sequence([GenUtils.waitFrames(400), this.fade("var(--paper)", 0, 1, 210)]),
         })
-    }
-
-    protected next(): Promise<Scene> {
-        return import("../SceneTitle").then(({ SceneTitle }) => new SceneTitle())
     }
 
     // 影は蜂の真下の雪の上に付いていく

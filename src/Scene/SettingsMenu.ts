@@ -6,6 +6,7 @@ import { InputCode } from "../utils/InputCode"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import type { Menu, MenuOption, MenuOptionBox } from "../utils/Menu/Menu"
 import { MenuPreset } from "../utils/Menu/MenuPreset"
+import { SceneTitle } from "./SceneTitle"
 
 const VOLUME_LABELS: Record<VolumeKind, string> = {
     bgm: "BGM",
@@ -99,6 +100,33 @@ export class SettingsMenu {
                         label: "データの削除",
                         hides: ["settings"],
                         subMenu: () => this.deleteDataBox(),
+                    },
+                ],
+                // 確認用。OP・EDを流してタイトルへ戻る。見たことは記録しない
+                [
+                    {
+                        type: "select",
+                        label: "OP",
+                        disabled: () => !playerData.hasSeenCutscene("opening"),
+                        onSelect: () => {
+                            App.sc.goto(async () =>
+                                import("./Cutscene/SceneOpening").then(
+                                    ({ SceneOpening }) => new SceneOpening(async () => new SceneTitle()),
+                                ),
+                            )
+                        },
+                    },
+                    {
+                        type: "select",
+                        label: "ED",
+                        disabled: () => !playerData.hasSeenCutscene("ending"),
+                        onSelect: () => {
+                            App.sc.goto(async () =>
+                                import("./Cutscene/SceneEnding").then(
+                                    ({ SceneEnding }) => new SceneEnding(async () => new SceneTitle()),
+                                ),
+                            )
+                        },
                     },
                 ],
                 [

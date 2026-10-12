@@ -105,7 +105,13 @@ export class SceneGame extends Scene {
     private async sceneAfterWin(): Promise<Scene> {
         const graph = await MapGraph.load()
         if (this.node.id === graph.goal.id && !playerData.hasSeenCutscene("ending")) {
-            return import("./Cutscene/SceneEnding").then(({ SceneEnding }) => new SceneEnding())
+            return import("./Cutscene/SceneEnding").then(
+                ({ SceneEnding }) =>
+                    new SceneEnding(() => {
+                        playerData.markCutsceneSeen("ending")
+                        return import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle())
+                    }),
+            )
         }
         return import("./SceneMap").then(({ SceneMap }) => SceneMap.create())
     }
