@@ -206,20 +206,21 @@ export class Game {
         this.worldDrawings.push(f)
     }
 
-    // ステージクリア。何度呼ばれてもonWinは1度だけ発火する。
+    // ステージクリア。playingのときだけ効き、onWinは1度だけ発火する。
+    // ゲームオーバー後に残った自機の弾で敵が全滅しても、ここで弾かれてクリアにはならない。
     // スコア化した弾の回収(waitScoreCollected)を待たずに演出へ進める。
     // 回収自体はクリア後も続き、終わった時点でonScoreCollectedが発火する
     win() {
-        if (this.state === "cleared") return
+        if (this.state !== "playing") return
         this.state = "cleared"
         this.se.crush.play()
         this.onWin()
         this.scripts.add(() => this.waitScoreCollected())
     }
 
-    // ゲームオーバー。何度呼ばれてもonLoseは1度だけ発火する
+    // ゲームオーバー。playingのときだけ効き、onLoseは1度だけ発火する
     lose() {
-        if (this.state === "game-over") return
+        if (this.state !== "playing") return
         this.state = "game-over"
         this.onLose(this.score)
     }
