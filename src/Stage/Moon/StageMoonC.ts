@@ -12,20 +12,20 @@ import { Size } from "../Size"
 
 const ENTRANCE_FRAMES = 150
 
-const CYCLE_FRAMES = 620
+const CYCLE_FRAMES = 540
 
-const TOSSES = 2
-const TOSS_INTERVAL = 140
+const TOSSES = 3
+const TOSS_INTERVAL = 110
 const MOCHI: Mochi.Config = {
     gravity: 0.16,
     restitution: 0.82,
     bounces: 3,
-    waveCount: 11,
-    waveSpeed: 2.2,
+    waveCount: 13,
+    waveSpeed: 2.6,
     color: "#fff6e8",
 }
 
-const RABBIT_LIFE = 700
+const RABBIT_LIFE = 850
 
 export default class extends Stage {
     *G() {
@@ -67,9 +67,9 @@ class EnemyMortar extends Enemy {
                 .format("donut")
                 .color("#e0d8ff")
                 .p(this.p.clone())
-                .speed(1.5)
+                .speed(1.8)
                 .radian(this.random() * T + (k * T) / 40)
-                .ex(31)
+                .ex(37)
                 .g((me) => Behavior.appear(me, 20))
                 .fire(this.game.bullets)
 
