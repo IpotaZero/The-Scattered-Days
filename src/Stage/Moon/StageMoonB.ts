@@ -11,13 +11,13 @@ import { Size } from "../Size"
 
 const ENTRANCE_FRAMES = 150
 
-const RINGS = 9
-const RING_INTERVAL = 30
+const RINGS = 11
+const RING_INTERVAL = 26
 
 const CYCLE_FRAMES = RINGS * RING_INTERVAL + 200
-const RING: Phase.Ring = { count: 36, speed: 3, color: "#fff2c0" }
+const RING: Phase.Ring = { count: 44, speed: 3.4, color: "#fff2c0" }
 
-const STAR_LIFE = 700
+const STAR_LIFE = 850
 
 export default class extends Stage {
     *G() {
@@ -53,8 +53,9 @@ class EnemyMoon extends Enemy {
         yield
     }
 
+    // 照らされる向きは、最初の輪では自機のいる向き。そこから輪ごとに30°ずつ回る
     private *cycle() {
-        const light = this.random() * T
+        const light = this.game.player.p.sub(this.p).radian()
         const turn = this.random() < 0.5 ? -1 : 1
 
         for (let k = 0; k < RINGS; k++) {
@@ -84,10 +85,10 @@ class EnemyStar extends Enemy {
             .p(this.p.clone())
             .speed(0.5)
             .aim(this.game.player)
-            .nway(13, T / 20)
-            .g((me) => Behavior.accel(me, 60, 3))
+            .nway(15, T / 20)
+            .g((me) => Behavior.accel(me, 60, 3.6))
             .fire(this.game.bullets)
 
-        yield* Array(60)
+        yield* Array(55)
     }
 }
