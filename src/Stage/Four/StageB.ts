@@ -152,10 +152,11 @@ namespace Tiger {
             .length(me.game.WIDTH + me.game.HEIGHT)
             .alpha(0)
             .shift(4, 22)
+            // 予告線は濃さ0.3まで8フレームで現れ、爪が飛び終わるまで(75フレーム目まで)残って、15フレームで消える
             .g(function* (b) {
-                yield* Behavior.ease(b, "alpha", 0.1, 8)
-                yield* Array(20)
-                yield* Behavior.fadeout(b, 8)
+                yield* Behavior.ease(b, "alpha", 0.3, 8)
+                yield* Array(67)
+                yield* Behavior.fadeout(b, 15)
             })
             .fire(me.game.bullets)
 
