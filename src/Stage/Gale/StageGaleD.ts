@@ -213,7 +213,7 @@ class EnemyPhase3 extends Enemy {
         yield* remodel(this)
             .format("arrow")
             .color("#ffcbaa")
-            .p(this.p)
+            .p(this.p.clone())
             .speed(2)
             .radian(T / 4)
             .g(function* (me) {
@@ -239,12 +239,11 @@ class EnemyPhase3 extends Enemy {
         yield* remodel(this)
             .format("diamond")
             .color("#ffcbaa")
-            .p(this.p)
+            .p(this.p.clone())
             .speed(2)
-            .nway(10, T / 10)
+            .ex(23)
             .appear(20, 2)
-            .colorful(Math.random() * 100)
-
+            .colorful(this.random() * 100)
             .g(function* (me) {
                 yield* Behavior.stop(me, 30)
 
@@ -265,16 +264,16 @@ class EnemyPhase3 extends Enemy {
     }
 
     private *attackTurn() {
-        for (let i = 0; i < 4; i++) {
-            yield* Array(120)
+        for (let i = 0; i < 16; i++) {
             yield* this.fire()
             yield* this.fire2()
+            yield* Array(10)
         }
-        yield* Array(120)
+        yield* Array(60)
     }
 
     private *attack(): Generator<void, void, void> {
-        yield* GenUtils.all({ attack: this.attackTurn(), wait: Array(720) })
+        yield* GenUtils.all({ attack: this.attackTurn(), wait: Array(360) })
     }
 
     start() {

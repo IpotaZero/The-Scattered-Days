@@ -133,15 +133,15 @@ export class PlayerRenderer {
         const ratio = this.sneakProgress
         if (ratio < 0.001) return
 
-        Ctx.arc(ctx, player.p, player.GRAZE_R * EFFECT_SCALE * 3 * ratio, "#ffffff80", { lineWidth: 2 })
-        Ctx.arc(ctx, player.p, player.GRAZE_R * EFFECT_SCALE * 2.8 * ratio, "#ffffff80", { lineWidth: 2 })
+        Ctx.arc(ctx, player.p, player.GRAZE_R * EFFECT_SCALE * 3 * ratio, "#ffffff80", { lineWidth: 1 })
+        Ctx.arc(ctx, player.p, player.GRAZE_R * EFFECT_SCALE * 2.8 * ratio, "#ffffff80", { lineWidth: 1 })
         Ctx.polygon(ctx, 13, 2, player.p, player.GRAZE_R * EFFECT_SCALE * 2.7 * ratio, "#ffffff80", {
             theta: this.drawRadian / 72,
-            lineWidth: 2,
+            lineWidth: 1,
         })
         Ctx.polygon(ctx, 11, 2, player.p, player.GRAZE_R * EFFECT_SCALE * 2 * ratio, "#ffffff80", {
             theta: this.drawRadian / 144,
-            lineWidth: 2,
+            lineWidth: 1,
         })
     }
 
@@ -152,7 +152,7 @@ export class PlayerRenderer {
 
         Ctx.polygon(ctx, 8, 2, player.p, player.GRAZE_R * EFFECT_SCALE * 2.2 * ratio, "#ffffff40", {
             theta: this.drawRadian / 100,
-            lineWidth: 2,
+            lineWidth: 1,
         })
     }
 

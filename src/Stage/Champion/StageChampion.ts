@@ -139,7 +139,7 @@ class EnemyHornet extends Enemy {
 
     private *phases(generation: number) {
         this.scripts.add(() => this.ring(generation), { loop: Infinity, margin: 180, id: "body" })
-        while (this.wings.some((p) => p.life > 0)) yield
+        while (this.parts.some((e) => e.life > 0)) yield
 
         if (generation > 0) {
             this.scripts.remove("body")

@@ -320,10 +320,12 @@ export class Game {
 
                     e.hit(b.damage)
 
-                    // 当たった弾の位置から、弾が来た向きへ白色の三角形を1つ飛ばす
-                    this.scripts.add(() =>
-                        TriangleParticle.scatter(this, b.p.clone(), b.radian + Math.PI, Math.random() * 2 + 2, "#fff8"),
-                    )
+                    // 当たった弾の位置から、弾が来た向きへ白色の三角形を1つ飛ばす。レーザー(rect)はb.pが根元にあるので飛ばさない
+                    if (b.collision !== "rect") {
+                        this.scripts.add(() =>
+                            TriangleParticle.scatter(this, b.p.clone(), b.radian + Math.PI, Math.random() * 2 + 2, "#fff8"),
+                        )
+                    }
                 }
             })
         })

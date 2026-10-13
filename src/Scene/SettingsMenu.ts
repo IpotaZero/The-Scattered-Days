@@ -60,17 +60,6 @@ export class SettingsMenu {
                 [
                     {
                         type: "select",
-                        label: this.drawFpsLabel(),
-                        // 選ぶたびに60と30を切り替える
-                        onSelect: () => {
-                            App.settings.changeDrawFps(App.settings.drawFps === 60 ? 30 : 60)
-                            this.menu.render()
-                        },
-                    },
-                ],
-                [
-                    {
-                        type: "select",
                         label: this.showFpsLabel(),
                         onSelect: () => {
                             App.settings.toggleShowFps()
@@ -81,6 +70,18 @@ export class SettingsMenu {
                 [
                     {
                         type: "select",
+                        label: this.drawFpsLabel(),
+                        // 選ぶたびに60と30を切り替える
+                        onSelect: () => {
+                            App.settings.changeDrawFps(App.settings.drawFps === 60 ? 30 : 60)
+                            this.menu.render()
+                        },
+                    },
+                ],
+
+                [
+                    {
+                        type: "select",
                         label: this.liteBulletsLabel(),
                         onSelect: () => {
                             App.settings.toggleLiteBullets()
@@ -88,6 +89,7 @@ export class SettingsMenu {
                         },
                     },
                 ],
+
                 [
                     this.dragScaleArrow(-1),
                     {
