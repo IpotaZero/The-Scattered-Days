@@ -133,7 +133,7 @@ class EnemyHotaru extends Enemy {
     }
 
     private *phases() {
-        this.scripts.add(() => this.ring(), { loop: Infinity, margin: 180, id: "body" })
+        this.scripts.add(() => this.necklace(), { loop: Infinity, margin: 180, id: "body" })
         while (this.lantern.life > 0) yield
 
         this.scripts.remove("body")
@@ -149,9 +149,11 @@ class EnemyHotaru extends Enemy {
         })
 
         this.scripts.add(() => this.meteorFan(), { loop: Infinity, margin: 60, id: "body" })
+        this.scripts.add(() => this.comets(), { loop: Infinity, margin: 60, id: "comets" })
         while (bigs.some((p) => p.life > 0)) yield
 
         this.scripts.remove("body")
+        this.scripts.remove("comets")
         this.isInvincible = false
         this.game.camera.shake(8, 30)
         this.scripts.add(() => this.lastLight(), { loop: Infinity, margin: 30, id: "body" })
@@ -164,18 +166,42 @@ class EnemyHotaru extends Enemy {
         yield* Hotaru.glow(this, 110, 60)
     }
 
-    private *ring() {
+    // 一拍おきに、拍から15フレームたつと、隣り合う子蛍どうしを星座の線で結ぶ。線は弾10発に砕け、胴から遠ざかる向きへ飛んで速さ3.5まで加速する(Meteor.link)。
+    // 倒れた子蛍とは結ばないので、子蛍を落とすほど輪が切れていく
+    private *necklace() {
         yield* Hotaru.waitBeat(this)
+        if (Math.floor(this.frame / 150) % 2 === 1) return
         yield* Array(15)
-        yield* remodel(this)
-            .format("small-ball")
-            .r(5)
-            .color("#ffffc0")
-            .p(this.p.clone())
-            .speed(3.5)
-            .radian(this.random() * T)
-            .ex(20)
-            .fire(this.game.bullets)
+
+        this.fireflies.forEach((a, k) => {
+            this.scripts.add(() =>
+                Meteor.link(this, a, this.fireflies[(k + 1) % this.fireflies.length], this, 10, 3.5, "#d8ff90"),
+            )
+        })
+    }
+
+    // 一拍おきに、彗星を二本放つ(Meteor.comet)。二本目の遠日点は、一本目の遠日点を胴を通る縦の線で折り返した所(画面の端の内側に押さえる)。
+    // 二本は逆向きに回るので、軌道が交わる
+    private *comets() {
+        yield* Hotaru.waitBeat(this)
+        if (Math.floor(this.frame / 150) % 2 === 0) return
+
+        const aphelion = vec(
+            this.game.WIDTH * (0.08 + 0.84 * this.random()),
+            this.game.HEIGHT * (0.72 + 0.22 * this.random()),
+        )
+        const turn = this.random() < 0.5 ? 1 : -1
+
+        yield* Meteor.comet(this, aphelion, turn, "#ffffc0")
+        yield* Meteor.comet(
+            this,
+            vec(
+                Math.min(Math.max(this.p.x * 2 - aphelion.x, this.game.WIDTH * 0.08), this.game.WIDTH * 0.92),
+                aphelion.y,
+            ),
+            -turn,
+            "#ffffc0",
+        )
     }
 
     private *meteorFan() {
