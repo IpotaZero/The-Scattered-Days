@@ -10,6 +10,7 @@
     "scripts": {
         "build": "npx vite build",
         "build:watch": "npx vite build --watch",
-        "map": "node scripts/map.mjs"
+        "map": "node scripts/map.mjs",
+        "deploy": "node scripts/deploy.mjs"
     }
 }
