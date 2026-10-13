@@ -23,7 +23,7 @@ class EnemyPupil extends Enemy {
     private readonly path = Curves.lissajous(this.game.WIDTH * 0.5, this.game.HEIGHT * 0.08, 2, 3)
 
     constructor(game: Game) {
-        super(game, 2000, Size.MASTER, { renderer: new EnemyRendererCore() })
+        super(game, 2400, Size.MASTER, { renderer: new EnemyRendererCore() })
 
         this.scripts.add(() => this.enter())
     }
@@ -44,18 +44,22 @@ class EnemyPupil extends Enemy {
         yield
     }
 
+    // 流星群を三度降らせる。二度目は一度目と左右を逆にした向きから降るので、一度目の尾と交わって格子になる
     private *cycle() {
+        const side = this.random() < 0.5 ? -1 : 1
+
         yield* GenUtils.all({
-            first: this.shower(0),
-            second: this.shower(110),
-            wait: Array(440),
+            first: this.shower(0, side),
+            second: this.shower(110, -side),
+            third: this.shower(240, side),
+            wait: Array(500),
         })
     }
 
-    private *shower(wait: number) {
+    private *shower(wait: number, side: number) {
         yield* Array(wait)
 
-        const angle = T / 4 + (this.random() < 0.5 ? -1 : 1) * (T / 14 + (this.random() * T) / 14)
+        const angle = T / 4 + side * (T / 14 + (this.random() * T) / 14)
         const center = vec(this.game.WIDTH / 2, this.game.HEIGHT / 2)
         const normal = vec.arg(angle + T / 4)
         const reach = (this.game.WIDTH + this.game.HEIGHT) / 2
@@ -63,7 +67,7 @@ class EnemyPupil extends Enemy {
 
         const lanes = Array.from({ length: Math.ceil((reach * 2) / 70) }, (_, k) =>
             center.add(normal.scale(-reach + offset + k * 70)),
-        ).filter(() => this.random() < 0.6)
+        ).filter(() => this.random() < 0.7)
 
         yield* GenUtils.all(
             Object.fromEntries(
@@ -73,7 +77,7 @@ class EnemyPupil extends Enemy {
                         yield* Array(Math.floor(me.random() * lanes.length) * 6)
                         yield* Meteor.fall(me, through, angle, {
                             preview: 50,
-                            speed: 8,
+                            speed: 10,
                             tailInterval: 2,
                             tailLife: 40,
                             color: "#fff4b0",
@@ -87,7 +91,7 @@ class EnemyPupil extends Enemy {
 
 class EnemyStardust extends Enemy {
     constructor(game: Game, parent: Enemy, index: number) {
-        super(game, 500, Size.S)
+        super(game, 600, Size.S)
 
         this.setParent(parent, () => vec.arg(this.frame / 60 + (T * index) / 4).scale(110))
 
@@ -106,10 +110,10 @@ class EnemyStardust extends Enemy {
             .speed(1.5)
             .aim(this.game.player)
             .nway(5, T / 24)
-            .g((me) => Behavior.ease(me, "speed", 4, 40, Ease.In))
+            .g((me) => Behavior.ease(me, "speed", 5, 40, Ease.In))
             .fire(this.game.bullets)
 
-        yield* Array(55)
+        yield* Array(50)
     }
 
     private *ring() {
@@ -120,8 +124,8 @@ class EnemyStardust extends Enemy {
             .p(this.p.clone())
             .speed(4)
             .radian(this.random() * T)
-            .ex(18)
-            .g((me) => Behavior.reaccel(me, 20, 20, 30, 3))
+            .ex(24)
+            .g((me) => Behavior.reaccel(me, 20, 20, 30, 3.5))
             .fire(this.game.bullets)
 
         yield* Array(80)
