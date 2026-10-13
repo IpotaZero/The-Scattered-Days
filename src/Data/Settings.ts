@@ -111,8 +111,8 @@ export class Settings {
     // ゲーム開始時にGameへ渡し、タッチのドラッグ量に level / 10 を掛ける
     dragScaleLevel = 10
 
-    // ゲーム開始時にGameへ渡し、trueなら弾の光を省いて軽く描く。スマホは描画が重いので初期値をtrueにする
-    liteBullets = isSmartPhone
+    // ゲーム開始時にGameへ渡し、trueなら弾の光を省いて軽く描く。
+    liteBullets = false
 
     constructor(private readonly target: SettingsTarget) {
         this.load()
@@ -219,7 +219,10 @@ export class Settings {
             if (typeof data.showFps === "boolean") this.showFps = data.showFps
             if (typeof data.liteBullets === "boolean") this.liteBullets = data.liteBullets
             if (typeof data.dragScaleLevel === "number")
-                this.dragScaleLevel = Math.min(DRAG_SCALE_MAX_LEVEL, Math.max(DRAG_SCALE_MIN_LEVEL, data.dragScaleLevel))
+                this.dragScaleLevel = Math.min(
+                    DRAG_SCALE_MAX_LEVEL,
+                    Math.max(DRAG_SCALE_MIN_LEVEL, data.dragScaleLevel),
+                )
 
             // 保存後にアクションが増えても、欠けているアクションはデフォルトで補う。
             // 旧形式(@ipota/inputのSourceが文字列だった頃)で保存されたアクションもデフォルトに戻す

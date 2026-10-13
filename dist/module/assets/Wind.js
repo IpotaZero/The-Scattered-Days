@@ -1,4 +1,4 @@
-import{l as e}from"../main.js";import{n as t}from"./SceneCutscene.js";var n=`<ellipse cx="0" cy="-24" rx="13" ry="24" />`,r=class r{static HOVER={front:80,mid:100,hind:115};static STAND={front:73,mid:120,hind:135};static TUCKED={front:0,mid:15,hind:25};static LEGS={front:{root:[16,14],length:24},mid:{root:[6,18],length:22},hind:{root:[-4,20],length:24}};el;x=0;y=0;deg=0;scale=1;facing=1;legs;wing;fan;antenna;antennaDeg=0;constructor(e){this.el=t.g(`side-bee`,`
+import{c as e}from"../main.js";import{n as t}from"./SceneCutscene.js";var n=`<ellipse cx="0" cy="-24" rx="13" ry="24" />`,r=class r{static HOVER={front:80,mid:100,hind:115};static STAND={front:73,mid:120,hind:135};static TUCKED={front:0,mid:15,hind:25};static LEGS={front:{root:[16,14],length:24},mid:{root:[6,18],length:22},hind:{root:[-4,20],length:24}};el;x=0;y=0;deg=0;scale=1;facing=1;legs;wing;fan;antenna;antennaDeg=0;constructor(e){this.el=t.g(`side-bee`,`
             <g class="side-bee-wing-fan">
                 ${[-55,-35,-15,5,25].map(e=>`<g transform="translate(2 -18) rotate(${e})">${n}</g>`).join(``)}
             </g>

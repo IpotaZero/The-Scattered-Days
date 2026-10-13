@@ -1,4 +1,4 @@
-import{c as e}from"../main.js";import{n as t,t as n}from"./SceneCutscene.js";import{t as r}from"./seededRandom.js";import{n as i,r as a,t as o}from"./Wind.js";var s=class{depth;el;constructor(e,n,r){this.depth=n,this.el=t.g(`cutscene-leaf cutscene-leaf-${r}`,`
+import{s as e}from"../main.js";import{n as t,t as n}from"./SceneCutscene.js";import{t as r}from"./seededRandom.js";import{n as i,r as a,t as o}from"./Wind.js";var s=class{depth;el;constructor(e,n,r){this.depth=n,this.el=t.g(`cutscene-leaf cutscene-leaf-${r}`,`
             <path d="M-6 0 Q-1 -4 6 0 Q-1 4 -6 0 Z" />
             <path class="cutscene-leaf-vein" d="M-6 0 Q0 -0.6 5 0" />
             <path class="cutscene-leaf-stem" d="M-6 0 L-8.5 0.8" />
