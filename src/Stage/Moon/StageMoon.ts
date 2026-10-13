@@ -9,6 +9,8 @@ import { EnemyRendererBoss } from "../../Game/Actor/EnemyRendererBoss"
 import { Part } from "../Part"
 import { Charge } from "../Charge"
 import { Size } from "../Size"
+import { Mochi } from "./Mochi"
+import { Phase } from "./Phase"
 
 export default class extends Stage {
     *G() {
@@ -71,11 +73,14 @@ class EnemySuzumushi extends Enemy {
         })
 
         this.scripts.add(() => this.moonRing(), { loop: Infinity, margin: 90, id: "body" })
+        this.scripts.add(() => this.mochi(), { loop: Infinity, margin: 150, id: "mochi" })
         while (crickets.some((p) => p.life > 0)) yield
 
+        this.scripts.remove("mochi")
         this.isInvincible = false
         this.game.camera.shake(8, 30)
         this.scripts.add(() => Suzumushi.chirp(this, 0, 25), { loop: Infinity, margin: 30, id: "song" })
+        this.scripts.add(() => this.waxing(), { loop: Infinity, margin: 120, id: "phase" })
     }
 
     private *ring() {
@@ -90,6 +95,37 @@ class EnemySuzumushi extends Enemy {
             .fire(this.game.bullets)
 
         yield* Array(150)
+    }
+
+    // 胴から餅を一つ放る。餅は画面の底のどこかに落ちて三度弾み、弾むたびに底から半円の衝撃波を広げる。300フレームおき
+    private *mochi() {
+        yield* Mochi.toss(
+            this,
+            vec(this.game.WIDTH * (0.15 + 0.7 * this.random()), this.game.HEIGHT - 22),
+            this.game.HEIGHT * (0.05 + 0.1 * this.random()),
+            { gravity: 0.16, restitution: 0.82, bounces: 3, waveCount: 11, waveSpeed: 2.2, color: "#fff6e8" },
+        ).fire(this.game.bullets)
+
+        yield* Array(300)
+    }
+
+    // 満ち欠けする輪を、30フレームおきに5つ広げ、300フレーム休む。最初の輪は照らされた側が自機の方を向き、そこから輪ごとに30°ずつ回る。
+    // 照らされた弧は細い三日月から満月まで満ちて、また欠ける。影の側は薄く、当たらない
+    private *waxing() {
+        const light = this.game.player.p.sub(this.p).radian()
+        const turn = this.random() < 0.5 ? -1 : 1
+
+        for (let k = 0; k < 5; k++) {
+            yield* Phase.ring(
+                this,
+                { count: 36, speed: 3.4, color: "#fff2c0" },
+                light + (turn * k * T) / 12,
+                Math.sin((Math.PI * (k + 1)) / 6),
+            ).fire(this.game.bullets)
+            yield* Array(30)
+        }
+
+        yield* Array(300)
     }
 
     private *moonRing() {
