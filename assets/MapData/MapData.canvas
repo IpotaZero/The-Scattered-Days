@@ -25,6 +25,7 @@
 		{"id":"166d9f9191ad1a93","type":"text","text":"網掛道場・師範代\nStageWebC","x":2720,"y":960,"width":160,"height":160},
 		{"id":"70041c417988cd82","type":"text","text":"網掛道場・道場主\nStageWebD\nbadge:網掛","x":2960,"y":800,"width":480,"height":480},
 		{"id":"35c5577f1a6c4709","type":"text","text":"師匠の庵\nStageTest","x":0,"y":0,"width":160,"height":160},
+		{"id":"c3a1e7d94b2f6058","type":"text","text":"色の試し場\nStageLaserColor","x":0,"y":240,"width":160,"height":160},
 		{"id":"f840811f7f798aeb","type":"text","text":"霜月道場・門下生\nStageFrozenBreath","x":400,"y":0,"width":160,"height":160},
 		{"id":"31f7d87e5e5e2323","type":"text","text":"霜月道場・高弟\nStageRikka","x":640,"y":0,"width":160,"height":160},
 		{"id":"3b69dc58c8ff5df6","type":"text","text":"霜月道場・師範代\nStageTriangle","x":880,"y":0,"width":160,"height":160},
@@ -88,6 +89,8 @@
 		{"id":"bcaeeff0907faa6e","fromNode":"2a0f289b578f41f4","fromSide":"right","toNode":"94be0c796c5a45c2","toSide":"left"},
 		{"id":"930c44ba62266bbc","fromNode":"70041c417988cd82","fromSide":"right","toNode":"ed45c0b7fab66007","toSide":"left","label":"standard"},
 		{"id":"b6f7b13917ca7faa","fromNode":"5fbe65792de30064","fromSide":"right","toNode":"46e539f50437a678","toSide":"left","label":"badges"},
-		{"id":"4679701d62d5bf4e","fromNode":"5675d716c5761d80","fromSide":"right","toNode":"573084b0c44d937c","toSide":"left","label":"laser"}
+		{"id":"4679701d62d5bf4e","fromNode":"5675d716c5761d80","fromSide":"right","toNode":"573084b0c44d937c","toSide":"left","label":"laser"},
+		{"id":"5e9b0d27a4c81f36","fromNode":"35c5577f1a6c4709","fromSide":"bottom","toNode":"c3a1e7d94b2f6058","toSide":"top"},
+		{"id":"04fc4fa449874303","fromNode":"c3a1e7d94b2f6058","fromSide":"bottom","toNode":"f840811f7f798aeb","toSide":"left"}
 	]
 }
