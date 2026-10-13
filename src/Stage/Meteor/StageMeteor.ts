@@ -223,22 +223,39 @@ class EnemyHotaru extends Enemy {
         }
     }
 
+    // 最後の灯。拍ごとに、画面全体に流星群を降らせる(Meteor.shower)。流星群は拍ごとに左右逆の斜めから降るので、前の拍の尾と交わって格子になる。
+    // 一拍おきに、流星群に加えて自機を狙う流れ星を3本流す。拍から60フレームたつと、菱形の輪を二重に広げる
     private *lastLight() {
         yield* Hotaru.waitBeat(this)
-        const aim = this.game.player.p.sub(this.p).radian()
 
-        for (const k of [0, -1, 1, -2, 2, -3, 3]) {
-            this.scripts.add(
-                () =>
-                    Meteor.fall(this, this.p.clone(), aim + k * 0.26, {
-                        preview: 40,
-                        speed: 18,
-                        tailInterval: 2,
-                        tailLife: 30,
-                        color: "#ffffe0",
-                    }),
-                { margin: Math.abs(k) * 6 },
-            )
+        const side = Math.floor(this.frame / 150) % 2 === 0 ? 1 : -1
+
+        this.scripts.add(() =>
+            Meteor.shower(this, T / 4 + side * (T / 14 + (this.random() * T) / 14), 75, 0.6, {
+                preview: 50,
+                speed: 12,
+                tailInterval: 2,
+                tailLife: 40,
+                color: "#ffffe0",
+            }),
+        )
+
+        if (side < 0) {
+            const aim = this.game.player.p.sub(this.p).radian()
+
+            for (const k of [0, -1, 1]) {
+                this.scripts.add(
+                    () =>
+                        Meteor.fall(this, this.p.clone(), aim + k * 0.3, {
+                            preview: 40,
+                            speed: 18,
+                            tailInterval: 2,
+                            tailLife: 30,
+                            color: "#ffffe0",
+                        }),
+                    { margin: Math.abs(k) * 6 },
+                )
+            }
         }
 
         yield* Array(60)
