@@ -25,7 +25,7 @@ class EnemyPupil extends Enemy {
     readonly moons = [0, 1, 2, 3].map((i) => new Moon(this.game, this, i))
 
     constructor(game: Game) {
-        super(game, 1400, Size.MASTER, { renderer: new EnemyRendererCore() })
+        super(game, 1800, Size.MASTER, { renderer: new EnemyRendererCore() })
 
         this.scripts.add(() => this.enter())
     }
@@ -54,11 +54,11 @@ class EnemyPupil extends Enemy {
             .p(this.p.clone())
             .speed(4.5)
             .radian(this.random() * T)
-            .ex(37)
-            .g((me) => Behavior.reaccel(me, 20, 25, 30, 5))
+            .ex(44)
+            .g((me) => Behavior.reaccel(me, 20, 25, 30, 5.5))
             .fire(this.game.bullets)
 
-        yield* Array(100)
+        yield* Array(90)
     }
 }
 
@@ -68,7 +68,7 @@ class Moon extends Part {
         parent: Enemy,
         private readonly i: number,
     ) {
-        super(game, parent, 400, Size.S, 140 + i * 30)
+        super(game, parent, 500, Size.S, 140 + i * 30)
     }
 
     protected place() {
@@ -84,14 +84,14 @@ class Moon extends Part {
             .color((["#fff2c0", "#e0d8ff", "#c8e8ff", "#ffd8e8"] as Color[])[this.i])
             .speed(1.5)
             .radian(aim)
-            .duplicate(9, (b, k) => {
-                b.p = this.p.add(vec.arg(aim + (k - 4) * 0.28).scale(32))
+            .duplicate(13, (b, k) => {
+                b.p = this.p.add(vec.arg(aim + (k - 6) * 0.22).scale(32))
                 return b
             })
             .appear(60)
-            .g((b) => Behavior.ease(b, "speed", 6.5, 50, Ease.In))
+            .g((b) => Behavior.ease(b, "speed", 7, 50, Ease.In))
             .fire(this.game.bullets)
 
-        yield* Array(120)
+        yield* Array(100)
     }
 }
