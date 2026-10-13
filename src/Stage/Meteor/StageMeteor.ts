@@ -22,18 +22,19 @@ namespace Hotaru {
     }
 
     // frames フレームの間、拍に合わせて明滅する。
-    // 拍から15フレームでだんだん明るくなり、そこから55フレーム光っている間だけ当たる。15フレームで暗くなり、次の拍まで暗いまま。暗い間は当たらない
+    // 拍から25フレームで濃さ0.3から0.7まで明るくなり(当たらない)、そこから45フレーム光っている間だけ当たる。
+    // 15フレームで暗くなり、次の拍まで濃さ0.3で見えたまま(当たらない)
     export function* blink(b: Bullet, clock: Enemy, frames: number) {
         for (let f = 0; f < frames; f++) {
             const t = clock.frame % 150
-            b.type = 15 <= t && t < 70 ? "enemy" : "neutral"
-            b.alpha = t < 15 ? 0.15 + t * 0.03 : t < 70 ? 1 : t < 85 ? 1 - (t - 70) * 0.057 : 0.15
+            b.type = 25 <= t && t < 70 ? "enemy" : "neutral"
+            b.alpha = t < 25 ? 0.3 + t * 0.016 : t < 70 ? 1 : t < 85 ? 1 - (t - 70) * 0.047 : 0.3
             yield
         }
     }
 
-    // e のまわりに光を count 個放つ。光は60フレームかけて速さ speed まで加速し、向きをゆらゆら変えながら漂う。
-    // 光は clock の拍に合わせて明滅し、life フレームたつと30フレームかけて消える
+    // e のまわりに光を count 個放つ。光は clock の拍に合わせて明滅し(blink)、光っている45フレームの間だけ、速さ0から speed まで上がってまた0に戻るように飛ぶ。
+    // 暗い間はその場に止まっている。飛ぶ向きは、放たれた向きを中心に少しずつ揺れる。life フレームたつと30フレームかけて消える
     export function* lights(e: Enemy, clock: Enemy, count: number, speed: number, life: number) {
         yield* remodel(e)
             .format("small-ball")
@@ -50,13 +51,14 @@ namespace Hotaru {
                 yield* blink(b, clock, life)
                 yield* Behavior.fadeout(b, 30)
             })
-            .g((b) => Behavior.accel(b, 60, speed))
             .g(function* (b) {
                 const base = b.radian
                 const phase = this.random() * T
 
                 for (let f = 0; ; f++) {
-                    b.radian = base + Math.sin(f / 50 + phase) * 0.8
+                    const t = clock.frame % 150
+                    b.speed = 25 <= t && t < 70 ? speed * Math.sin((Math.PI * (t - 25)) / 45) : 0
+                    b.radian = base + Math.sin(f / 50 + phase) * 0.5
                     yield
                 }
             })
@@ -175,7 +177,7 @@ class EnemyHotaru extends Enemy {
 
         this.fireflies.forEach((a, k) => {
             this.scripts.add(() =>
-                Meteor.link(this, a, this.fireflies[(k + 1) % this.fireflies.length], this, 10, 3.5, "#d8ff90"),
+                Meteor.link(this, a, this.fireflies[(k + 1) % this.fireflies.length], this, 10, 3.5, "#ffffc0"),
             )
         })
     }
@@ -277,10 +279,10 @@ class EnemyHotaru extends Enemy {
         }
     }
 
-    // 最後の灯。拍ごとに、胴のまわりに光を十放つ。光は子蛍の光より速く(速さ2.6)、長く(450フレーム)漂う
+    // 最後の灯。拍ごとに、胴のまわりに光を十放つ(Hotaru.lights)。光は子蛍の光より速く(光っている間の速さは最大4)、長く(450フレーム)漂う
     private *swarm() {
         yield* Hotaru.waitBeat(this)
-        yield* Hotaru.lights(this, this, 10, 2.6, 450)
+        yield* Hotaru.lights(this, this, 10, 4, 450)
     }
 }
 
@@ -312,7 +314,7 @@ class Lantern extends Part {
                         speed: 16,
                         tailInterval: 2,
                         tailLife: 36,
-                        color: "#d8ff90",
+                        color: "#fff4b0",
                     }),
                 { margin: Math.abs(k) * 8 },
             )
@@ -362,13 +364,13 @@ class Firefly extends Part {
         return vec.arg(this.frame / 120 + (T * this.i) / 8).scale(160)
     }
 
-    // 拍から i * 6 フレーム遅れて光り、まわりに光を六つ放つ。光は60フレームかけて速さ2.2まで加速し、向きをゆらゆら変えながら漂う。
-    // 光は拍に合わせて明滅し、420フレームたつと30フレームかけて消える
+    // 拍から i * 6 フレーム遅れて光り、まわりに光を六つ放つ(Hotaru.lights)。光は拍に合わせて明滅し、光っている間だけ最大で速さ3.5で飛ぶ。
+    // 420フレームたつと30フレームかけて消える
     protected *attack() {
         yield* Hotaru.waitBeat(this.parent)
         yield* Array(this.i * 6)
         yield* Hotaru.glow(this, 50, 40)
-        yield* Hotaru.lights(this, this.parent, 6, 2.2, 420)
+        yield* Hotaru.lights(this, this.parent, 6, 3.5, 420)
     }
 }
 
