@@ -253,21 +253,19 @@ class EnemyHornet extends Enemy {
             .format("small-ball")
             .color("#eef6ff")
             .speed(1.4)
-            .duplicate(2, (b) => {
-                b.p = vec(this.random() * this.game.WIDTH, 0)
-                return b
-            })
+            .duplicate(2)
+            .scatter({ x: [0, this.game.WIDTH] })
             .appear(20)
             .g(function* (b) {
                 const phase = this.random() * T
                 for (let f = 0; ; f++) {
-                    b.radian = T / 4 + 0.35 * Math.sin(f / 40 + phase)
+                    b.radian = T / 4 + 0.15 * Math.sin(f / 40 + phase)
                     yield
                 }
             })
             .fire(this.game.bullets)
 
-        yield* Array(18)
+        yield* Array(60)
     }
 }
 
@@ -511,8 +509,7 @@ class Escort extends Part {
         parent: Enemy,
         private readonly i: number,
     ) {
-        // 体力は 200 から 40 ずつ多くなる。生まれてから 60 + 40i フレーム充電する
-        super(game, parent, 200 + i * 40, Size.M, 20, { charge: 60 + i * 40 })
+        super(game, parent, 400 + i * 40, Size.M, 20, { charge: 60 + i * 40 })
     }
 
     protected place() {
@@ -526,8 +523,8 @@ class Escort extends Part {
             .p(this.p.clone())
             .speed(1.5)
             .radian(this.p.sub(this.parent.p).radian())
-            .nway(3, 0.25)
-            .g((b) => Behavior.ease(b, "speed", 6.5, 35, Ease.In))
+            .nway(31, 0.25)
+            .g((b) => Behavior.ease(b, "speed", 5, 35, Ease.In))
             .fire(this.game.bullets)
 
         yield* Array(90 + (this.i % 2) * 10)

@@ -24,8 +24,8 @@ const 衝撃フレーム = 36
 const 衝撃半径倍率 = 10
 const 破片数 = 18
 const 閃光フレーム = 8
-const 揺れの強さ = 16
-const 揺れフレーム = 30
+const 揺れの強さ = 8
+const 揺れフレーム = 15
 
 export const needle: SubEquipment = {
     label: "大針",

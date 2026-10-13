@@ -19,9 +19,6 @@ export class SceneGame extends Scene {
     protected async onStart(): Promise<void> {
         console.log(`SceneGame: ${this.node.id}`)
 
-        // ステージ中に残機が増えることはないので、クリア時に開始時から減っていなければノーミス
-        const initialLives = playerData.getLives()
-
         this.game = await Game.create({
             createStage: (game) => this.node.stage(game),
             input: App.input,
@@ -30,7 +27,8 @@ export class SceneGame extends Scene {
             liteBullets: App.settings.liteBullets,
             se: App.se,
             onWin: () => {
-                this.node.recordClear(playerData, playerData.getLoadout().main, playerData.getLives() === initialLives)
+                // 追加残機で受けた被弾も数えるので、一度も被弾せずにクリアしたときだけノーミスになる
+                this.node.recordClear(playerData, playerData.getLoadout().main, this.game!.player.hitCount === 0)
                 this.showResultMenu("--:: 前進 ::--", "Next", () => this.sceneAfterWin())
             },
             onLose: (score) => {

@@ -288,6 +288,17 @@ export class PlayerRenderer {
                 lineWidth: 2,
             })
         }
+
+        // 追加残機は青く、残機より少し外側を、残機の3倍の速さで回る
+        for (let i = 0; i < player.extraLives; i++) {
+            const center = player.p.add(
+                vec(player.GRAZE_R * EFFECT_SCALE * 4.5, 0).rotate(T * (i / player.extraLives) + this.frame / 20),
+            )
+            Ctx.polygon(ctx, 6, 1, center, player.GRAZE_R * EFFECT_SCALE, "rgba(110, 180, 255, 0.6)", {
+                theta: this.frame / 20,
+                lineWidth: 2,
+            })
+        }
     }
 
     // 体と翅を描くための座標に移す。(0,0)が胸の真ん中で、頭が上(-y)。

@@ -80,7 +80,7 @@ class EnemyBoss extends Enemy {
         yield* Array(55)
         yield* this.moveTo(
             vec(this.game.WIDTH * (0.32 + 0.36 * this.random()), this.game.HEIGHT * (0.1 + 0.12 * this.random())),
-            28,
+            60,
         )
     }
 
@@ -88,7 +88,7 @@ class EnemyBoss extends Enemy {
         yield* Array(20)
         yield* this.moveTo(
             vec(this.game.WIDTH * (0.32 + 0.36 * this.random()), this.game.HEIGHT * (0.1 + 0.14 * this.random())),
-            15,
+            60,
         )
 
         yield* remodel(this)
@@ -189,7 +189,7 @@ namespace Tiger {
                 .radian(T / 4 + sway + (k - 2) * 0.12)
                 .shift(11, 24)
                 .fire(me.game.bullets)
-            yield* Array(30)
+            yield* Array(60)
         }
 
         yield* Array(140)
@@ -203,7 +203,7 @@ class Paw extends Part {
         private readonly side: number,
     ) {
         // 右の前脚は420フレーム充電してから動き出す
-        super(game, parent, 500, Size.L, 140 + (side > 0 ? 55 : 0), { charge: side > 0 ? 420 : 0 })
+        super(game, parent, 1000, Size.L, 140 + (side > 0 ? 55 : 0), { charge: side > 0 ? 420 : 0 })
     }
 
     protected place() {
@@ -222,7 +222,7 @@ class HindLeg extends Part {
         private readonly side: number,
     ) {
         // 後脚は左が1200フレーム、右が1500フレーム充電してから動き出す
-        super(game, parent, 350, Size.M, 170 + (side > 0 ? 45 : 0), { charge: side > 0 ? 1500 : 1200 })
+        super(game, parent, 700, Size.M, 170 + (side > 0 ? 45 : 0), { charge: side > 0 ? 1500 : 1200 })
     }
 
     protected place() {
@@ -256,7 +256,7 @@ class HindLeg extends Part {
 class Tail extends Part {
     constructor(game: Game, parent: Enemy) {
         // 900フレーム充電してから動き出す
-        super(game, parent, 600, Size.L, 200, { charge: 900 })
+        super(game, parent, 1200, Size.L, 200, { charge: 900 })
     }
 
     protected place() {
@@ -275,7 +275,7 @@ class Cub extends Part {
         private readonly k: number,
     ) {
         // 600・840・1080フレーム充電してから、順に動き出す
-        super(game, parent, 180, Size.S, 150 + k * 30, { charge: 600 + k * 240 })
+        super(game, parent, 360, Size.S, 150 + k * 30, { charge: 600 + k * 240 })
     }
 
     protected place() {
@@ -305,7 +305,7 @@ class Young extends Part {
         private readonly side: number,
     ) {
         // 右の若虎は480フレーム充電してから動き出す
-        super(game, parent, 350, Size.M, 60 + (side > 0 ? 50 : 0), { charge: side > 0 ? 480 : 0 })
+        super(game, parent, 700, Size.M, 60 + (side > 0 ? 50 : 0), { charge: side > 0 ? 480 : 0 })
     }
 
     protected place() {
@@ -335,7 +335,7 @@ class YoungClaw extends Part {
         private readonly side: number,
     ) {
         // 右の若虎の爪は480フレーム充電してから動き出す(充電中は攻撃が効かないので、その間は右の若虎も守られたまま)
-        super(game, parent, 100, Size.S, 80, { charge: side > 0 ? 480 : 0 })
+        super(game, parent, 200, Size.S, 80, { charge: side > 0 ? 480 : 0 })
     }
 
     protected place() {

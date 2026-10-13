@@ -1,6 +1,7 @@
 import { EquipmentId } from "../../Data/Equipment"
 import { barrier } from "./Barrier"
 import { dash } from "./Dash"
+import { extraLife } from "./ExtraLife"
 import { laser } from "./Laser"
 import { needle } from "./Needle"
 import { standard } from "./Standard"
@@ -17,6 +18,7 @@ export const mainEquipments: Record<EquipmentId, MainEquipment> = {
 export const subEquipments: Record<EquipmentId, SubEquipment> = {
     dash,
     barrier,
+    extraLife,
     needle,
     sweep,
 }

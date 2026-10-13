@@ -118,8 +118,7 @@ export class BulletDrawer {
         }
 
         if (bullet.appearance === "beam") {
-            // 根元の光の色は弾の色によらないので、色は一つに決めて使い回す
-            const flare = this.getSprite("beam-flare", "aqua", bullet.r)
+            const flare = this.getSprite("beam-flare", bullet.color, bullet.r)
             if (!this.queueBeamFlare(bullet, flare)) this.drawBeamFlareDirectly(bullet, flare, ctx)
         }
     }
@@ -316,25 +315,30 @@ export class BulletDrawer {
 
     // --- 各外見の描画ロジック ---
 
-    // ビーム・レーザーの本体(色の長方形に白い芯)。原点から向きの方向へ length だけ描く
+    // ビーム・レーザーの本体(色の長方形に、幅が全体の3割の白い芯)。原点から向きの方向へ length だけ描く
     private paintRectBody(ctx: CanvasRenderingContext2D, color: Color, r: number, length: number) {
         ctx.shadowBlur = r
         ctx.shadowColor = color
         ctx.fillStyle = color
         ctx.fillRect(0, -r, length, r * 2)
 
-        // 白い芯
-        ctx.shadowBlur = r
-        ctx.shadowColor = "white"
+        // 白い芯。まとう光は弾の色
+        ctx.shadowBlur = r / 2
         ctx.fillStyle = "white"
-        ctx.fillRect(0, -r * 0.8, length, r * 1.6)
+        ctx.fillRect(0, -r * 0.3, length, r * 0.6)
     }
 
-    // ビームの根元の光。原点が根元で、向きの方向へ広がる
-    private paintBeamFlare(ctx: CanvasRenderingContext2D, r: number) {
-        // 本体の白い芯と同じ白い光をまとわせる
+    // ビームの根元の光。原点が根元で、向きの方向へ広がる。中心のごく小さい部分だけが白く、ほかは弾の色
+    private paintBeamFlare(ctx: CanvasRenderingContext2D, color: Color, r: number) {
+        // fillStyle に入れた色は "#rrggbb" の形で読み出せるので、そこから赤・緑・青を取り出す
+        ctx.fillStyle = color
+        const hex = ctx.fillStyle as string
+        const [red, green, blue] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+        const tint = (alpha: number) => `rgba(${red}, ${green}, ${blue}, ${alpha})`
+
+        // 本体と同じく、弾の色の光をまとわせる
         ctx.shadowBlur = r
-        ctx.shadowColor = "white"
+        ctx.shadowColor = color
 
         const coneLength = r * 12
         const coneWidth = r * 8
@@ -342,9 +346,9 @@ export class BulletDrawer {
         // 外側のぼんやりした光
         const outer = ctx.createLinearGradient(0, 0, coneLength, 0)
 
-        outer.addColorStop(0, "rgba(0, 255, 255, 0.22)")
-        outer.addColorStop(0.25, "rgba(0, 255, 255, 0.12)")
-        outer.addColorStop(0.65, "rgba(0, 255, 255, 0.04)")
+        outer.addColorStop(0, tint(0.22))
+        outer.addColorStop(0.25, tint(0.12))
+        outer.addColorStop(0.65, tint(0.04))
         outer.addColorStop(1, "transparent")
 
         ctx.fillStyle = outer
@@ -359,10 +363,10 @@ export class BulletDrawer {
         // メインの光
         const cone = ctx.createLinearGradient(0, 0, coneLength, 0)
 
-        cone.addColorStop(0, "rgba(255, 255, 255, 0.9)")
-        cone.addColorStop(0.12, "rgba(0, 255, 255, 0.65)")
-        cone.addColorStop(0.4, "rgba(0, 255, 255, 0.25)")
-        cone.addColorStop(0.75, "rgba(0, 255, 255, 0.06)")
+        cone.addColorStop(0, tint(0.8))
+        cone.addColorStop(0.12, tint(0.6))
+        cone.addColorStop(0.4, tint(0.25))
+        cone.addColorStop(0.75, tint(0.06))
         cone.addColorStop(1, "transparent")
 
         ctx.fillStyle = cone
@@ -379,9 +383,9 @@ export class BulletDrawer {
 
         const core = ctx.createLinearGradient(0, 0, coreLength, 0)
 
-        core.addColorStop(0, "rgba(255,255,255,0.95)")
-        core.addColorStop(0.2, "rgba(255,255,255,0.8)")
-        core.addColorStop(0.5, "rgba(200,255,255,0.25)")
+        core.addColorStop(0, "rgba(255,255,255,0.8)")
+        core.addColorStop(0.15, tint(0.7))
+        core.addColorStop(0.5, tint(0.25))
         core.addColorStop(1, "transparent")
 
         ctx.fillStyle = core
@@ -395,9 +399,9 @@ export class BulletDrawer {
         // 根元
         const flare = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r * 3)
 
-        flare.addColorStop(0, "rgba(255,255,255,0.95)")
-        flare.addColorStop(0.25, "rgba(255,255,255,0.7)")
-        flare.addColorStop(0.55, "rgba(0,255,255,0.25)")
+        flare.addColorStop(0, "rgba(255,255,255,0.9)")
+        flare.addColorStop(0.15, tint(0.7))
+        flare.addColorStop(0.55, tint(0.25))
         flare.addColorStop(1, "transparent")
 
         ctx.fillStyle = flare
@@ -428,7 +432,7 @@ export class BulletDrawer {
         const ctx = canvas.getContext("2d")!
         ctx.globalCompositeOperation = "lighter"
         ctx.translate(look.r * 5, look.r * 10)
-        this.paintBeamFlare(ctx, look.r)
+        this.paintBeamFlare(ctx, look.color, look.r)
         return canvas
     }
 

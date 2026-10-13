@@ -18,7 +18,7 @@ const 通常時威力 = 1
 const 集中時威力 = 1
 
 // 自機の左右2本、細く長いビームを常時出し続ける。自機狙いをせず一直線にしか飛ばないため、
-// 敵の正面に自機を移動させて撃ち合わせないと当たらない
+// 敵の正面に自機を移動させて撃ち合わせないと当たらない。被弾後の無敵の間はビームも消える
 export const laser: MainEquipment = {
     label: "貫通",
     description: "自機の左右から常時光線を出し続ける。",
@@ -58,7 +58,9 @@ export const laser: MainEquipment = {
                     const x = Math.max(0, Math.min(player.game.WIDTH, player.p.x + side * interval))
                     me.p = vec(x, player.p.y)
                     me.r = isFocused ? 集中時太さ : 通常時太さ
-                    me.alpha = isFocused ? 集中時濃さ : 通常時濃さ
+                    // 被弾後の無敵の間は見えなくなり、敵に当たらない
+                    me.type = player.isStunned() ? "effect" : "friend"
+                    me.alpha = player.isStunned() ? 0 : isFocused ? 集中時濃さ : 通常時濃さ
                     me.damage = isFocused ? 集中時威力 : 通常時威力
 
                     yield

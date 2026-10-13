@@ -29,6 +29,10 @@ export class Player extends Actor {
     override readonly r: number = 3
 
     readonly maxLife: number
+    // ステージの中だけで使える追加残機の数。被弾するとlifeより先に減る。playerDataへは送り返さない
+    extraLives = 0
+    // このステージで被弾した回数。追加残機で受けた被弾と自爆も数える
+    hitCount = 0
     readonly speed = 8
     readonly slowSpeed = 3
 
@@ -59,7 +63,7 @@ export class Player extends Actor {
         this.onLifeChange = config.onLifeChange
         this.equipments = [config.mainEquipment, ...(config.subEquipment ? [config.subEquipment] : [])]
 
-        this.scripts.add(() => config.mainEquipment.fire(this), { loop: Infinity })
+        this.scripts.add(() => this.pauseWhileStunned(config.mainEquipment.fire(this)), { loop: Infinity })
         if (config.subEquipment) this.scripts.add(() => config.subEquipment!.action(this))
     }
 
@@ -82,6 +86,11 @@ export class Player extends Actor {
         return this.scripts.has("invincible") || this.isActionInvincible
     }
 
+    // 被弾後の無敵の間。主装備は撃たない(技による無敵は含まない)
+    isStunned() {
+        return this.scripts.has("invincible")
+    }
+
     // ダッシュ等でboostSpeedが設定されている状態
     isBoosted() {
         return this.boostSpeed !== undefined
@@ -91,18 +100,17 @@ export class Player extends Actor {
     hit(damage: number) {
         if (this.isInvincible()) return
 
-        this.life = Math.max(-1, this.life - damage)
-        this.onLifeChange(this.life)
+        this.hitCount++
+        if (this.extraLives > 0) {
+            this.extraLives--
+        } else {
+            this.life = Math.max(-1, this.life - damage)
+            this.onLifeChange(this.life)
+        }
         this.game.se.hit.play()
         this.game.camera.shake(HIT_SHAKE_INTENSITY, HIT_SHAKE_FRAME)
 
-        this.scripts.add(
-            function* () {
-                const invincibleFrame = 120
-                yield* Array(invincibleFrame)
-            },
-            { id: "invincible" },
-        )
+        this.scripts.add(() => this.stun(), { id: "invincible" })
 
         if (this.life < 0) {
             this.die()
@@ -113,6 +121,7 @@ export class Player extends Actor {
 
     // 自爆: 無敵時間に関係なく強制的にゲームオーバーにする。被弾と同じ弾処理リングは出す
     selfDestruct() {
+        this.hitCount++
         this.life = Math.max(-1, this.life - 1)
         this.onLifeChange(this.life)
 
@@ -144,6 +153,49 @@ export class Player extends Actor {
             })
             .g((me) => Behavior.fadeout(me, 60))
             .fire(this.game.bullets)
+    }
+
+    // 被弾後の無敵。120フレームかけて、自機のまわりに#59A4FFの三角形を頂点から一辺ずつ描き足していき、
+    // 描き終わったフレームで無敵が解ける。その間、主装備は撃たない(isStunned)
+    private *stun() {
+        const frame = 120
+        const radius = this.GRAZE_R * 2.5
+
+        for (let i = 1; i < frame + 1; i++) {
+            const drawn = (i / frame) * 3
+
+            this.game.drawInWorld((ctx) => {
+                const vertices = [0, 1, 2, 3].map((k) => this.p.add(vec(radius, 0).rotate(-T / 4 + (T / 3) * k)))
+
+                ctx.lineWidth = 2
+
+                ctx.strokeStyle = "rgba(89, 164, 255, 0.2)"
+                ctx.beginPath()
+                ctx.moveTo(vertices[0]!.x, vertices[0]!.y)
+                for (let k = 1; k <= 3; k++) ctx.lineTo(vertices[k]!.x, vertices[k]!.y)
+                ctx.stroke()
+
+                ctx.strokeStyle = "#59A4FF"
+                ctx.beginPath()
+                ctx.moveTo(vertices[0]!.x, vertices[0]!.y)
+                for (let k = 0; k < Math.ceil(drawn); k++) {
+                    const end = vertices[k]!.add(vertices[k + 1]!.sub(vertices[k]!).scale(Math.min(1, drawn - k)))
+                    ctx.lineTo(end.x, end.y)
+                }
+                ctx.stroke()
+            })
+
+            yield
+        }
+    }
+
+    // gを毎フレーム一歩ずつ進める。isStunnedの間は進めない(すでに撃った弾はそのまま飛ぶ)
+    private *pauseWhileStunned(g: Generator<void, void, void>) {
+        while (true) {
+            while (this.isStunned()) yield
+            if (g.next().done) return
+            yield
+        }
     }
 
     // 被弾した瞬間に自機を中心としたリングを広げ、触れた敵弾をスコアに変える。
