@@ -22,7 +22,7 @@ class EnemySun extends Enemy {
     private readonly path = Curves.lissajous(this.game.WIDTH * 0.4, this.game.HEIGHT * 0.06, 2, 3)
 
     constructor(game: Game) {
-        super(game, 2400, Size.MASTER, { renderer: new EnemyRendererCore() })
+        super(game, 2900, Size.MASTER, { renderer: new EnemyRendererCore() })
 
         this.scripts.add(() => this.enter())
     }
@@ -43,18 +43,28 @@ class EnemySun extends Enemy {
         yield
     }
 
+    // 彗星を二本ずつ、4回放つ。二本目の遠日点は、一本目の遠日点を太陽を通る縦の線で折り返した所(画面の端の内側に押さえる)。
+    // 二本は逆向きに回るので、軌道が交わる
     private *cycle() {
-        for (let k = 0; k < 5; k++) {
+        for (let k = 0; k < 4; k++) {
             const aphelion = vec(
                 this.game.WIDTH * (0.08 + 0.84 * this.random()),
                 this.game.HEIGHT * (0.72 + 0.22 * this.random()),
             )
+            const turn = k % 2 === 0 ? 1 : -1
 
-            yield* this.comet(aphelion, k % 2 === 0 ? 1 : -1)
-            yield* Array(28)
+            yield* this.comet(aphelion, turn)
+            yield* this.comet(
+                vec(
+                    Math.min(Math.max(this.p.x * 2 - aphelion.x, this.game.WIDTH * 0.08), this.game.WIDTH * 0.92),
+                    aphelion.y,
+                ),
+                -turn,
+            )
+            yield* Array(40)
         }
 
-        yield* Array(330)
+        yield* Array(300)
     }
 
     private *comet(aphelion: Vec, turn: number) {
@@ -113,7 +123,7 @@ class EnemySun extends Enemy {
 
 class EnemyPlanet extends Enemy {
     constructor(game: Game, parent: Enemy, index: number) {
-        super(game, 600, Size.S)
+        super(game, 700, Size.S)
 
         const radius = 90 + 35 * index
         const turn = index % 2 === 0 ? 1 : -1
@@ -134,10 +144,10 @@ class EnemyPlanet extends Enemy {
             .speed(1)
             .aim(this.game.player)
             .nway(5, T / 22)
-            .g((me) => Behavior.ease(me, "speed", 6.5, 45, Ease.In))
+            .g((me) => Behavior.ease(me, "speed", 7, 45, Ease.In))
             .fire(this.game.bullets)
 
-        yield* Array(70)
+        yield* Array(60)
     }
 
     private *ring() {
@@ -148,10 +158,10 @@ class EnemyPlanet extends Enemy {
             .p(this.p.clone())
             .speed(4)
             .radian(this.random() * T)
-            .ex(20)
-            .g((me) => Behavior.reaccel(me, 20, 25, 30, 5))
+            .ex(26)
+            .g((me) => Behavior.reaccel(me, 20, 25, 30, 5.5))
             .fire(this.game.bullets)
 
-        yield* Array(90)
+        yield* Array(80)
     }
 }
