@@ -32,6 +32,37 @@ namespace Hotaru {
         }
     }
 
+    // e のまわりに光を count 個放つ。光は60フレームかけて速さ speed まで加速し、向きをゆらゆら変えながら漂う。
+    // 光は clock の拍に合わせて明滅し、life フレームたつと30フレームかけて消える
+    export function* lights(e: Enemy, clock: Enemy, count: number, speed: number, life: number) {
+        yield* remodel(e)
+            .format("small-ball")
+            .r(6)
+            .color("#d8ff90")
+            .p(e.p.clone())
+            .speed(0)
+            .radian(e.random() * T)
+            .ex(count)
+            .forEach((b) => {
+                b.p = b.p.add(vec.arg(b.radian).scale(14))
+            })
+            .g(function* (b) {
+                yield* blink(b, clock, life)
+                yield* Behavior.fadeout(b, 30)
+            })
+            .g((b) => Behavior.accel(b, 60, speed))
+            .g(function* (b) {
+                const base = b.radian
+                const phase = this.random() * T
+
+                for (let f = 0; ; f++) {
+                    b.radian = base + Math.sin(f / 50 + phase) * 0.8
+                    yield
+                }
+            })
+            .fire(e.game.bullets)
+    }
+
     // e のまわりが半径 r でぼうっと光り、frames フレームかけて消える。光は e について動き、当たり判定はない
     export function* glow(e: Enemy, r: number, frames: number) {
         yield* remodel(e)
@@ -124,6 +155,7 @@ class EnemyHotaru extends Enemy {
         this.isInvincible = false
         this.game.camera.shake(8, 30)
         this.scripts.add(() => this.lastLight(), { loop: Infinity, margin: 30, id: "body" })
+        this.scripts.add(() => this.swarm(), { loop: Infinity, margin: 30, id: "swarm" })
     }
 
     // 拍ごとに、胴のまわりがぼうっと光る
@@ -169,10 +201,10 @@ class EnemyHotaru extends Enemy {
         yield* Hotaru.waitBeat(this)
         const aim = this.game.player.p.sub(this.p).radian()
 
-        for (const k of [0, -1, 1, -2, 2]) {
+        for (const k of [0, -1, 1, -2, 2, -3, 3]) {
             this.scripts.add(
                 () =>
-                    Meteor.fall(this, this.p.clone(), aim + k * 0.3, {
+                    Meteor.fall(this, this.p.clone(), aim + k * 0.26, {
                         preview: 40,
                         speed: 18,
                         tailInterval: 2,
@@ -185,15 +217,27 @@ class EnemyHotaru extends Enemy {
 
         yield* Array(60)
 
-        yield* remodel(this)
-            .format("diamond")
-            .color("#ffffc0")
-            .p(this.p.clone())
-            .speed(5)
-            .radian(this.random() * T)
-            .ex(40)
-            .g((b) => Behavior.reaccel(b, 20, 20, 30, 5.5))
-            .fire(this.game.bullets)
+        const radian = this.random() * T
+
+        for (const k of [0, 1]) {
+            yield* remodel(this)
+                .format("diamond")
+                .color("#ffffc0")
+                .p(this.p.clone())
+                .speed(5)
+                .radian(radian + (k * T) / 96)
+                .ex(48)
+                .g((b) => Behavior.reaccel(b, 20, 20, 30, 5.5))
+                .fire(this.game.bullets)
+
+            yield* Array(20)
+        }
+    }
+
+    // 最後の灯。拍ごとに、胴のまわりに光を十放つ。光は子蛍の光より速く(速さ2.6)、長く(450フレーム)漂う
+    private *swarm() {
+        yield* Hotaru.waitBeat(this)
+        yield* Hotaru.lights(this, this, 10, 2.6, 450)
     }
 }
 
@@ -281,33 +325,7 @@ class Firefly extends Part {
         yield* Hotaru.waitBeat(this.parent)
         yield* Array(this.i * 6)
         yield* Hotaru.glow(this, 50, 40)
-
-        yield* remodel(this)
-            .format("small-ball")
-            .r(6)
-            .color("#d8ff90")
-            .p(this.p.clone())
-            .speed(0)
-            .radian(this.random() * T)
-            .ex(6)
-            .forEach((b) => {
-                b.p = b.p.add(vec.arg(b.radian).scale(14))
-            })
-            .g(function* (b) {
-                yield* Hotaru.blink(b, this.parent, 420)
-                yield* Behavior.fadeout(b, 30)
-            })
-            .g((b) => Behavior.accel(b, 60, 2.2))
-            .g(function* (b) {
-                const base = b.radian
-                const phase = this.random() * T
-
-                for (let f = 0; ; f++) {
-                    b.radian = base + Math.sin(f / 50 + phase) * 0.8
-                    yield
-                }
-            })
-            .fire(this.game.bullets)
+        yield* Hotaru.lights(this, this.parent, 6, 2.2, 420)
     }
 }
 
