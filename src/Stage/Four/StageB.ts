@@ -201,7 +201,8 @@ class Paw extends Part {
         parent: Enemy,
         private readonly side: number,
     ) {
-        super(game, parent, 500, Size.L, 140 + (side > 0 ? 55 : 0))
+        // 右の前脚は420フレーム充電してから動き出す
+        super(game, parent, 500, Size.L, 140 + (side > 0 ? 55 : 0), { charge: side > 0 ? 420 : 0 })
     }
 
     protected place() {
@@ -219,7 +220,8 @@ class HindLeg extends Part {
         parent: Enemy,
         private readonly side: number,
     ) {
-        super(game, parent, 350, Size.M, 170 + (side > 0 ? 45 : 0))
+        // 後脚は左が1200フレーム、右が1500フレーム充電してから動き出す
+        super(game, parent, 350, Size.M, 170 + (side > 0 ? 45 : 0), { charge: side > 0 ? 1500 : 1200 })
     }
 
     protected place() {
@@ -252,7 +254,8 @@ class HindLeg extends Part {
 
 class Tail extends Part {
     constructor(game: Game, parent: Enemy) {
-        super(game, parent, 600, Size.L, 200)
+        // 900フレーム充電してから動き出す
+        super(game, parent, 600, Size.L, 200, { charge: 900 })
     }
 
     protected place() {
@@ -270,7 +273,8 @@ class Cub extends Part {
         parent: Enemy,
         private readonly k: number,
     ) {
-        super(game, parent, 180, Size.S, 150 + k * 30)
+        // 600・840・1080フレーム充電してから、順に動き出す
+        super(game, parent, 180, Size.S, 150 + k * 30, { charge: 600 + k * 240 })
     }
 
     protected place() {
@@ -299,7 +303,8 @@ class Young extends Part {
         parent: Enemy,
         private readonly side: number,
     ) {
-        super(game, parent, 350, Size.M, 60 + (side > 0 ? 50 : 0))
+        // 右の若虎は480フレーム充電してから動き出す
+        super(game, parent, 350, Size.M, 60 + (side > 0 ? 50 : 0), { charge: side > 0 ? 480 : 0 })
     }
 
     protected place() {
@@ -328,7 +333,8 @@ class YoungClaw extends Part {
         parent: Enemy,
         private readonly side: number,
     ) {
-        super(game, parent, 100, Size.S, 80)
+        // 右の若虎の爪は480フレーム充電してから動き出す(充電中は攻撃が効かないので、その間は右の若虎も守られたまま)
+        super(game, parent, 100, Size.S, 80, { charge: side > 0 ? 480 : 0 })
     }
 
     protected place() {
