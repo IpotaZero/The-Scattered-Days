@@ -269,6 +269,7 @@
         .option {
             padding: 0.25em 0.6em 0.3em;
             letter-spacing: 0.1em;
+            font-size: 0.8em;
 
             /* 入力待ち中など、選べない行は丸ごと薄くする(menu.cssの既定はspanごとに重ねて薄くなりすぎる) */
             &.disabled {
