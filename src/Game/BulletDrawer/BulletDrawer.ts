@@ -535,28 +535,32 @@ export class BulletDrawer {
         return canvas
     }
 
-    private drawLine(bullet: Look, halfCanvasSize: number) {
-        const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
+    // 今の path を、弾の色の太さ3の線で描き、その上に太さ2の白い芯を描く。
+    // 線と芯は弾の色の光(shadowBlur = r)をまとう。lite のときは光を省く
+    private strokeGlowing(ctx: CanvasRenderingContext2D, bullet: Look) {
         if (!this.lite) {
             ctx.shadowColor = bullet.color
-            // 光を広げすぎると色が薄まるので、本体付近に集める
             ctx.shadowBlur = bullet.r
         }
-
-        ctx.translate(center, center)
-
-        ctx.beginPath()
-        ctx.moveTo(-bullet.r, 0)
-        ctx.lineTo(bullet.r, 0)
 
         ctx.strokeStyle = bullet.color
         ctx.lineWidth = 3
         ctx.stroke()
 
-        // 白い芯は細くして、本来の色を見せる(全体の太さは3のまま)
+        // 白い芯
         ctx.strokeStyle = "white"
-        ctx.lineWidth = 1
+        ctx.lineWidth = 3
         ctx.stroke()
+    }
+
+    private drawLine(bullet: Look, halfCanvasSize: number) {
+        const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
+        ctx.translate(center, center)
+
+        ctx.beginPath()
+        ctx.moveTo(-bullet.r, 0)
+        ctx.lineTo(bullet.r, 0)
+        this.strokeGlowing(ctx, bullet)
 
         return canvas
     }
@@ -594,11 +598,6 @@ export class BulletDrawer {
 
     private drawArrow(bullet: Look, halfCanvasSize: number) {
         const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
-        if (!this.lite) {
-            ctx.shadowColor = bullet.color
-            // 光を広げすぎると色が薄まるので、本体付近に集める
-            ctx.shadowBlur = bullet.r
-        }
 
         const tipSize = bullet.r * (1 - Math.SQRT1_2)
         const tipWidth = bullet.r * Math.SQRT1_2
@@ -612,15 +611,7 @@ export class BulletDrawer {
         ctx.lineTo(tipSize, tipWidth)
         ctx.moveTo(bullet.r, 0)
         ctx.lineTo(tipSize, -tipWidth)
-
-        ctx.strokeStyle = bullet.color
-        ctx.lineWidth = 3
-        ctx.stroke()
-
-        // 白い芯は細くして、本来の色を見せる(全体の太さは3のまま)
-        ctx.strokeStyle = "white"
-        ctx.lineWidth = 1
-        ctx.stroke()
+        this.strokeGlowing(ctx, bullet)
 
         return canvas
     }
