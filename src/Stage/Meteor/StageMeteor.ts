@@ -78,7 +78,7 @@ class EnemyHotaru extends Enemy {
     readonly parts = [this.lantern, ...this.antennae, ...this.fireflies]
 
     constructor(game: Game) {
-        super(game, 1600, Size.BOSS, { renderer: new EnemyRendererBoss() })
+        super(game, 2000, Size.BOSS, { renderer: new EnemyRendererBoss() })
         this.isInvincible = true
 
         this.scripts.add(() => this.enter())
@@ -150,10 +150,10 @@ class EnemyHotaru extends Enemy {
         yield* Hotaru.waitBeat(this)
         const sway = (this.random() - 0.5) * 0.6
 
-        for (const k of [0, 1, 2, 3]) {
+        for (const k of [0, 1, 2, 3, 4, 5]) {
             this.scripts.add(
                 () =>
-                    Meteor.fall(this, this.p.clone(), T / 4 + sway + (k - 1.5) * 0.5, {
+                    Meteor.fall(this, this.p.clone(), T / 4 + sway + (k - 2.5) * 0.36, {
                         preview: 40,
                         speed: 16,
                         tailInterval: 2,
@@ -169,17 +169,17 @@ class EnemyHotaru extends Enemy {
         yield* Hotaru.waitBeat(this)
         const aim = this.game.player.p.sub(this.p).radian()
 
-        for (const k of [0, -1, 1]) {
+        for (const k of [0, -1, 1, -2, 2]) {
             this.scripts.add(
                 () =>
-                    Meteor.fall(this, this.p.clone(), aim + k * 0.4, {
+                    Meteor.fall(this, this.p.clone(), aim + k * 0.3, {
                         preview: 40,
                         speed: 18,
                         tailInterval: 2,
                         tailLife: 30,
                         color: "#ffffe0",
                     }),
-                { margin: (k + 1) * 6 },
+                { margin: Math.abs(k) * 6 },
             )
         }
 
@@ -191,7 +191,7 @@ class EnemyHotaru extends Enemy {
             .p(this.p.clone())
             .speed(5)
             .radian(this.random() * T)
-            .ex(30)
+            .ex(40)
             .g((b) => Behavior.reaccel(b, 20, 20, 30, 5.5))
             .fire(this.game.bullets)
     }
@@ -199,7 +199,7 @@ class EnemyHotaru extends Enemy {
 
 class Lantern extends Part {
     constructor(game: Game, parent: Enemy) {
-        super(game, parent, 900, Size.L, 150)
+        super(game, parent, 1100, Size.L, 150)
         this.scripts.add(() => this.pulse(), { loop: Infinity })
     }
 
@@ -217,17 +217,17 @@ class Lantern extends Part {
         yield* Hotaru.waitBeat(this.parent)
         const aim = this.game.player.p.sub(this.p).radian()
 
-        for (const k of [0, -1, 1]) {
+        for (const k of [0, -1, 1, -2, 2]) {
             this.scripts.add(
                 () =>
-                    Meteor.fall(this, this.p.clone(), aim + k * 0.45, {
+                    Meteor.fall(this, this.p.clone(), aim + k * 0.35, {
                         preview: 45,
                         speed: 16,
                         tailInterval: 2,
                         tailLife: 36,
                         color: "#d8ff90",
                     }),
-                { margin: (k + 1) * 8 },
+                { margin: Math.abs(k) * 8 },
             )
         }
     }
@@ -239,7 +239,7 @@ class Antenna extends Part {
         parent: Enemy,
         private readonly side: number,
     ) {
-        super(game, parent, 350, Size.M, 130 + (side > 0 ? 30 : 0))
+        super(game, parent, 450, Size.M, 130 + (side > 0 ? 30 : 0))
     }
 
     protected place() {
@@ -253,12 +253,12 @@ class Antenna extends Part {
             .p(this.p.clone())
             .speed(2)
             .aim(this.game.player)
-            .duplicate(5)
+            .duplicate(7)
             .delayByIndex(4)
             .g((b) => Behavior.ease(b, "speed", 8, 30, Ease.In))
             .fire(this.game.bullets)
 
-        yield* Array(60)
+        yield* Array(50)
     }
 }
 
@@ -268,15 +268,15 @@ class Firefly extends Part {
         parent: Enemy,
         private readonly i: number,
     ) {
-        super(game, parent, 200, Size.S, 160)
+        super(game, parent, 250, Size.S, 160)
     }
 
     protected place() {
         return vec.arg(this.frame / 120 + (T * this.i) / 8).scale(160)
     }
 
-    // 拍から i * 6 フレーム遅れて光り、まわりに光を四つ放つ。光は60フレームかけて速さ1.8まで加速し、向きをゆらゆら変えながら漂う。
-    // 光は拍に合わせて明滅し、360フレームたつと30フレームかけて消える
+    // 拍から i * 6 フレーム遅れて光り、まわりに光を六つ放つ。光は60フレームかけて速さ2.2まで加速し、向きをゆらゆら変えながら漂う。
+    // 光は拍に合わせて明滅し、420フレームたつと30フレームかけて消える
     protected *attack() {
         yield* Hotaru.waitBeat(this.parent)
         yield* Array(this.i * 6)
@@ -289,15 +289,15 @@ class Firefly extends Part {
             .p(this.p.clone())
             .speed(0)
             .radian(this.random() * T)
-            .ex(4)
+            .ex(6)
             .forEach((b) => {
                 b.p = b.p.add(vec.arg(b.radian).scale(14))
             })
             .g(function* (b) {
-                yield* Hotaru.blink(b, this.parent, 360)
+                yield* Hotaru.blink(b, this.parent, 420)
                 yield* Behavior.fadeout(b, 30)
             })
-            .g((b) => Behavior.accel(b, 60, 1.8))
+            .g((b) => Behavior.accel(b, 60, 2.2))
             .g(function* (b) {
                 const base = b.radian
                 const phase = this.random() * T
@@ -318,7 +318,7 @@ class BigFirefly extends Part {
         private readonly x: number,
         private readonly i: number,
     ) {
-        super(game, parent, 280, Size.M, 60 + i * 20)
+        super(game, parent, 350, Size.M, 60 + i * 20)
     }
 
     protected place() {
@@ -356,7 +356,7 @@ class LittleFirefly extends Part {
         parent: Enemy,
         private readonly k: number,
     ) {
-        super(game, parent, 90, Size.S, 70 + k * 50)
+        super(game, parent, 110, Size.S, 70 + k * 50)
     }
 
     protected place() {
