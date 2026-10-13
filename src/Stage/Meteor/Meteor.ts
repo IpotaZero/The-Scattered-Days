@@ -2,7 +2,7 @@ import { Vec, vec } from "@ipota/vec"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
-import { Ease } from "@ipota/functions"
+import { Ease, GenUtils } from "@ipota/functions"
 import { T } from "../../T"
 
 // 流星道場の「流れ星」。
@@ -103,6 +103,31 @@ export namespace Meteor {
                 }
             })
             .fire(game.bullets)
+    }
+
+    // 流星群。画面を、向き angle に平行で spacing ずつ離れた筋に分け(筋の位置は spacing の範囲でずらす)、割合 density の筋にだけ流れ星を流す(fall)。
+    // 筋ごとに、6フレームの0倍から(筋の数-1)倍のどれかだけ遅らせて流す
+    export function* shower(e: Enemy, angle: number, spacing: number, density: number, config: Config) {
+        const center = vec(e.game.WIDTH / 2, e.game.HEIGHT / 2)
+        const normal = vec.arg(angle + T / 4)
+        const reach = (e.game.WIDTH + e.game.HEIGHT) / 2
+        const offset = e.random() * spacing
+
+        const lanes = Array.from({ length: Math.ceil((reach * 2) / spacing) }, (_, k) =>
+            center.add(normal.scale(-reach + offset + k * spacing)),
+        ).filter(() => e.random() < density)
+
+        yield* GenUtils.all(
+            Object.fromEntries(
+                lanes.map((through, k) => [
+                    `lane${k}`,
+                    (function* () {
+                        yield* Array(Math.floor(e.random() * lanes.length) * 6)
+                        yield* fall(e, through, angle, config)
+                    })(),
+                ]),
+            ),
+        )
     }
 
     // 彗星。e のいる所を太陽として、遠日点 aphelion まで行って戻る楕円の軌道を、240フレームかけて一周する。

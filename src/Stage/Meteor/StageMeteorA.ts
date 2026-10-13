@@ -58,34 +58,13 @@ class EnemyPupil extends Enemy {
 
     private *shower(wait: number, side: number) {
         yield* Array(wait)
-
-        const angle = T / 4 + side * (T / 14 + (this.random() * T) / 14)
-        const center = vec(this.game.WIDTH / 2, this.game.HEIGHT / 2)
-        const normal = vec.arg(angle + T / 4)
-        const reach = (this.game.WIDTH + this.game.HEIGHT) / 2
-        const offset = this.random() * 70
-
-        const lanes = Array.from({ length: Math.ceil((reach * 2) / 70) }, (_, k) =>
-            center.add(normal.scale(-reach + offset + k * 70)),
-        ).filter(() => this.random() < 0.7)
-
-        yield* GenUtils.all(
-            Object.fromEntries(
-                lanes.map((through, k) => [
-                    `lane${k}`,
-                    (function* (me: EnemyPupil) {
-                        yield* Array(Math.floor(me.random() * lanes.length) * 6)
-                        yield* Meteor.fall(me, through, angle, {
-                            preview: 50,
-                            speed: 10,
-                            tailInterval: 2,
-                            tailLife: 40,
-                            color: "#fff4b0",
-                        })
-                    })(this),
-                ]),
-            ),
-        )
+        yield* Meteor.shower(this, T / 4 + side * (T / 14 + (this.random() * T) / 14), 70, 0.7, {
+            preview: 50,
+            speed: 10,
+            tailInterval: 2,
+            tailLife: 40,
+            color: "#fff4b0",
+        })
     }
 }
 
