@@ -1,0 +1,2 @@
+function e(){return Math.random().toString(36).slice(2)}var t=class{generators=new Map;update(){for(let[e,t]of this.generators)t.next().done&&this.generators.delete(e)}add(t,{loop:n=1,margin:r=0,id:i=e()}={}){this.generators.set(i,(function*(){for(let e=0;e<r;e++)yield;for(;n--;)yield*t()})())}has(e){return this.generators.has(e)}remove(e){this.generators.delete(e)}clear(){this.generators.clear()}};export{e as n,t};
+//# sourceMappingURL=IteratorQueue.js.map
