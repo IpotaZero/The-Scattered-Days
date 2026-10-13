@@ -33,7 +33,7 @@ class EnemyBoss extends Enemy {
     readonly parts = [...this.shells, this.snakeHead, ...this.snakeBody]
 
     constructor(game: Game) {
-        super(game, 2400, Size.BOSS, { renderer: new EnemyRendererBoss() })
+        super(game, 3100, Size.BOSS, { renderer: new EnemyRendererBoss() })
         this.isInvincible = true
 
         this.scripts.add(() => this.enter())
@@ -169,7 +169,7 @@ class Shell extends Part {
         parent: Enemy,
         private readonly k: number,
     ) {
-        super(game, parent, 300, Size.M, 150)
+        super(game, parent, 400, Size.M, 150)
     }
 
     protected place() {
@@ -196,7 +196,7 @@ class Shell extends Part {
 
 class Head extends Part {
     constructor(game: Game, parent: Enemy) {
-        super(game, parent, 600, Size.L, 170)
+        super(game, parent, 800, Size.L, 170)
     }
 
     protected place() {
@@ -224,7 +224,7 @@ class SnakeBody extends Part {
         parent: Enemy,
         private readonly j: number,
     ) {
-        super(game, parent, 160, Size.S, 160)
+        super(game, parent, 200, Size.S, 160)
     }
 
     protected place() {
@@ -255,7 +255,7 @@ class Baby extends Part {
         parent: Enemy,
         private readonly side: number,
     ) {
-        super(game, parent, 300, Size.M, 60 + (side > 0 ? 50 : 0))
+        super(game, parent, 400, Size.M, 60 + (side > 0 ? 50 : 0))
     }
 
     protected place() {
@@ -283,7 +283,7 @@ class SmallShell extends Part {
         parent: Enemy,
         private readonly k: number,
     ) {
-        super(game, parent, 80, Size.S, 60 + k * 30)
+        super(game, parent, 100, Size.S, 60 + k * 30)
     }
 
     protected place() {

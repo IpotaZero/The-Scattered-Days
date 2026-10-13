@@ -32,7 +32,7 @@ class EnemyBoss extends Enemy {
     readonly parts = [...this.firstWings, ...this.tails]
 
     constructor(game: Game) {
-        super(game, 1400, Size.BOSS, { renderer: new EnemyRendererBoss() })
+        super(game, 1800, Size.BOSS, { renderer: new EnemyRendererBoss() })
         this.isInvincible = true
 
         this.scripts.add(() => this.enter())
@@ -131,7 +131,7 @@ class Wing extends Part {
         private readonly side: number,
         private readonly generation: number,
     ) {
-        super(game, parent, 500, Size.L, generation === 0 ? 150 + (side > 0 ? 40 : 0) : 60 + (side > 0 ? 40 : 0))
+        super(game, parent, 650, Size.L, generation === 0 ? 150 + (side > 0 ? 40 : 0) : 60 + (side > 0 ? 40 : 0))
     }
 
     protected place() {
@@ -204,7 +204,7 @@ class TailFeather extends Part {
         parent: Enemy,
         private readonly k: number,
     ) {
-        super(game, parent, 200, Size.S, 160)
+        super(game, parent, 260, Size.S, 160)
     }
 
     protected place() {
