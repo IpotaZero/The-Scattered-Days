@@ -1,4 +1,4 @@
-import { Vec, vec } from "@ipota/vec"
+import { vec } from "@ipota/vec"
 import { Ease } from "@ipota/functions"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
@@ -8,6 +8,7 @@ import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
 import { Curves } from "../../utils/Functions/Curves"
 import { T } from "../../T"
 import { Size } from "../Size"
+import { Meteor } from "./Meteor"
 
 export default class extends Stage {
     *G() {
@@ -53,71 +54,20 @@ class EnemySun extends Enemy {
             )
             const turn = k % 2 === 0 ? 1 : -1
 
-            yield* this.comet(aphelion, turn)
-            yield* this.comet(
+            yield* Meteor.comet(this, aphelion, turn, "#bfe8ff")
+            yield* Meteor.comet(
+                this,
                 vec(
                     Math.min(Math.max(this.p.x * 2 - aphelion.x, this.game.WIDTH * 0.08), this.game.WIDTH * 0.92),
                     aphelion.y,
                 ),
                 -turn,
+                "#bfe8ff",
             )
             yield* Array(40)
         }
 
         yield* Array(300)
-    }
-
-    private *comet(aphelion: Vec, turn: number) {
-        const sun = this.p.clone()
-
-        yield* remodel(this)
-            .format("big-ball")
-            .r(14)
-            .color("#bfe8ff")
-            .speed(0)
-            .unbounded()
-            .g(function* (me) {
-                const far = aphelion.sub(sun).magnitude()
-                const away = sun.sub(aphelion).normalize()
-                const a = (far + 70) / 2
-
-                const gm = (4 * Math.PI ** 2 * a ** 3) / 240 ** 2
-
-                me.p = sun.add(away.scale(70))
-                let v = vec.arg(away.radian() + (turn * T) / 4).scale(Math.sqrt(gm * (2 / 70 - 1 / a)))
-
-                yield* Behavior.appear(me, 10)
-
-                for (let f = 0; f < 240; f++) {
-                    for (let s = 0; s < 8; s++) {
-                        const d = sun.sub(me.p)
-                        const r = Math.max(d.magnitude(), 20)
-                        v = v.add(d.scale(gm / r ** 3 / 8))
-                        me.p = me.p.add(v.scale(1 / 8))
-                    }
-
-                    me.radian = v.radian()
-
-                    if (f % 2 === 0) {
-                        yield* remodel(this)
-                            .format("small-ball")
-                            .r(5)
-                            .color("#bfe8ff")
-                            .p(me.p.clone())
-                            .speed(0)
-                            .g(function* (tail) {
-                                yield* Array(36)
-                                yield* Behavior.fadeout(tail, 16)
-                            })
-                            .fire(this.game.bullets)
-                    }
-
-                    yield
-                }
-
-                yield* Behavior.fadeout(me, 15)
-            })
-            .fire(this.game.bullets)
     }
 }
 

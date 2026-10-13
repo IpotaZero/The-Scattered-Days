@@ -9,6 +9,7 @@ import { Curves } from "../../utils/Functions/Curves"
 import { T } from "../../T"
 import { Part } from "../Part"
 import { Size } from "../Size"
+import { Meteor } from "./Meteor"
 
 export default class extends Stage {
     *G() {
@@ -99,56 +100,10 @@ class Star extends Part {
         return vec.arg(angle).scale(175).add(this.offset.rotate(angle))
     }
 
-    // 次の星との間に、50フレームかけて薄い線(当たらない)が濃くなっていく。線は弾12発に砕け、北極星から遠ざかる向きへ飛び、
-    // 60フレームかけて速さ4まで加速する。どちらかの星が倒れると、線は消えて砕けない
+    // 次の星との間に星座の線を引き、線は弾12発に砕けて北極星から遠ざかる向きへ飛ぶ(Meteor.link)。160フレームおき
     protected *attack() {
         yield* Array(this.i * 10)
-
-        const next = this.next()
-
-        yield* remodel(this)
-            .appearance("laser")
-            .collision("rect")
-            .type("neutral")
-            .isScorable(false)
-            .color(this.i % 2 === 0 ? "#fff4b0" : "#b8e0ff")
-            .r(2)
-            .speed(0)
-            .alpha(0)
-            .g(function* (b) {
-                for (let f = 0; f < 50 && next.life > 0; f++) {
-                    b.p = this.p.clone()
-                    b.radian = next.p.sub(this.p).radian()
-                    b.length = next.p.sub(this.p).magnitude()
-                    b.alpha = (0.4 * f) / 50
-                    yield
-                }
-
-                b.life = 0
-            })
-            .fire(this.game.bullets)
-
-        yield* Array(50)
-
-        if (next.life > 0) {
-            const along = next.p.sub(this.p)
-            const away = this.p.add(along.scale(0.5)).sub(this.parent.p).radian()
-            const normal = along.radian() + T / 4
-
-            yield* remodel(this)
-                .format("small-ball")
-                .r(5)
-                .color(this.i % 2 === 0 ? "#fff4b0" : "#b8e0ff")
-                .speed(0.5)
-                .radian(Math.cos(normal - away) > 0 ? normal : normal + Math.PI)
-                .duplicate(12, (b, k) => {
-                    b.p = this.p.add(along.scale((k + 0.5) / 12))
-                    return b
-                })
-                .g((b) => Behavior.ease(b, "speed", 4, 60, Ease.In))
-                .fire(this.game.bullets)
-        }
-
+        yield* Meteor.link(this, this, this.next(), this.parent, 12, 4, this.i % 2 === 0 ? "#fff4b0" : "#b8e0ff")
         yield* Array(110 - this.i * 10)
     }
 }

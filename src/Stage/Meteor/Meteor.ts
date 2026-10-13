@@ -2,6 +2,8 @@ import { Vec, vec } from "@ipota/vec"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Ease } from "@ipota/functions"
+import { T } from "../../T"
 
 // 流星道場の「流れ星」。
 // 流れ星は、まず通り道に薄い予告線(当たり判定なし)が引かれ、そのあと画面の端から端まで一気に駆け抜ける。
@@ -101,5 +103,107 @@ export namespace Meteor {
                 }
             })
             .fire(game.bullets)
+    }
+
+    // 彗星。e のいる所を太陽として、遠日点 aphelion まで行って戻る楕円の軌道を、240フレームかけて一周する。
+    // 太陽から70の所(近日点)で生まれ、turn の向き(1か-1)に回る。2フレームごとに尾(止まった小さな弾)を落とし、尾は36フレーム残って16フレームで消える
+    export function* comet(e: Enemy, aphelion: Vec, turn: number, color: Color) {
+        const sun = e.p.clone()
+
+        yield* remodel(e)
+            .format("big-ball")
+            .r(14)
+            .color(color)
+            .speed(0)
+            .unbounded()
+            .g(function* (me) {
+                const far = aphelion.sub(sun).magnitude()
+                const away = sun.sub(aphelion).normalize()
+                const a = (far + 70) / 2
+
+                const gm = (4 * Math.PI ** 2 * a ** 3) / 240 ** 2
+
+                me.p = sun.add(away.scale(70))
+                let v = vec.arg(away.radian() + (turn * T) / 4).scale(Math.sqrt(gm * (2 / 70 - 1 / a)))
+
+                yield* Behavior.appear(me, 10)
+
+                for (let f = 0; f < 240; f++) {
+                    for (let s = 0; s < 8; s++) {
+                        const d = sun.sub(me.p)
+                        const r = Math.max(d.magnitude(), 20)
+                        v = v.add(d.scale(gm / r ** 3 / 8))
+                        me.p = me.p.add(v.scale(1 / 8))
+                    }
+
+                    me.radian = v.radian()
+
+                    if (f % 2 === 0) {
+                        yield* remodel(this)
+                            .format("small-ball")
+                            .r(5)
+                            .color(color)
+                            .p(me.p.clone())
+                            .speed(0)
+                            .g(function* (tail) {
+                                yield* Array(36)
+                                yield* Behavior.fadeout(tail, 16)
+                            })
+                            .fire(this.game.bullets)
+                    }
+
+                    yield
+                }
+
+                yield* Behavior.fadeout(me, 15)
+            })
+            .fire(e.game.bullets)
+    }
+
+    // 星座の線。a と b の間に、50フレームかけて薄い線(当たらない)が濃くなっていく。線は弾 count 発に砕け、center から遠ざかる向きへ飛び、
+    // 60フレームかけて速さ speed まで加速する。線を引いている間に a か b が倒れると、線は消えて砕けない。弾は e が撃つ
+    export function* link(e: Enemy, a: Enemy, b: Enemy, center: Enemy, count: number, speed: number, color: Color) {
+        yield* remodel(e)
+            .appearance("laser")
+            .collision("rect")
+            .type("neutral")
+            .isScorable(false)
+            .color(color)
+            .r(2)
+            .speed(0)
+            .alpha(0)
+            .g(function* (line) {
+                for (let f = 0; f < 50 && a.life > 0 && b.life > 0; f++) {
+                    line.p = a.p.clone()
+                    line.radian = b.p.sub(a.p).radian()
+                    line.length = b.p.sub(a.p).magnitude()
+                    line.alpha = (0.4 * f) / 50
+                    yield
+                }
+
+                line.life = 0
+            })
+            .fire(e.game.bullets)
+
+        yield* Array(50)
+
+        if (a.life <= 0 || b.life <= 0) return
+
+        const along = b.p.sub(a.p)
+        const away = a.p.add(along.scale(0.5)).sub(center.p).radian()
+        const normal = along.radian() + T / 4
+
+        yield* remodel(e)
+            .format("small-ball")
+            .r(5)
+            .color(color)
+            .speed(0.5)
+            .radian(Math.cos(normal - away) > 0 ? normal : normal + Math.PI)
+            .duplicate(count, (shard, k) => {
+                shard.p = a.p.add(along.scale((k + 0.5) / count))
+                return shard
+            })
+            .g((shard) => Behavior.ease(shard, "speed", speed, 60, Ease.In))
+            .fire(e.game.bullets)
     }
 }
