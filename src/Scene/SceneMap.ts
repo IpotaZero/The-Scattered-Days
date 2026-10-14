@@ -1,9 +1,11 @@
 import { App } from "../App"
 import { Dom } from "../Dom"
-import { EquipmentId } from "../Data/Equipment"
-import { LIFE_PRICE, playerData } from "../Data/PlayerData"
-import { mainEquipments, subEquipments, type SubEquipment } from "../Game/Equipment/PlayerEquipment"
-import { MapEdge, MapGraph, MapNode, MapNodeId } from "../Map/MapGraph"
+import { playerData } from "../Data/PlayerData"
+import { MapGraph, MapNodeId } from "../Map/MapGraph"
+import { MapEquipMenu } from "../Map/MapEquipMenu"
+import { MapHud } from "../Map/MapHud"
+import { MapNavigation, type Direction } from "../Map/MapNavigation"
+import { MapNodeViews } from "../Map/MapNodeViews"
 import { MapMinimap } from "../Map/MapMinimap"
 import { MapBee } from "../Map/MapBee"
 import { MapBadgeSeals } from "../Map/MapBadgeSeals"
@@ -11,33 +13,20 @@ import { MapCamera } from "../Map/MapCamera"
 import { MapProps } from "../Map/MapProps"
 import { InputCode } from "../utils/InputCode"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
-import { Menu, MenuOption, MenuOptionBox } from "../utils/Menu/Menu"
-import { MenuPreset } from "../utils/Menu/MenuPreset"
 import { Scene } from "../utils/Scene/Scene"
 import { SvgFile } from "../utils/SvgFile"
-
-type Direction = "up" | "down" | "left" | "right"
 
 // 全体図・型と残機の画面を閉じるときのフェードアウトにかける時間
 const OVERLAY_FADE_OUT_MS = 200
 
-const DIRECTION_VECTORS: Record<Direction, { x: number; y: number }> = {
-    up: { x: 0, y: -1 },
-    down: { x: 0, y: 1 },
-    left: { x: -1, y: 0 },
-    right: { x: 1, y: 0 },
-}
-
 export class SceneMap extends Scene {
     private selectedId: MapNodeId
-    private readonly nodeElements = new Map<MapNodeId, HTMLElement>()
+    private nodeViews!: MapNodeViews
     private camera!: MapCamera
     // 地図の上の自分(蜂)。選んだノードへ飛んでいく
     private bee!: MapBee
-    private livesEl!: HTMLElement
-    private livesRecoveryEl!: HTMLElement
-    private equipMenu?: Menu
-    private equipDescriptionEl?: HTMLElement
+    private hud!: MapHud
+    private equipMenu?: MapEquipMenu
     private minimap?: MapMinimap
 
     private constructor(private readonly graph: MapGraph) {
@@ -62,7 +51,7 @@ export class SceneMap extends Scene {
             <div class="map-grid map-backdrop map-camera-layer"></div>
             <div class="map-world map-camera-layer">
                 <svg class="map-edges">
-                    ${this.graph.edges.map((edge) => this.renderEdge(edge)).join("")}
+                    ${MapNodeViews.renderEdges(this.graph)}
                 </svg>
                 <div class="map-nodes"></div>
             </div>
@@ -93,30 +82,13 @@ export class SceneMap extends Scene {
         nodesEl.before(new MapProps(this.graph, playerData).el)
         // 最後の場所への関所の辺には、免状の印を辺より手前・ノードより奥に並べる
         nodesEl.before(new MapBadgeSeals(this.graph, playerData).el)
-        for (const node of this.graph.nodes) {
-            const el = document.createElement("div")
-            // ノードには文字の代わりに、その場所の景色の絵柄を描く。まだ行けない場所の絵柄は伏せておく(css)
-            el.className = `map-node scenery-${node.scenery.id}`
-            el.innerHTML = `<svg class="map-node-motif" viewBox="-12 -12 24 24">${node.scenery.motif.content}</svg>`
-            el.classList.toggle("locked", !this.graph.isUnlocked(node, playerData))
-            // クリア済みなら銀の星、ノーミスでクリア済みなら金の星を付ける
-            el.classList.toggle("cleared", playerData.isStageCleared(node.id))
-            el.classList.toggle("no-miss", playerData.isStageClearedWithoutMiss(node.id))
-            el.style.left = `${node.x}px`
-            el.style.top = `${node.y}px`
-            el.style.width = `${node.width}px`
-            el.style.height = `${node.height}px`
-            el.addEventListener("click", () => {
-                // スワイプ・ピンチの指を離した直後に発火するclickをタップ選択として扱わない
-                if (this.camera.dragged) return
-                this.handleNodeTap(node.id)
-            })
-
-            nodesEl.appendChild(el)
-            this.nodeElements.set(node.id, el)
-        }
+        this.nodeViews = new MapNodeViews(this.graph, nodesEl, (id) => {
+            // スワイプ・ピンチの指を離した直後に発火するclickをタップ選択として扱わない
+            if (this.camera.dragged) return
+            this.handleNodeTap(id)
+        })
         // 初期選択ノードにも見た目上selectedを反映しておく(そうしないと最初の移動まで枠が出ない)
-        this.nodeElements.get(this.selectedId)?.classList.add("selected")
+        this.nodeViews.select(this.selectedId)
 
         this.root.querySelector<HTMLElement>('[data-control="back-to-title"]')?.addEventListener("click", () => {
             if (this.equipMenu) return
@@ -134,11 +106,7 @@ export class SceneMap extends Scene {
         this.bee = new MapBee(this.graph.node(this.selectedId))
         this.root.querySelector(".map-world")!.appendChild(this.bee.el)
 
-        this.livesEl = this.root.querySelector<HTMLElement>(".map-lives-count")!
-        this.livesRecoveryEl = this.root.querySelector<HTMLElement>(".map-lives-recovery")!
-        this.updateLivesDisplay()
-
-        this.updateScoreDisplay()
+        this.hud = new MapHud(this.root.querySelector<HTMLElement>(".map-lives")!)
 
         // 初期カメラは選択中ノードを中央に据えた状態から始める(アニメーションなし)
         this.camera.lookAt(this.graph.node(this.selectedId), false)
@@ -148,15 +116,10 @@ export class SceneMap extends Scene {
 
     update(): void {
         playerData.recoverLivesOverTime()
-        this.updateLivesDisplay()
+        this.hud.updateLives()
 
         if (this.equipMenu) {
             this.equipMenu.update()
-
-            if (App.input.isPushed("action")) {
-                this.closeEquipMenu()
-            }
-
             return
         }
 
@@ -190,7 +153,7 @@ export class SceneMap extends Scene {
         const current = this.graph.node(this.selectedId)
         const neighbors = this.graph.neighbors(current, playerData)
 
-        const next = pickClosestInDirection(current, neighbors, DIRECTION_VECTORS[direction])
+        const next = MapNavigation.pickClosestInDirection(current, neighbors, direction)
         if (!next) return
 
         this.selectNode(next.id)
@@ -201,7 +164,7 @@ export class SceneMap extends Scene {
 
         this.selectedId = id
         playerData.moveOnMap(id)
-        this.nodeElements.forEach((el, nodeId) => el.classList.toggle("selected", nodeId === this.selectedId))
+        this.nodeViews.select(id)
         this.minimap?.select(id)
         this.bee.flyTo(this.graph.node(id))
         this.camera.lookAt(this.graph.node(id), true)
@@ -248,323 +211,19 @@ export class SceneMap extends Scene {
         App.sc.goto(async () => import("./SceneGame").then(({ SceneGame }) => new SceneGame(node)))
     }
 
-    // 所持している主装備・副装備の中から選び直せる、右側に開くモーダル
     private openEquipMenu() {
-        this.equipMenu = new Menu(
-            `<div id="equip-root"></div>
-             <div id="equip-main-options" class="fadeout"></div>
-             <div id="equip-sub-options" class="fadeout"></div>
-             <div id="equip-learn" class="fadeout"></div>
-             <div id="equip-life" class="fadeout"></div>
-             <div class="equip-description"></div>
-             <div class="texture-overlay"></div>`,
-            {
-                elementId: "equip-root",
-                title: "--:: 型 ::--",
-                options: () => this.buildEquipRootOptions(),
+        this.equipMenu = new MapEquipMenu(
+            this.root,
+            () => {
+                this.hud.updateScore()
+                this.hud.updateLives()
             },
-            App.input,
-            App.se.menu,
+            () => this.closeEquipMenu(),
         )
-
-        this.equipMenu.onBack = () => this.closeEquipMenu()
-        this.equipMenu.container.classList.add("map-equip-modal")
-        this.root.appendChild(this.equipMenu.container)
-
-        this.equipDescriptionEl = this.equipMenu.container.querySelector<HTMLElement>(".equip-description")!
     }
 
     private closeEquipMenu() {
-        if (this.equipMenu) Dom.fadeOutAndRemove(this.equipMenu.container, OVERLAY_FADE_OUT_MS)
+        this.equipMenu?.fadeOutAndRemove(OVERLAY_FADE_OUT_MS)
         this.equipMenu = undefined
-        this.equipDescriptionEl = undefined
     }
-
-    // ルート: 「針: ○○」「技: ○○」「残機: n / 8」の3行。針と技は選ぶとサブメニューが開き、残機は選ぶと回復するかを尋ねる
-    private buildEquipRootOptions(): MenuOption[][] {
-        return [
-            [
-                {
-                    type: "submenu",
-                    label: `針: ${mainEquipments[playerData.getLoadout().main]?.label ?? playerData.getLoadout().main}`,
-                    hides: [],
-                    onFocus: () => this.hideEquipDescription(),
-                    subMenu: () => this.buildMainEquipmentSubMenu(),
-                },
-            ],
-            [
-                {
-                    type: "submenu",
-                    label: `技: ${this.getSubEquipmentLabel()}`,
-                    // 技の一覧を開いている間はルートを隠す(並べると画面からはみ出す)
-                    hides: ["equip-root"],
-                    onFocus: () => this.hideEquipDescription(),
-                    subMenu: () => this.buildSubEquipmentSubMenu(),
-                },
-            ],
-            // [this.buildLifeOption()],
-            [
-                {
-                    type: "select",
-                    label: `戻る`,
-                    onFocus: () => this.hideEquipDescription(),
-                    onSelect: () => {
-                        this.equipMenu?.back(1)
-                    },
-                    sound: "cancel",
-                },
-            ],
-        ]
-    }
-
-    // 残機が満タンか花粉が足りなければ選べない。選ぶと回復するかを尋ね、「はい」で花粉を払って残機を1つ回復し、ルートへ戻る
-    private buildLifeOption(): MenuOption {
-        const price = `<span class="equip-price">花粉 ${LIFE_PRICE.toLocaleString()}</span>`
-
-        return {
-            type: "submenu",
-            label: `残機: ${playerData.getLives()} / ${playerData.getMaxLives()}　${price}`,
-            hides: ["equip-root"],
-            disabled: () => !playerData.canBuyLife(),
-            onFocus: () => this.showEquipDescription("花粉を払って残機を1つ回復する。"),
-            subMenu: () =>
-                MenuPreset.buildConfirmBox(
-                    this.equipMenu!,
-                    () => {
-                        // 確認を開いている間に実時間で満タンまで回復していたら、何も払わずに戻る
-                        if (playerData.canBuyLife()) playerData.buyLife()
-                        this.updateScoreDisplay()
-                        this.updateLivesDisplay()
-                        this.equipMenu?.back(1)
-                    },
-                    {
-                        title: "--:: 回復する? ::--",
-                        elementId: "equip-life",
-                        confirmLabel: `はい　${price}`,
-                    },
-                ),
-        }
-    }
-
-    private buildMainEquipmentSubMenu(): MenuOptionBox {
-        return {
-            elementId: "equip-main-options",
-            title: "--:: 針を選択 ::--",
-            options: () => this.buildMainEquipmentOptions(),
-            // 開いた瞬間、現在装備している主装備にカーソルを合わせる
-            initialCursor: () => {
-                const row = Object.keys(mainEquipments).indexOf(playerData.getLoadout().main)
-                return { row: Math.max(row, 0), col: 0 }
-            },
-        }
-    }
-
-    // 所持していない主装備もdisabledとして一覧に出す(存在を知らせつつ選べないようにする)
-    private buildMainEquipmentOptions(): MenuOption[][] {
-        return [
-            ...Object.keys(mainEquipments).map((id) => [
-                {
-                    type: "select" as const,
-                    label: mainEquipments[id]?.label ?? id,
-                    disabled: () => !playerData.getOwnedMainEquipmentIds().has(id),
-                    onFocus: () => this.showEquipDescription(mainEquipments[id]?.description ?? ""),
-                    onSelect: () => {
-                        playerData.setLoadout({ ...playerData.getLoadout(), main: id })
-                        this.equipMenu?.backToRoot()
-                    },
-                },
-            ]),
-            [
-                {
-                    type: "select",
-                    label: `戻る`,
-                    onFocus: () => this.hideEquipDescription(),
-                    onSelect: () => {
-                        this.equipMenu?.back(1)
-                    },
-                    sound: "cancel",
-                },
-            ],
-        ]
-    }
-
-    private buildSubEquipmentSubMenu(): MenuOptionBox {
-        return {
-            elementId: "equip-sub-options",
-            title: "--:: 技を選択 ::--",
-            options: () => this.buildSubEquipmentOptions(),
-            // 開いた瞬間、現在装備している副装備にカーソルを合わせる(「なし」は先頭行)
-            initialCursor: () => {
-                const subId = playerData.getLoadout().sub
-                const row = subId === null ? 0 : 1 + Object.keys(subEquipments).indexOf(subId)
-                return { row: Math.max(row, 0), col: 0 }
-            },
-        }
-    }
-
-    private buildSubEquipmentOptions(): MenuOption[][] {
-        return [
-            [
-                {
-                    type: "select",
-                    label: "なし",
-                    onFocus: () => this.showEquipDescription("技を使用しない。"),
-                    onSelect: () => {
-                        playerData.setLoadout({ ...playerData.getLoadout(), sub: null })
-                        this.equipMenu?.backToRoot()
-                    },
-                },
-            ],
-            ...Object.keys(subEquipments).map((id) => [this.buildSubEquipmentOption(id)]),
-            [
-                {
-                    type: "select",
-                    label: `戻る`,
-                    onFocus: () => this.hideEquipDescription(),
-                    onSelect: () => {
-                        this.equipMenu?.back(1)
-                    },
-                    sound: "cancel",
-                },
-            ],
-        ]
-    }
-
-    // 持っている技は選べばそのまま装備する。まだ持っていない技は、花粉を払って習得するかを尋ねる
-    private buildSubEquipmentOption(id: EquipmentId): MenuOption {
-        const equipment = subEquipments[id]!
-        const equip = () => {
-            playerData.setLoadout({ ...playerData.getLoadout(), sub: id })
-            this.equipMenu?.backToRoot()
-        }
-
-        if (playerData.getOwnedSubEquipmentIds().has(id)) {
-            return {
-                type: "select",
-                label: equipment.label,
-                onFocus: () => this.showEquipDescription(this.describeSub(equipment)),
-                onSelect: equip,
-            }
-        }
-
-        return {
-            type: "submenu",
-            label: `${equipment.label}　<span class="equip-price">花粉 ${equipment.price.toLocaleString()}</span>`,
-            hides: ["equip-sub-options"],
-            disabled: () => playerData.getTotalScore() < equipment.price,
-            onFocus: () => this.showEquipDescription(this.describeSub(equipment)),
-            subMenu: () => ({
-                ...MenuPreset.buildConfirmBox(
-                    this.equipMenu!,
-                    () => {
-                        playerData.learnSubEquipment(id, equipment.price)
-                        this.updateScoreDisplay()
-                        equip()
-                    },
-                    {
-                        title: "--:: 習得する? ::--",
-                        elementId: "equip-learn",
-                        // 題に値段まで入れるとスマホの幅からはみ出すので、払う量は「はい」の側に添える
-                        confirmLabel: `はい　<span class="equip-price">花粉 ${equipment.price.toLocaleString()}</span>`,
-                    },
-                ),
-            }),
-        }
-    }
-
-    // 装備選択肢にカーソルが乗っている間、その装備の説明を表示する
-    private showEquipDescription(description: string) {
-        if (!this.equipDescriptionEl) return
-        this.equipDescriptionEl.textContent = description
-        this.equipDescriptionEl.classList.toggle("visible", description.length > 0)
-    }
-
-    private hideEquipDescription() {
-        this.showEquipDescription("")
-    }
-
-    // ステージ中に技を使う操作の説明。スマホは2本指タップ、それ以外は技に割り当てたキー
-    private actionHint(): string {
-        return isSmartPhone
-            ? "ステージ中、2本の指で画面をタップすると技を使う。"
-            : `ステージ中、${InputCode.primaryLabel(App.settings.keyConfig.action)}キーを押すと技を使う。`
-    }
-
-    // 説明文。action入力で使う技には、使い方を続ける
-    private describeSub(equipment: SubEquipment): string {
-        return equipment.manual ? `${equipment.description}${this.actionHint()}` : equipment.description
-    }
-
-    private getSubEquipmentLabel(): string {
-        const subId = playerData.getLoadout().sub
-        if (!subId) return "なし"
-
-        // 削除した技を装備したままの保存データもある。ゲームでは技なしとして扱われる(SceneGame)ので、表示もそれに合わせる
-        return subEquipments[subId]?.label ?? "なし"
-    }
-
-    // 花粉はステージで稼ぐか技の習得で払ったときにだけ変わるので、毎フレームではなくその都度表示し直す
-    private updateScoreDisplay() {
-        this.root.querySelector<HTMLElement>(".map-score")!.textContent =
-            `花粉 ${playerData.getTotalScore().toLocaleString()}`
-    }
-
-    private updateLivesDisplay() {
-        this.livesEl.textContent = `残機 ${playerData.getLives()} / ${playerData.getMaxLives()}`
-
-        const remainingMs = playerData.getLifeRecoveryRemainingMs()
-        this.livesRecoveryEl.textContent = remainingMs > 0 ? `次の回復まで ${formatMmSs(remainingMs)}` : ""
-    }
-
-    private renderEdge(edge: MapEdge): string {
-        const { from, to } = edge
-        const locked = !this.graph.isPassable(edge, playerData)
-        const className = [locked ? "locked" : "", edge.condition.name ?? ""].join(" ")
-        const line = (offset: { x: number; y: number }) =>
-            `<line class="${className}" x1="${from.x + offset.x}" y1="${from.y + offset.y}" x2="${to.x + offset.x}" y2="${to.y + offset.y}" />`
-
-        // laserの条件は二重線で表す。辺に垂直な方向へ左右にずらした2本の線を引く
-        if (edge.condition.name === "laser") {
-            const len = Math.hypot(to.x - from.x, to.y - from.y) || 1
-            const gap = 3
-            const normal = { x: (-(to.y - from.y) / len) * gap, y: ((to.x - from.x) / len) * gap }
-            return line(normal) + line({ x: -normal.x, y: -normal.y })
-        }
-
-        return line({ x: 0, y: 0 })
-    }
-}
-
-// 現在ノードから見て、押した方向に最も近い(角度が小さい)隣接ノードを選ぶ
-function pickClosestInDirection(
-    current: MapNode,
-    neighbors: MapNode[],
-    direction: { x: number; y: number },
-): MapNode | undefined {
-    let best: MapNode | undefined
-    let bestDot = -Infinity
-
-    for (const neighbor of neighbors) {
-        const dx = neighbor.x - current.x
-        const dy = neighbor.y - current.y
-        const len = Math.hypot(dx, dy)
-        if (len === 0) continue
-
-        const dot = (dx / len) * direction.x + (dy / len) * direction.y
-        if (dot < 0.5) continue // 押した方向から60度を超えて外れているノードは候補にしない
-
-        if (dot > bestDot) {
-            bestDot = dot
-            best = neighbor
-        }
-    }
-
-    return best
-}
-
-function formatMmSs(ms: number): string {
-    const totalSeconds = Math.ceil(ms / 1000)
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = totalSeconds % 60
-    return `${minutes}:${String(seconds).padStart(2, "0")}`
 }
