@@ -106,7 +106,14 @@ export class SceneTitle extends Scene {
     }
 
     private async startBGM() {
-        if (App.bm.getCurrentBgmSrc() === App.SetList.title.src) return
+        // OPやEDなど、タイトルを出るときにフェードアウトして止めた曲が残っているので、続きから1秒かけて戻す
+        if (App.bm.getCurrentBgmSrc() === App.SetList.title.src) {
+            if (!App.bm.isPlaying()) await App.bm.fadeIn(1)
+            return
+        }
+
+        // マップなどで別の曲が鳴っていれば、1秒かけて消してからタイトルの曲を始める
+        if (App.bm.getCurrentBgmSrc() !== undefined && App.bm.isPlaying()) await App.bm.fadeOut(1)
 
         await Promise.all([App.bm.load(App.SetList.title), Awaits.sleep(1000)])
         await App.bm.play()
