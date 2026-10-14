@@ -27,7 +27,7 @@ const loopTime = 680
 
 class EnemyAim extends Enemy {
     constructor(game: Game, parent: Enemy, radian: number) {
-        super(game, 1000, Size.S)
+        super(game, 600, Size.S)
         this.setParent(parent, () => vec.arg(radian + this.frame / 300).scale(parent.r + this.r))
         this.scripts.add(() => this.attack(), { loop: Infinity, margin: 120 })
     }
@@ -105,7 +105,7 @@ class EnemyCore extends Enemy {
     private readonly path = Curves.lissajous(this.game.WIDTH * 0.2, this.game.HEIGHT * 0.3, 3, 3)
 
     constructor(game: Game) {
-        super(game, 1800, Size.MASTER, { renderer: new EnemyRendererCore() })
+        super(game, 1200, Size.MASTER, { renderer: new EnemyRendererCore() })
         this.scripts.add(() => this.enter())
     }
 
