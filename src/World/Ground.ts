@@ -1,5 +1,6 @@
 import { T } from "../T"
 import { seededRandom } from "../utils/Functions/seededRandom"
+import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 
 // 戦闘画面のキャンバスに敷く地面の模様。虫の目の高さから見下ろした地面を、細い線だけで描く。
 // 模様は縦にくり返しながらゆっくり下へ流れ、自機が前へ飛び続けているように見せる。
@@ -26,10 +27,15 @@ export abstract class Ground {
         ctx.lineCap = "round"
         ctx.lineJoin = "round"
 
+        // スマホでは同じ線を3回重ねて描く。太さは変わらず、濃さがおよそ2.5倍になる
         const offset = (frame * this.speed) % this.tileHeight
         for (let y = offset - this.tileHeight; y < height; y += this.tileHeight) {
             ctx.translate(0, y)
             ctx.stroke(this.path)
+            if (isSmartPhone) {
+                ctx.stroke(this.path)
+                ctx.stroke(this.path)
+            }
             ctx.translate(0, -y)
         }
 
