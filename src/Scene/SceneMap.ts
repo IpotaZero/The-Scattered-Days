@@ -21,7 +21,7 @@ import type { Scenery } from "../World/Scenery"
 const OVERLAY_FADE_OUT_MS = 200
 
 // 別の景色の塊へ入ったときの、曲のクロスフェードにかける秒数
-const AREA_BGM_CROSSFADE_SECONDS = 3
+const AREA_BGM_CROSSFADE_SECONDS = 1
 
 export class SceneMap extends Scene {
     private selectedId: MapNodeId

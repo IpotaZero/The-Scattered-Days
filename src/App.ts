@@ -62,8 +62,26 @@ export namespace App {
         const base = `assets/bgm`
         export const title = { src: `${base}/title.mp3`, trackVolume: 0.5 }
 
-        // 景色のid(Scenery.id)ごとの曲。載せていない景色では、いま流れている曲がそのまま流れ続ける
-        export const sceneries: Readonly<Record<string, BgmManager.LoadConfig>> = {}
+        // 景色のid(Scenery.id)ごとの曲。載せていない景色では、いま流れている曲がそのまま流れ続ける。
+        // 地図を縦に割って同じ枠に入る景色は同じ曲にしてあり、枠の中を行き来しても曲は切り替わらない
+        export const sceneries: Readonly<Record<string, BgmManager.LoadConfig>> = {
+            // 地図の左端
+            hive: { src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 0.5 },
+            frost: { src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 0.5 },
+            // 疾風道場と網掛道場
+            gale: { src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 0.5 },
+            web: { src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 0.5 },
+            // 霧隠・砂塵・陽炎・鉄壁の道場
+            mist: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
+            sand: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
+            haze: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
+            iron: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
+            // 流星道場と月影道場
+            meteor: { src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 0.5 },
+            moon: { src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 0.5 },
+            // 四天王とチャンピオン
+            nest: { src: `${base}/chopin-waltz-op69-1.ogg`, trackVolume: 0.5 },
+        }
 
         export function ofScenery(scenery: Scenery): BgmManager.LoadConfig | undefined {
             return sceneries[scenery.id]
