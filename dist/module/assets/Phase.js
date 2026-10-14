@@ -1,2 +1,0 @@
-import{t as e}from"./T.js";import{r as t}from"./Remodel.js";var n;(function(n){function r(n,r,i,a){let o=Math.cos(Math.PI*a);return t(n).format(`diamond`).color(r.color).p(n.p.clone()).speed(r.speed).radian(i+e/r.count/2).ex(r.count).forEach(e=>{Math.cos(e.radian-i)<=o&&(e.type=`neutral`,e.alpha=.18,e.isScorable=!1)})}n.ring=r})(n||={});export{n as Phase};
-//# sourceMappingURL=Phase.js.map

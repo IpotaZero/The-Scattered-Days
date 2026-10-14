@@ -15,9 +15,13 @@ import { InputCode } from "../utils/InputCode"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import { Scene } from "../utils/Scene/Scene"
 import { SvgFile } from "../utils/SvgFile"
+import type { Scenery } from "../World/Scenery"
 
 // 全体図・型と残機の画面を閉じるときのフェードアウトにかける時間
 const OVERLAY_FADE_OUT_MS = 200
+
+// 別の景色の塊へ入ったときの、曲のクロスフェードにかける秒数
+const AREA_BGM_CROSSFADE_SECONDS = 3
 
 export class SceneMap extends Scene {
     private selectedId: MapNodeId
@@ -28,6 +32,8 @@ export class SceneMap extends Scene {
     private hud!: MapHud
     private equipMenu?: MapEquipMenu
     private minimap?: MapMinimap
+    // 曲を切り替え済みの景色。選んだノードの景色がこれと違ったら、その景色の曲へクロスフェードする
+    private bgmScenery?: Scenery
 
     private constructor(private readonly graph: MapGraph) {
         super()
@@ -110,6 +116,8 @@ export class SceneMap extends Scene {
 
         // 初期カメラは選択中ノードを中央に据えた状態から始める(アニメーションなし)
         this.camera.lookAt(this.graph.node(this.selectedId), false)
+
+        this.crossfadeToSceneryBgm()
     }
 
     protected async onEnd(): Promise<void> {}
@@ -168,6 +176,23 @@ export class SceneMap extends Scene {
         this.minimap?.select(id)
         this.bee.flyTo(this.graph.node(id))
         this.camera.lookAt(this.graph.node(id), true)
+        this.crossfadeToSceneryBgm()
+    }
+
+    // 選んでいるノードの景色の曲へクロスフェードする。曲が載っていない景色や読み込めなかった曲では、いまの曲のまま
+    private async crossfadeToSceneryBgm() {
+        const scenery = this.graph.node(this.selectedId).scenery
+        if (scenery === this.bgmScenery) return
+        this.bgmScenery = scenery
+
+        const bgm = App.SetList.ofScenery(scenery)
+        if (!bgm) return
+
+        try {
+            await App.bm.crossfadeTo(bgm, AREA_BGM_CROSSFADE_SECONDS)
+        } catch (error) {
+            console.warn(`曲を読み込めません: ${bgm.src}`, error)
+        }
     }
 
     // 全ノードを一画面に収めた全体図の開閉。開いている間も方向キーでの選択移動はそのまま使える

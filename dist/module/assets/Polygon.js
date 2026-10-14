@@ -1,2 +1,0 @@
-import{n as e}from"./T.js";var t;(function(t){function n(t,n){switch(t){case`wedge`:return[e(n,0),e(-n*.9,n*.4),e(-n*.9,-n*.4)];case`diamond`:return[e(n,0),e(0,n*.4),e(-n,0),e(0,-n*.4)];case`triangle`:return[e(n,0),e(-n/2,n*Math.sqrt(3)/2),e(-n/2,-n*Math.sqrt(3)/2)]}}t.vertices=n})(t||={});export{t};
-//# sourceMappingURL=Polygon.js.map

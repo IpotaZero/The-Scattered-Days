@@ -1,6 +1,7 @@
 import { BgmManager } from "@ipota/bgm-manager"
 import { Sound } from "./utils/Sound"
 import { Dom } from "./Dom"
+import type { Scenery } from "./World/Scenery"
 import { SceneChanger } from "./utils/Scene/SceneChanger"
 import { Looper } from "@ipota/my-utils"
 import { FrameLimiter } from "./utils/FrameLimiter"
@@ -15,9 +16,9 @@ export namespace App {
     const master = context.createGain()
     master.connect(context.destination)
 
-    const base = `assets/se`
-
     export namespace se {
+        const base = `assets/se`
+
         export const graze = set(`${base}/graze.wav`, 0.1)
         export const hit = set(`${base}/player_hit.mp3`)
         export const dash = set(`${base}/dash.mp3`)
@@ -54,6 +55,18 @@ export namespace App {
             playCancel: () => cancel.play(),
             playCursor: () => cursor.play(),
             playDisable: () => disabled.play(),
+        }
+    }
+
+    export namespace SetList {
+        const base = `assets/bgm`
+        export const title = { src: `${base}/title.mp3`, trackVolume: 0.5 }
+
+        // 景色のid(Scenery.id)ごとの曲。載せていない景色では、いま流れている曲がそのまま流れ続ける
+        export const sceneries: Readonly<Record<string, BgmManager.LoadConfig>> = {}
+
+        export function ofScenery(scenery: Scenery): BgmManager.LoadConfig | undefined {
+            return sceneries[scenery.id]
         }
     }
 

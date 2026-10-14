@@ -34,7 +34,7 @@ export class SceneCredits extends SceneCutscene {
     }
 
     private async startBgm() {
-        await Promise.all([App.bm.load({ src: "assets/bgm/title.mp3", trackVolume: 0.5 }), Awaits.sleep(2000)])
+        await Promise.all([App.bm.load(App.SetList.title), Awaits.sleep(2000)])
         await App.bm.play()
     }
 
