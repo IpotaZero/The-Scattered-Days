@@ -31,6 +31,7 @@ export const needle: SubEquipment = {
     label: "大針",
     description: "真上へ大きな針を飛ばす。最初に触れた敵ひとつに大きな傷を与える。",
     price: 5000,
+    manual: true,
     *action(player) {
         while (true) {
             if (player.game.input.isPushed("action")) {

@@ -2,7 +2,7 @@ import { App } from "../App"
 import { Dom } from "../Dom"
 import { EquipmentId } from "../Data/Equipment"
 import { LIFE_PRICE, playerData } from "../Data/PlayerData"
-import { mainEquipments, subEquipments } from "../Game/Equipment/PlayerEquipment"
+import { mainEquipments, subEquipments, type SubEquipment } from "../Game/Equipment/PlayerEquipment"
 import { MapEdge, MapGraph, MapNode, MapNodeId } from "../Map/MapGraph"
 import { MapMinimap } from "../Map/MapMinimap"
 import { MapBee } from "../Map/MapBee"
@@ -442,7 +442,7 @@ export class SceneMap extends Scene {
             return {
                 type: "select",
                 label: equipment.label,
-                onFocus: () => this.showEquipDescription(equipment.description),
+                onFocus: () => this.showEquipDescription(this.describeSub(equipment)),
                 onSelect: equip,
             }
         }
@@ -452,7 +452,7 @@ export class SceneMap extends Scene {
             label: `${equipment.label}　<span class="equip-price">花粉 ${equipment.price.toLocaleString()}</span>`,
             hides: ["equip-sub-options"],
             disabled: () => playerData.getTotalScore() < equipment.price,
-            onFocus: () => this.showEquipDescription(equipment.description),
+            onFocus: () => this.showEquipDescription(this.describeSub(equipment)),
             subMenu: () => ({
                 ...MenuPreset.buildConfirmBox(
                     this.equipMenu!,
@@ -481,6 +481,18 @@ export class SceneMap extends Scene {
 
     private hideEquipDescription() {
         this.showEquipDescription("")
+    }
+
+    // ステージ中に技を使う操作の説明。スマホは2本指タップ、それ以外は技に割り当てたキー
+    private actionHint(): string {
+        return isSmartPhone
+            ? "ステージ中、2本の指で画面をタップすると技を使う。"
+            : `ステージ中、${InputCode.primaryLabel(App.settings.keyConfig.action)}キーを押すと技を使う。`
+    }
+
+    // 説明文。action入力で使う技には、使い方を続ける
+    private describeSub(equipment: SubEquipment): string {
+        return equipment.manual ? `${equipment.description}${this.actionHint()}` : equipment.description
     }
 
     private getSubEquipmentLabel(): string {

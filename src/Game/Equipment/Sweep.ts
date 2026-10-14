@@ -15,6 +15,7 @@ export const sweep: SubEquipment = {
     label: "一掃",
     description: "自機から波を広げ、画面の敵弾をすべて花粉に変える。",
     price: 10000,
+    manual: true,
     *action(player) {
         while (true) {
             if (player.game.input.isPushed("action")) {

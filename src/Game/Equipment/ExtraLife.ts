@@ -7,6 +7,7 @@ export const extraLife: SubEquipment = {
     label: "追加残機",
     description: "追加の残機が得られる。",
     price: 3000,
+    manual: false,
     *action(player) {
         player.extraLives = 1
     },

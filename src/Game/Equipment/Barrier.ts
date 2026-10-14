@@ -18,6 +18,7 @@ export const barrier: SubEquipment = {
     label: "障壁",
     description: "その場に結界を張る。中に入った敵弾を花粉に変える。",
     price: 1000,
+    manual: true,
     *action(player) {
         while (true) {
             if (player.game.input.isPushed("action")) {

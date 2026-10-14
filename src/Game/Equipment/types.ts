@@ -13,5 +13,7 @@ export type SubEquipment = {
     readonly description: string
     // 習得に払う花粉。初めから持っている技は0
     readonly price: number
+    // action入力で使う技ならtrue。ステージの始めに効くだけの技はfalse
+    readonly manual: boolean
     action(player: Player): Generator<void, void, void>
 }
