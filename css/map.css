@@ -474,6 +474,23 @@
         justify-content: start;
     }
 
+    /* 曲が切り替わったときの曲名。残機の書き付けと同じ縦線を添えて右上に置く(出し入れは src/Scene/SceneMap.ts) */
+    .map-bgm-title {
+        position: absolute;
+        top: 1em;
+        right: 5%;
+
+        padding-right: 0.5em;
+        border-right: 2px solid var(--sage);
+
+        font-family: "Courier New", monospace;
+        font-size: 1em;
+        letter-spacing: 0.1em;
+        white-space: nowrap;
+        opacity: 0.8;
+        pointer-events: none;
+    }
+
     /* 初雪までの日付は、帳面の日付のように右上へ縦書きで添える。一日進むたびに書き換わる */
     .map-day {
         position: absolute;

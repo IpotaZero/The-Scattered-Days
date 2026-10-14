@@ -36,6 +36,8 @@ function* barrierField(player: Player): Generator<void, void, void> {
     const center = player.p.clone()
     const maxRadius = player.GRAZE_R * 半径倍率
 
+    player.game.se.bulletSuzu.play()
+
     for (let i = 1; i <= 持続フレーム; i++) {
         const radius = maxRadius * Ease.Out(Math.min(1, i / 展開フレーム))
         const remaining = 持続フレーム - i

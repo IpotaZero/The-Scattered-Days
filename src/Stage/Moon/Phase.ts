@@ -28,7 +28,6 @@ export namespace Phase {
                 if (Math.cos(b.radian - light) <= threshold) {
                     b.type = "neutral"
                     b.alpha = SHADOW_ALPHA
-                    b.isScorable = false
                 }
             })
     }

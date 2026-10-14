@@ -28,8 +28,7 @@ export namespace Charge {
 
         yield* Array(30)
 
-        // todo: 後で何か差し替える
-        e.game.se.charge.play()
+        e.game.se.charged.play()
         yield* burst(e, color)
     }
 

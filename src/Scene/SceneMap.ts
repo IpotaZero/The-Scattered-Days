@@ -23,6 +23,9 @@ const OVERLAY_FADE_OUT_MS = 200
 // 別の景色の塊へ入ったときの、曲のクロスフェードにかける秒数
 const AREA_BGM_CROSSFADE_SECONDS = 1
 
+// 曲が切り替わったときに、右上へ曲名を出しておく時間(ms)
+const BGM_TITLE_MS = 5000
+
 export class SceneMap extends Scene {
     private selectedId: MapNodeId
     private nodeViews!: MapNodeViews
@@ -34,6 +37,10 @@ export class SceneMap extends Scene {
     private minimap?: MapMinimap
     // 曲を切り替え済みの景色。選んだノードの景色がこれと違ったら、その景色の曲へクロスフェードする
     private bgmScenery?: Scenery
+    // 最後に鳴らすよう頼んだ曲。クロスフェードの途中でも、頼んだ曲を指す
+    private requestedBgmSrc?: string
+    // 右上に出ている曲名
+    private bgmTitleEl?: HTMLElement
 
     private constructor(private readonly graph: MapGraph) {
         super()
@@ -188,11 +195,33 @@ export class SceneMap extends Scene {
         const bgm = App.SetList.ofScenery(scenery)
         if (!bgm) return
 
+        // 切り替えの途中でさらに別の景色へ移っても、最後に選んだ景色の曲名が出る。
+        // 鳴っている曲との比較だと、A→B→Aと素早く移ったときにAの曲名が出ず、Bの曲名が残ってしまう
+        const from = this.requestedBgmSrc ?? App.bm.getCurrentBgmSrc()
+        this.requestedBgmSrc = bgm.src
+        if (bgm.src !== from) this.showBgmTitle(bgm.title)
+
         try {
             await App.bm.crossfadeTo(bgm, AREA_BGM_CROSSFADE_SECONDS)
         } catch (error) {
             console.warn(`曲を読み込めません: ${bgm.src}`, error)
         }
+    }
+
+    // 曲名を右上へ出し、BGM_TITLE_MSかけて薄く現れて消える。出ている曲名があれば取り替える
+    private showBgmTitle(title: string) {
+        this.bgmTitleEl?.remove()
+
+        const el = document.createElement("div")
+        el.className = "map-bgm-title"
+        el.textContent = title
+        this.root.appendChild(el)
+        this.bgmTitleEl = el
+
+        el.animate([{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], {
+            duration: BGM_TITLE_MS,
+            easing: "ease-out",
+        }).addEventListener("finish", () => el.remove())
     }
 
     // 全ノードを一画面に収めた全体図の開閉。開いている間も方向キーでの選択移動はそのまま使える

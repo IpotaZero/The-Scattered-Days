@@ -14,6 +14,7 @@ import { TouchControls } from "./TouchControls"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import { Dom } from "../Dom"
 import { Scenery } from "../World/Scenery"
+import type { App } from "../App"
 import { TriangleParticle } from "./Actor/TriangleParticle"
 
 const FPS = 60
@@ -27,11 +28,10 @@ export type GameInput = DigitalInput.Reader<GameAction> &
         getTouchMoveVector?(): Vec | undefined
     }
 
-// ゲーム中に鳴らすSE。App.seをそのまま渡せるよう、play()できることだけを要求する
-export type GameSE = Record<
-    "graze" | "hit" | "dash" | "u" | "crush" | "bossDefeatPre" | "bossDefeat" | "charge" | "gameover" | "bulletSuzu",
-    { play(): void }
->
+// ゲーム中に鳴らすSE。App.seのうちplay()できるもの全部。App.seにSEを足せば、ここにも自動で増える
+export type GameSE = {
+    [Name in keyof typeof App.se as (typeof App.se)[Name] extends { play(): void } ? Name : never]: { play(): void }
+}
 
 export type GameConfig = {
     createStage: (game: Game) => Promise<Stage>

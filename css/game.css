@@ -36,7 +36,10 @@
 
     .menu {
         #root {
+            width: 10em;
+            max-width: 100%;
             font-size: 1.6em;
+            padding: 0 1em;
             
             border-radius: 0.1em;
             
@@ -47,7 +50,7 @@
             .menu-title {
                 border-bottom: 4px #fff8 double;
                 border-top: 4px #fff8 double;
-
+                width: 100%;
                 padding: 0.3em 0.8em;
             }
 
@@ -55,11 +58,11 @@
                 background-color: #1118;
                 border: white 1px solid;
                 padding: 0.125em 1em;
-                width: 3.6em;
+                width: 3.8em;
                 text-align: center;
 
                 span{
-                    font-size: 0.8em;
+                    font-size: 0.7em;
                 }
             }
         }

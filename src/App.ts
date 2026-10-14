@@ -29,6 +29,9 @@ export namespace App {
         export const bossDefeat = set(`${base}/boss_defeat.mp3`)
         export const charge = set(`${base}/se_charge.mp3`)
 
+        export const charged = set(`${base}/charged.mp3`)
+        export const bomb = set(`${base}/bomb.mp3`, 0.8)
+
         export const start = set(`${base}/mushi.mp3`)
         export const uhm = set(`${base}/uhm.mp3`)
         export const unlock = set(`${base}/ドアを開ける2.mp3`)
@@ -60,30 +63,38 @@ export namespace App {
 
     export namespace SetList {
         const base = `assets/bgm`
-        export const title = { src: `${base}/title.mp3`, trackVolume: 0.5 }
+
+        // 地図の上で鳴らす曲。titleは切り替わったときに右上へ出す曲名
+        export type Track = BgmManager.LoadConfig & { title: string }
+
+        export const title = { src: `${base}/title.mp3`, trackVolume: 0.8 }
 
         // 景色のid(Scenery.id)ごとの曲。載せていない景色では、いま流れている曲がそのまま流れ続ける。
         // 地図を縦に割って同じ枠に入る景色は同じ曲にしてあり、枠の中を行き来しても曲は切り替わらない
-        export const sceneries: Readonly<Record<string, BgmManager.LoadConfig>> = {
+        export const sceneries: Readonly<Record<string, Track>> = {
             // 地図の左端
-            hive: { src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 0.5 },
-            frost: { src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 0.5 },
+            hive: { title: "Chopin: Berceuse Op. 57", src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 1 },
+            frost: { title: "Chopin: Berceuse Op. 57", src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 1 },
             // 疾風道場と網掛道場
-            gale: { src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 0.5 },
-            web: { src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 0.5 },
+            gale: { title: "Chopin: Waltz Op. 64 No. 3", src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 1 },
+            web: { title: "Chopin: Waltz Op. 64 No. 3", src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 1 },
             // 霧隠・砂塵・陽炎・鉄壁の道場
-            mist: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
-            sand: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
-            haze: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
-            iron: { src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 0.5 },
+            mist: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
+            sand: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
+            haze: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
+            iron: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
             // 流星道場と月影道場
-            meteor: { src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 0.5 },
-            moon: { src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 0.5 },
+            meteor: { title: "Chopin: Waltz Op. 64 No. 2", src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 1 },
+            moon: { title: "Chopin: Waltz Op. 64 No. 2", src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 1 },
             // 四天王とチャンピオン
-            nest: { src: `${base}/chopin-waltz-op69-1.ogg`, trackVolume: 0.5 },
+            nest: {
+                title: "Chopin: Waltz Op. 69 No. 1 “Farewell”",
+                src: `${base}/chopin-waltz-op69-1.ogg`,
+                trackVolume: 1,
+            },
         }
 
-        export function ofScenery(scenery: Scenery): BgmManager.LoadConfig | undefined {
+        export function ofScenery(scenery: Scenery): Track | undefined {
             return sceneries[scenery.id]
         }
     }
