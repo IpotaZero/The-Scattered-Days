@@ -1,8 +1,8 @@
 import { Ease } from "@ipota/functions"
-import { Ctx } from "../../utils/Functions/Ctx"
-import type { Player } from "../Actor/Player"
-import { actionCooldown } from "./ActionCooldown"
-import type { SubEquipment } from "./types"
+import { Ctx } from "../../../utils/Functions/Ctx"
+import type { Player } from "../../Actor/Player"
+import { actionCooldown } from "../ActionCooldown"
+import type { SubEquipment } from "../types"
 
 // 障壁は「空間を作る」装備。
 // 展開した場所に固定された結界を長く張り、入ってくる敵弾をすべてスコアに変える。
