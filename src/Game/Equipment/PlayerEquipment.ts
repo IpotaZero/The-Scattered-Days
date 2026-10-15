@@ -1,10 +1,10 @@
 import { EquipmentId } from "../../Data/Equipment"
-import { barrier } from "./Barrier"
-import { dash } from "./Dash"
-import { extraLife } from "./ExtraLife"
-import { laser } from "./Laser"
-import { needle } from "./Needle"
-import { standard } from "./Standard"
+import { barrier } from "./Sub/Barrier"
+import { dash } from "./Sub/Dash"
+import { extraLife } from "./Sub/ExtraLife"
+import { laser } from "./Main/Laser"
+import { needle } from "./Sub/Needle"
+import { standard } from "./Main/Standard"
 import { sweep } from "./Sweep"
 import type { MainEquipment, SubEquipment } from "./types"
 
@@ -18,7 +18,7 @@ export const mainEquipments: Record<EquipmentId, MainEquipment> = {
 export const subEquipments: Record<EquipmentId, SubEquipment> = {
     dash,
     barrier,
-    extraLife,
     needle,
+    extraLife,
     sweep,
 }
