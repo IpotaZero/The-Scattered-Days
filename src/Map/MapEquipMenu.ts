@@ -189,7 +189,10 @@ export class MapEquipMenu {
         const equipment = subEquipments[id]!
         const equip = () => {
             playerData.setLoadout({ ...playerData.getLoadout(), sub: id })
+<<<<<<< HEAD
             this.menu.back(2)
+=======
+>>>>>>> b0a9947355ef503b2c2b50ec900c64b2552472df
         }
 
         if (playerData.getOwnedSubEquipmentIds().has(id)) {
@@ -197,7 +200,10 @@ export class MapEquipMenu {
                 type: "select",
                 label: equipment.label,
                 onFocus: () => this.showDescription(this.describeSub(equipment)),
-                onSelect: equip,
+                onSelect: () => {
+                    equip()
+                    this.menu.back(1)
+                },
             }
         }
 
@@ -214,9 +220,10 @@ export class MapEquipMenu {
                         playerData.learnSubEquipment(id, equipment.price)
                         this.pollenChanged()
                         equip()
+                        this.menu.back(1)
                     },
                     {
-                        title: "--:: 習得する? ::--",
+                        title: "--:: 習得して装備する? ::--",
                         elementId: "equip-learn",
                         // 題に値段まで入れるとスマホの幅からはみ出すので、払う量は「はい」の側に添える
                         confirmLabel: `はい　<span class="equip-price">花粉 ${equipment.price.toLocaleString()}</span>`,
