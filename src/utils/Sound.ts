@@ -27,7 +27,7 @@ export class Sound {
     }
 
     play() {
-        if (!this.buffer) return
+        if (!this.buffer || document.hidden) return
 
         const now = performance.now()
         if (now - this.lastPlayedAt < MIN_INTERVAL_MS) return
