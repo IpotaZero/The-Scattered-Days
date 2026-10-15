@@ -2,6 +2,8 @@ import { vec } from "@ipota/vec"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Motion } from "../../Game/Actor/Motion"
+import { Shape } from "../../Game/Actor/Shape"
 import { Stage } from "../Stage"
 import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
 import { Curves } from "../../utils/Functions/Curves"
@@ -92,13 +94,12 @@ class Rifleman extends Part {
         const aim = this.game.player.p.sub(start).radian()
 
         yield* remodel(this)
-            .appearance("laser")
-            .collision("rect")
+            .shape(Shape.laser)
             .type("neutral")
             .isScorable(false)
             .color("#ffe0a0")
             .r(2)
-            .speed(0)
+            .motion(Motion.still)
             .p(start)
             .radian(aim)
             .length(this.game.WIDTH + this.game.HEIGHT)

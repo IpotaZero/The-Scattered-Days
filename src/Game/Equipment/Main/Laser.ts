@@ -4,6 +4,8 @@ import { GenUtils } from "@ipota/functions"
 import { Behavior, remodel } from "../../Remodel"
 import type { Player } from "../../Actor/Player"
 import type { MainEquipment } from "../types"
+import { Motion } from "../../Actor/Motion"
+import { Shape } from "../../Actor/Shape"
 
 const ビーム本数 = 2
 const 通常時間隔 = 180
@@ -31,9 +33,8 @@ export const laser: MainEquipment = {
         yield* remodel(player)
             .p(player.p.clone())
             .length(ビーム長さ)
-            .speed(0)
-            .appearance("beam")
-            .collision("rect")
+            .motion(Motion.still)
+            .shape(Shape.beam)
             .isScorable(false)
             .r(通常時太さ)
             .damage(通常時威力)
@@ -92,7 +93,7 @@ function* 球弾を撃ち続ける(player: Player): Generator<void, void, void> 
             .type("friend")
             .color("white")
             .alpha(0.7)
-            .appearance("ball")
+            .shape(Shape.ball)
             .r(球弾半径)
             .damage(球弾威力)
             .speed(球弾速度)
@@ -118,7 +119,7 @@ function* リング弾を撃ち続ける(player: Player): Generator<void, void, 
             .type("friend")
             .color("white")
             .alpha(0.4)
-            .appearance("wedge")
+            .shape(Shape.wedge)
             .r(16)
             .damage(リング弾威力)
             .speed(0)

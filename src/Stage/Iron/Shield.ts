@@ -30,7 +30,7 @@ export namespace Shield {
     export function* block(me: Bullet) {
         while (me.life > 0) {
             for (const b of me.game.bullets) {
-                if (b.type === "friend" && b.collision !== "rect" && b.life > 0 && isTouching(me, b)) {
+                if (b.type === "friend" && b.shape.collision !== "rect" && b.life > 0 && isTouching(me, b)) {
                     b.life = 0
                 }
             }

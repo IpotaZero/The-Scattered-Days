@@ -6,6 +6,7 @@ import type { Bullet } from "../../Actor/Bullet"
 import type { Enemy } from "../../Actor/Enemy"
 import type { Player } from "../../Actor/Player"
 import type { MainEquipment } from "../types"
+import { Shape } from "../../Actor/Shape"
 
 const 連射間隔 = 6
 const 弾数 = 7
@@ -46,7 +47,7 @@ function* mainShotLoop(player: Player): Generator<void, void, void> {
         yield* remodel(player)
             .p(player.p.clone())
             .radian(-T / 4)
-            .appearance("player")
+            .shape(Shape.player)
             .type("friend")
             .color("white")
             .alpha(0.5)
@@ -66,7 +67,7 @@ function* homingShotLoop(player: Player): Generator<void, void, void> {
         yield* remodel(player)
             .p(player.p.clone())
             .radian(-T / 4)
-            .appearance("wedge")
+            .shape(Shape.wedge)
             .type("friend")
             .color("white")
             .alpha(0.2)

@@ -5,6 +5,9 @@ import { T } from "../T"
 import type { NumberKeys } from "@ipota/my-utils"
 import { Actor } from "./Actor/Actor"
 import { Enemy } from "./Actor/Enemy"
+import { Motion } from "./Actor/Motion"
+import { Boundary } from "./Actor/Boundary"
+import { Shape } from "./Actor/Shape"
 import { seededRandom } from "../utils/Functions/seededRandom"
 
 export function remodel<Parent extends Actor>(e: Parent) {
@@ -45,26 +48,15 @@ export namespace Format {
         "triangle": 16,
     } as const
 
-    export const collision: Record<Type, Bullet["collision"]> = {
-        "donut": "circle",
-        "big-ball": "circle",
-        "small-ball": "circle",
-        "arrow": "arrow",
-        "line": "line",
-        "wedge": "wedge",
-        "diamond": "diamond",
-        "triangle": "triangle",
-    } as const
-
-    export const appearance: Record<Type, Bullet["appearance"]> = {
-        "donut": "donut",
-        "big-ball": "ball",
-        "small-ball": "ball",
-        "arrow": "arrow",
-        "line": "line",
-        "wedge": "wedge",
-        "diamond": "diamond",
-        "triangle": "triangle",
+    export const shape: Record<Type, Shape.Type> = {
+        "donut": Shape.donut,
+        "big-ball": Shape.ball,
+        "small-ball": Shape.ball,
+        "arrow": Shape.arrow,
+        "line": Shape.line,
+        "wedge": Shape.wedge,
+        "diamond": Shape.diamond,
+        "triangle": Shape.triangle,
     } as const
 }
 
@@ -232,7 +224,7 @@ export class Remodel<Parent extends Actor> {
     }
 
     format(type: keyof typeof Format.r) {
-        return this.appearance(Format.appearance[type]).collision(Format.collision[type]).r(Format.r[type])
+        return this.shape(Format.shape[type]).r(Format.r[type])
     }
 
     // frame フレームかけて現れる。interval を指定すると index 順に interval フレームずつ遅れて現れる。
@@ -431,10 +423,9 @@ export class Remodel<Parent extends Actor> {
         const parent = this.parent
 
         return this.length(length)
-            .speed(0)
+            .motion(Motion.still)
             .r(12)
-            .appearance("beam")
-            .collision("rect")
+            .shape(Shape.beam)
             .isScorable(false)
             .g(function* (me) {
                 while (1) {
@@ -458,11 +449,10 @@ export class Remodel<Parent extends Actor> {
         return this.p(start)
             .radian(diff.radian())
             .length(diff.magnitude())
-            .speed(0)
+            .motion(Motion.still)
             .type("neutral")
             .alpha(0)
-            .appearance("laser")
-            .collision("rect")
+            .shape(Shape.laser)
             .r(2)
             .g(
                 function* (me) {
@@ -532,10 +522,8 @@ export class Remodel<Parent extends Actor> {
 
     // 画面の端に出ても消えないようにする。画面の外から入ってくる弾や、はみ出してから戻ってくる弾に使う。
     // 弾を消すのは挙動(g)の側で行う。
-    // 画面の端で消す見張り(id "boundary")を、何もしない処理で発射前に置き換える
-    // (発射した瞬間にも一度動くので、挙動の中で見張りを外すのでは、画面の外で生まれた弾は間に合わずに消えてしまう)
     unbounded() {
-        return this.g(function* () {}, { id: "boundary" })
+        return this.boundary(Boundary.none)
     }
 
     // 指定したフレーム後に消える

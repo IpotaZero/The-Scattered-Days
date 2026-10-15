@@ -1,7 +1,9 @@
 import { Vec, vec } from "@ipota/vec"
 import { MathEx } from "../../utils/Functions/MathEx"
 import { Actor } from "./Actor"
-import { Polygon } from "../BulletDrawer/Polygon"
+import { Motion } from "./Motion"
+import { Boundary } from "./Boundary"
+import { Shape } from "./Shape"
 import { uid } from "../../utils/Functions/uid"
 import { Game } from "../Game"
 import { IteratorManager } from "../IteratorManager"
@@ -19,6 +21,7 @@ export class Bullet extends Actor {
     r: number = 12
     radian: number = 0
     speed: number = 8
+    // shape の当たり判定が rect のときだけ読まれる
     length: number = 0
     damage: number = 1
     isScorable: boolean = true
@@ -28,19 +31,10 @@ export class Bullet extends Actor {
     // cloneで作り直すのでreadonlyにしない
     scripts = new IteratorManager()
 
-    appearance:
-        | "donut"
-        | "ball"
-        | "line"
-        | "arrow"
-        /** 画面上の二点を結ぶ線分型の攻撃 */
-        | "laser"
-        /** 砲塔から延びる半直線型の攻撃 */
-        | "beam"
-        | "player"
-        | "score"
-        | Polygon.Type = "donut"
-    collision: "circle" | "line" | "arrow" | "rect" | Polygon.Type = "circle"
+    // 毎フレーム、motion で進み、boundary で消えるかを確かめてから scripts を進める
+    motion: Motion.Type = Motion.straight
+    boundary: Boundary.Type = Boundary.screen
+    shape: Shape.Type = Shape.donut
     type: "friend" | "enemy" | "neutral" | "effect" | "score" = "enemy"
     color: Color = "black"
     alpha: number = 1
@@ -131,79 +125,65 @@ export class Bullet extends Actor {
         const twin = this.clone()
         twin.scriptReservations = []
         twin.isTwin = true
-        twin.speed = 0
+        twin.motion = Motion.still
+        twin.boundary = Boundary.none
         twin.p = point(this.p)
         twin.radian = direction(this.radian)
         this.twins.push(twin)
 
-        // 画面の端で消す見張り(id "boundary")を、center からの距離で消す見張りに置き換える。
-        // 自分が双子なら、見張りの代わりに元の弾を写し取る処理が同じidで動いていて、元の弾と一緒に消えるので、置き換えない。
-        // 双子を何体作っても、この見張りは一つで足りる。自分がもう飛んでいるなら、予約ではなくすぐに置き換える
-        const watch = function* (me: Bullet) {
-            const { WIDTH, HEIGHT } = me.game
+        // 自分は画面の端ではなく、center から画面のどの角よりも遠く離れたときに消える。
+        // 自分が双子なら、元の弾を写し取る処理の中で消えるので、そのままにする
+        if (!this.isTwin) {
+            const { WIDTH, HEIGHT } = this.game
             const corners = [vec(0, 0), vec(WIDTH, 0), vec(0, HEIGHT), vec(WIDTH, HEIGHT)]
-            const far = Math.max(...corners.map((c) => c.sub(center).magnitude()))
+            this.boundary = new Boundary.FarFrom(center, Math.max(...corners.map((c) => c.sub(center).magnitude())))
+        }
 
-            while (me.life > 0) {
-                if (me.p.sub(center).magnitude() > far + me.r) me.life = 0
+        // 双子は元の弾を写し取り、元の弾が消えるか鏡が取り去られると消える
+        twin.bookScript(function* (me) {
+            const follow = () => {
+                me.p = point(original.p)
+                me.radian = direction(original.radian)
+                me.r = original.r
+                me.color = original.color
+            }
+
+            for (let f = 0; original.life > 0 && isActive(); f++) {
+                const appear = fadeIn > 0 ? Math.min(1, f / fadeIn) : 1
+
+                follow()
+                me.alpha = Math.min(original.alpha, maxAlpha) * appear
+                me.type = appear < 1 ? "neutral" : original.type
                 yield
             }
-        }
 
-        if (!this.isTwin) {
-            if (this.scripts.has("move")) {
-                this.scripts.add(() => watch(this), { id: "boundary" })
-            } else {
-                this.bookScript(watch, { id: "boundary" })
+            me.type = "neutral"
+            const alpha = me.alpha
+
+            for (let f = 1; f <= TWIN_FADE_FRAMES && original.life > 0; f++) {
+                follow()
+                me.alpha = alpha * (1 - f / TWIN_FADE_FRAMES)
+                yield
             }
-        }
 
-        // 双子は画面の端では消えないので、画面の端で消す見張りを、元の弾を写し取る処理で置き換える。
-        // (後から外すのでは、外す前の最初のフレームに画面の外にいると消えてしまう)
-        twin.bookScript(
-            function* (me) {
-                const follow = () => {
-                    me.p = point(original.p)
-                    me.radian = direction(original.radian)
-                    me.r = original.r
-                    me.color = original.color
-                }
-
-                for (let f = 0; original.life > 0 && isActive(); f++) {
-                    const appear = fadeIn > 0 ? Math.min(1, f / fadeIn) : 1
-
-                    follow()
-                    me.alpha = Math.min(original.alpha, maxAlpha) * appear
-                    me.type = appear < 1 ? "neutral" : original.type
-                    yield
-                }
-
-                me.type = "neutral"
-                const alpha = me.alpha
-
-                for (let f = 1; f <= TWIN_FADE_FRAMES && original.life > 0; f++) {
-                    follow()
-                    me.alpha = alpha * (1 - f / TWIN_FADE_FRAMES)
-                    yield
-                }
-
-                me.life = 0
-            },
-            { id: "boundary" },
-        )
+            me.life = 0
+        })
 
         return twin
     }
 
     init() {
-        this.scripts.add(() => this.move(this), { id: "move" })
-        this.scripts.add(() => this.boundary(this), { id: "boundary" })
-
         this.scriptReservations.forEach(([g, config]) => {
             this.scripts.add(() => g(this), config)
         })
 
         this.update()
+    }
+
+    update() {
+        this.motion.step(this)
+        if (this.boundary.isOut(this)) this.life = 0
+        this.scripts.update()
     }
 
     bookScript(
@@ -218,8 +198,8 @@ export class Bullet extends Actor {
         if (this.type === "score") return
         this.becomeScore()
 
-        this.scripts.add(() => this.homing(this), { id: "score-homing" })
-        this.scripts.add(() => this.move(this), { id: "move" })
+        this.motion = Motion.homing
+        this.boundary = Boundary.none
 
         this.twins.forEach((t) => t.scorenize())
     }
@@ -230,8 +210,9 @@ export class Bullet extends Actor {
         if (this.type === "score") return
         this.becomeScore()
 
-        this.scripts.add(() => this.fall(this), { id: "score-fall" })
-        this.scripts.add(() => this.boundary(this), { id: "boundary" })
+        this.motion = Motion.still
+        this.boundary = Boundary.screen
+        this.scripts.add(() => this.fall(this))
 
         this.twins.forEach((t) => t.scorenizeToFall())
     }
@@ -240,7 +221,7 @@ export class Bullet extends Actor {
     // 元の弾がスコアに変わったときは、写し取るのをやめて自分もスコアになる(scorenize / scorenizeToFall が双子にも伝える)
     private becomeScore() {
         this.type = "score"
-        this.appearance = "score"
+        this.shape = Shape.score
         this.r = 8
         this.alpha = 0.8
         this.color = "#ecce74"
@@ -259,39 +240,8 @@ export class Bullet extends Actor {
             yield
         }
 
-        // ホーミング中は自機を追い続けて画面の外へは出ないので、画面の端で消す見張りは外す
-        me.scripts.remove("boundary")
-        me.scripts.add(() => me.move(me), { id: "move" })
-        yield* me.homing(me)
-    }
-
-    // move/boundary/homingは全弾が毎フレーム回すので、loop: Infinityで毎フレームジェネレータを作り直すと
-    // スマホでGCによるカクつきが出る。一つのジェネレータの中で回し続ける
-    private *homing(me: Bullet) {
-        while (true) {
-            const diff = me.game.player.p.sub(me.p)
-
-            me.radian = diff.radian()
-            me.speed = Math.max(diff.magnitude() / 12, 16)
-
-            yield
-        }
-    }
-
-    private *move(me: Bullet) {
-        while (true) {
-            me.p.x += Math.cos(me.radian) * me.speed
-            me.p.y += Math.sin(me.radian) * me.speed
-            yield
-        }
-    }
-
-    private *boundary(me: Bullet) {
-        while (true) {
-            if (me.p.x < -me.r || me.game.WIDTH + me.r < me.p.x || me.p.y < -me.r || me.game.HEIGHT + me.r < me.p.y) {
-                me.life = 0
-            }
-            yield
-        }
+        // ホーミング中は自機を追い続けて画面の外へは出ないので、画面の端では消えないようにする
+        me.motion = Motion.homing
+        me.boundary = Boundary.none
     }
 }

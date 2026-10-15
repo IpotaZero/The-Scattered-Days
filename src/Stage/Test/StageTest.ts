@@ -2,6 +2,7 @@ import { vec } from "@ipota/vec"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Shape } from "../../Game/Actor/Shape"
 import { Stage } from "../Stage"
 import { Figure } from "../Figure"
 import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
@@ -64,7 +65,7 @@ class EnemyBoss extends Enemy {
 
         yield* remodel(this)
             .p(this.p.clone())
-            .appearance("ball")
+            .shape(Shape.ball)
             .r(4)
             .speed(8)
             .color("#ffffff")
@@ -116,7 +117,7 @@ class EnemySatellite extends Enemy {
 
         yield* remodel(this)
             .p(this.p.clone())
-            .appearance("donut")
+            .shape(Shape.donut)
             .r(12)
             .speed(6)
             .color("#ff3366")

@@ -3,6 +3,8 @@ import { Ease, GenUtils } from "@ipota/functions"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Motion } from "../../Game/Actor/Motion"
+import { Shape } from "../../Game/Actor/Shape"
 import { Stage } from "../Stage"
 import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
 import { Curves } from "../../utils/Functions/Curves"
@@ -80,13 +82,12 @@ class EnemyMaster extends Enemy {
         const start = vec(burst.x, game.HEIGHT - 2)
 
         yield* remodel(this)
-            .appearance("laser")
-            .collision("rect")
+            .shape(Shape.laser)
             .type("neutral")
             .isScorable(false)
             .color(color)
             .r(2)
-            .speed(0)
+            .motion(Motion.still)
             .p(start)
             .radian(-T / 4)
             .length(start.y - burst.y)

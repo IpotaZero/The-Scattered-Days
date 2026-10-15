@@ -2,6 +2,8 @@ import { Vec, vec } from "@ipota/vec"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Motion } from "../../Game/Actor/Motion"
+import { Shape } from "../../Game/Actor/Shape"
 import { Ease, GenUtils } from "@ipota/functions"
 import { T } from "../../T"
 
@@ -55,13 +57,12 @@ export namespace Meteor {
         const game = e.game
 
         yield* remodel(e)
-            .appearance("laser")
-            .collision("rect")
+            .shape(Shape.laser)
             .type("neutral")
             .isScorable(false)
             .color(config.color)
             .r(2)
-            .speed(0)
+            .motion(Motion.still)
             .p(start)
             .radian(angle)
             .length(end.sub(start).magnitude())
@@ -189,13 +190,12 @@ export namespace Meteor {
     // 60フレームかけて速さ speed まで加速する。線を引いている間に a か b が倒れると、線は消えて砕けない。弾は e が撃つ
     export function* link(e: Enemy, a: Enemy, b: Enemy, center: Enemy, count: number, speed: number, color: Color) {
         yield* remodel(e)
-            .appearance("laser")
-            .collision("rect")
+            .shape(Shape.laser)
             .type("neutral")
             .isScorable(false)
             .color(color)
             .r(2)
-            .speed(0)
+            .motion(Motion.still)
             .alpha(0)
             .g(function* (line) {
                 for (let f = 0; f < 50 && a.life > 0 && b.life > 0; f++) {

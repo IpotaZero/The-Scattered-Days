@@ -3,6 +3,8 @@ import { Ease } from "@ipota/functions"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Motion } from "../../Game/Actor/Motion"
+import { Shape } from "../../Game/Actor/Shape"
 import { Stage } from "../Stage"
 import { T } from "../../T"
 import { EnemyRendererBoss } from "../../Game/Actor/EnemyRendererBoss"
@@ -140,13 +142,12 @@ namespace Tiger {
         const aim = me.game.player.p.sub(start).radian()
 
         yield* remodel(me)
-            .appearance("laser")
-            .collision("rect")
+            .shape(Shape.laser)
             .type("neutral")
             .isScorable(false)
             .color("#ffffff")
             .r(2)
-            .speed(0)
+            .motion(Motion.still)
             .p(start)
             .radian(aim)
             .length(me.game.WIDTH + me.game.HEIGHT)

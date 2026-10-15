@@ -2,6 +2,7 @@ import { vec } from "@ipota/vec"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Shape } from "../../Game/Actor/Shape"
 import { Stage } from "../Stage"
 import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
 import { T } from "../../T"
@@ -72,7 +73,7 @@ class EnemyPupil extends Enemy {
         const base = this.random() * T
 
         yield* remodel(this)
-            .appearance("ball")
+            .shape(Shape.ball)
             .color("#dff6ff")
             .p(this.p.clone())
             .r(4)

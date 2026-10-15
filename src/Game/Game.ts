@@ -321,12 +321,12 @@ export class Game {
 
                 if (this.bulletCollision.isColliding(b, e)) {
                     // レーザーは貫通させ、当たった敵ごとに消えず触れている間ずっと削り続ける
-                    if (b.collision !== "rect") b.life = 0
+                    if (b.shape.collision !== "rect") b.life = 0
 
                     e.hit(b.damage)
 
                     // 当たった弾の位置から、弾が来た向きへ白色の三角形を1つ飛ばす。レーザー(rect)はb.pが根元にあるので飛ばさない
-                    if (b.collision !== "rect") {
+                    if (b.shape.collision !== "rect") {
                         this.scripts.add(() =>
                             TriangleParticle.scatter(
                                 this,

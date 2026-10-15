@@ -3,6 +3,8 @@ import { Ease } from "@ipota/functions"
 import { Enemy } from "../../Game/Actor/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
+import { Motion } from "../../Game/Actor/Motion"
+import { Shape } from "../../Game/Actor/Shape"
 import { Stage } from "../Stage"
 import { T } from "../../T"
 import { Curves } from "../../utils/Functions/Curves"
@@ -122,13 +124,12 @@ class Horn extends Part {
         const radian = this.game.player.p.sub(start).radian()
 
         yield* remodel(this)
-            .appearance("laser")
-            .collision("rect")
+            .shape(Shape.laser)
             .type("neutral")
             .isScorable(false)
             .color("#ffe0a0")
             .r(2)
-            .speed(0)
+            .motion(Motion.still)
             .p(start)
             .radian(radian)
             .length(this.game.WIDTH + this.game.HEIGHT)
