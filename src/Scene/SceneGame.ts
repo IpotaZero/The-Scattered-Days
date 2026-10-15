@@ -49,7 +49,9 @@ export class SceneGame extends Scene {
         this.root.append(new GameBackdrop().element, this.game.canvas, this.game.figureLayer.box, this.game.textBox.box)
     }
 
+    // ステージ中に変化した残機をここでまとめてplayerDataへ書き戻す
     protected async onEnd(): Promise<void> {
+        if (this.game) playerData.setLives(this.game.player.life)
         this.game?.dispose()
     }
 
@@ -130,6 +132,5 @@ function createPlayerConfig(): PlayerConfig {
         maxLife: playerData.getMaxLives(),
         mainEquipment: mainEquipments[loadout.main] ?? mainEquipments.standard,
         subEquipment: loadout.sub ? subEquipments[loadout.sub] : undefined,
-        onLifeChange: (life) => playerData.setLives(life),
     }
 }

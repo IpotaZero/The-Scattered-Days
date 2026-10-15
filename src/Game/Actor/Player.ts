@@ -14,13 +14,12 @@ const HIT_SHAKE_INTENSITY = 12
 const HIT_SHAKE_FRAME = 60
 
 // Player自身はセーブデータ(Data層)を知らない。呼び出し側(Scene層)が
-// playerDataから読んだ値をここに詰めて渡し、被弾等による変化もonLifeChangeで送り返してもらう
+// playerDataから読んだ値をここに詰めて渡す。被弾等で変化したlifeはScene層が終了時に読み取って保存する
 export type PlayerConfig = {
     readonly initialLife: number
     readonly maxLife: number
     readonly mainEquipment: MainEquipment
     readonly subEquipment: SubEquipment | undefined
-    readonly onLifeChange: (life: number) => void
 }
 
 export class Player extends Actor {
@@ -50,8 +49,6 @@ export class Player extends Actor {
 
     readonly scripts = new IteratorQueue()
 
-    private readonly onLifeChange: (life: number) => void
-
     private readonly equipments: readonly (MainEquipment | SubEquipment)[]
 
     constructor(game: Game, startPosition: Vec, config: PlayerConfig) {
@@ -60,7 +57,6 @@ export class Player extends Actor {
         // 残機はステージをまたいで引き継ぐ(値の出所はScene層のplayerData)
         this.life = config.initialLife
         this.maxLife = config.maxLife
-        this.onLifeChange = config.onLifeChange
         this.equipments = [config.mainEquipment, ...(config.subEquipment ? [config.subEquipment] : [])]
 
         this.scripts.add(() => this.pauseWhileStunned(config.mainEquipment.fire(this)), { loop: Infinity })
@@ -105,7 +101,6 @@ export class Player extends Actor {
             this.extraLives--
         } else {
             this.life = Math.max(-1, this.life - damage)
-            this.onLifeChange(this.life)
         }
         this.game.se.hit.play()
         this.game.camera.shake(HIT_SHAKE_INTENSITY, HIT_SHAKE_FRAME)
@@ -123,7 +118,6 @@ export class Player extends Actor {
     selfDestruct() {
         this.hitCount++
         this.life = Math.max(-1, this.life - 1)
-        this.onLifeChange(this.life)
 
         this.game.se.hit.play()
         this.game.camera.shake(HIT_SHAKE_INTENSITY, HIT_SHAKE_FRAME)
