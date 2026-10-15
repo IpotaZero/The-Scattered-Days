@@ -3,7 +3,6 @@ import { Ease, GenUtils } from "@ipota/functions"
 import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
-import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Stage } from "../Stage"
 import { T } from "../../T"
 import { EnemyRendererBoss } from "../../Game/Actor/Enemy/EnemyRendererBoss"
@@ -92,7 +91,7 @@ class SnakeHead extends Enemy {
         yield* Array(2)
         yield* remodel(this)
             .colorful(this.frame)
-            .shape(Shape.ball)
+            .appearance("ball")
             .r(5)
             .speed(3.24)
             .radian((this.frame / 2) ** 2)
@@ -303,7 +302,7 @@ class DetachedTail extends Enemy {
     // その場に白い玉を置き、240フレーム休む。玉は120フレーム留まってから60フレームかけて縮み、縮みきると矢を放って消える
     private *egg() {
         yield* remodel(this)
-            .shape(Shape.ball)
+            .appearance("ball")
             .color("#ffffff")
             .r(23)
             .speed(0)

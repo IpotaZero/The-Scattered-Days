@@ -3,7 +3,6 @@ import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Motion } from "../../Game/Actor/Bullet/Motion"
-import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Ease, GenUtils } from "@ipota/functions"
 import { T } from "../../T"
 
@@ -57,7 +56,8 @@ export namespace Meteor {
         const game = e.game
 
         yield* remodel(e)
-            .shape(Shape.laser)
+            .appearance("laser")
+            .collision("rect")
             .type("neutral")
             .isScorable(false)
             .color(config.color)
@@ -188,7 +188,8 @@ export namespace Meteor {
     // 60フレームかけて速さ speed まで加速する。線を引いている間に a か b が倒れると、線は消えて砕けない。弾は e が撃つ
     export function* link(e: Enemy, a: Enemy, b: Enemy, center: Enemy, count: number, speed: number, color: Color) {
         yield* remodel(e)
-            .shape(Shape.laser)
+            .appearance("laser")
+            .collision("rect")
             .type("neutral")
             .isScorable(false)
             .color(color)

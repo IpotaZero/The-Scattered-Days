@@ -4,7 +4,6 @@ import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Motion } from "../../Game/Actor/Bullet/Motion"
-import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Stage } from "../Stage"
 import { EnemyRendererCore } from "../../Game/Actor/Enemy/EnemyRendererCore"
 import { Curves } from "../../utils/Functions/Curves"
@@ -82,7 +81,8 @@ class EnemyMaster extends Enemy {
         const start = vec(burst.x, game.HEIGHT - 2)
 
         yield* remodel(this)
-            .shape(Shape.laser)
+            .appearance("laser")
+            .collision("rect")
             .type("neutral")
             .isScorable(false)
             .color(color)

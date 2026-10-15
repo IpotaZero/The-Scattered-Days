@@ -4,7 +4,6 @@ import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Motion } from "../../Game/Actor/Bullet/Motion"
-import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Stage } from "../Stage"
 import { T } from "../../T"
 import { EnemyRendererBoss } from "../../Game/Actor/Enemy/EnemyRendererBoss"
@@ -141,7 +140,8 @@ namespace Tiger {
         const aim = me.game.player.p.sub(start).radian()
 
         yield* remodel(me)
-            .shape(Shape.laser)
+            .appearance("laser")
+            .collision("rect")
             .type("neutral")
             .isScorable(false)
             .color("#ffffff")

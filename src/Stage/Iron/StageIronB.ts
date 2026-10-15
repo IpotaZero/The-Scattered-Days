@@ -3,7 +3,6 @@ import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Motion } from "../../Game/Actor/Bullet/Motion"
-import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Stage } from "../Stage"
 import { EnemyRendererCore } from "../../Game/Actor/Enemy/EnemyRendererCore"
 import { Curves } from "../../utils/Functions/Curves"
@@ -93,7 +92,8 @@ class Rifleman extends Part {
         const aim = this.game.player.p.sub(start).radian()
 
         yield* remodel(this)
-            .shape(Shape.laser)
+            .appearance("laser")
+            .collision("rect")
             .type("neutral")
             .isScorable(false)
             .color("#ffe0a0")

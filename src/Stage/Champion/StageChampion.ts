@@ -4,7 +4,6 @@ import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Motion } from "../../Game/Actor/Bullet/Motion"
-import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Stage } from "../Stage"
 import { T } from "../../T"
 import { Curves } from "../../utils/Functions/Curves"
@@ -47,7 +46,7 @@ export default class extends Stage {
     private *quietSnow() {
         yield* remodel(this.game.player)
             .type("effect")
-            .shape(Shape.ball)
+            .appearance("ball")
             .r(2)
             .color("#eef6ff")
             .alpha(0.3)
@@ -427,7 +426,8 @@ class Stinger extends Part {
         const aim = this.game.player.p.sub(start).radian()
 
         yield* remodel(this)
-            .shape(Shape.laser)
+            .appearance("laser")
+            .collision("rect")
             .type("neutral")
             .isScorable(false)
             .color("#ff9060")

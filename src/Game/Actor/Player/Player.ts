@@ -9,7 +9,6 @@ import { Ease } from "@ipota/functions"
 import type { MainEquipment, SubEquipment } from "../../Equipment/PlayerEquipment"
 import { PlayerRenderer } from "./PlayerRenderer"
 import { TriangleParticle } from "./TriangleParticle"
-import { Shape } from "../Bullet/Shape"
 
 const HIT_SHAKE_INTENSITY = 12
 const HIT_SHAKE_FRAME = 60
@@ -139,7 +138,8 @@ export class Player extends Actor {
         yield* remodel(this)
             .p(this.p.clone())
             .type("effect")
-            .shape(Shape.triangle)
+            .appearance("triangle")
+            .collision("triangle")
             .color("white")
             .alpha(0.5)
             .duplicate(16, (b) => {

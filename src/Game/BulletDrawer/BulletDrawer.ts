@@ -2,10 +2,9 @@ import { Bullet } from "../Actor/Bullet/Bullet"
 import { CameraTransform } from "../Actor/Camera"
 import { BulletGpuBatchRenderer } from "./BulletGpuBatchRenderer"
 import { Polygon } from "../Actor/Bullet/Polygon"
-import type { Shape } from "../Actor/Bullet/Shape"
 
 // スプライトの種類。弾の見た目のほかに、ビームの根元の光を別のスプライトにしている
-type SpriteKind = Shape.Appearance | "beam-flare"
+type SpriteKind = Bullet["appearance"] | "beam-flare"
 
 // スプライトを描くのに要る、弾の見た目だけ
 type Look = { appearance: SpriteKind; color: Color; r: number }
@@ -80,12 +79,12 @@ export class BulletDrawer {
     public draw(bullet: Bullet, ctx: CanvasRenderingContext2D): void {
         if (Math.floor(bullet.r) === 0 || bullet.alpha === 0) return
 
-        if (bullet.shape.appearance === "beam" || bullet.shape.appearance === "laser") {
+        if (bullet.appearance === "beam" || bullet.appearance === "laser") {
             this.drawRect(bullet, ctx)
             return
         }
 
-        const sprite = this.getSprite(bullet.shape.appearance, bullet.color, bullet.r)
+        const sprite = this.getSprite(bullet.appearance, bullet.color, bullet.r)
         // スプライトは丸めた半径で描いてあるので、本当の半径の大きさまで拡大縮小する(見た目と当たり判定をずらさない)
         const halfSize = (sprite.canvas.width / 2) * (bullet.r / sprite.r)
         const rotation = this.getEffectiveRotation(bullet)
@@ -114,11 +113,11 @@ export class BulletDrawer {
     // 長さ0の長方形は、光も含めて何も描かれない
     private drawRect(bullet: Bullet, ctx: CanvasRenderingContext2D) {
         if (bullet.length > 0) {
-            const body = this.getSprite(bullet.shape.appearance, bullet.color, bullet.r)
+            const body = this.getSprite(bullet.appearance, bullet.color, bullet.r)
             if (!this.queueRectBody(bullet, body)) this.drawRectBodyDirectly(bullet, body, ctx)
         }
 
-        if (bullet.shape.appearance === "beam") {
+        if (bullet.appearance === "beam") {
             const flare = this.getSprite("beam-flare", bullet.color, bullet.r)
             if (!this.queueBeamFlare(bullet, flare)) this.drawBeamFlareDirectly(bullet, flare, ctx)
         }
@@ -254,7 +253,7 @@ export class BulletDrawer {
 
     // Donut と Ball は回転させない（見た目が変わらないため）
     private getEffectiveRotation(bullet: Bullet): number {
-        if (bullet.shape.appearance === "donut" || bullet.shape.appearance === "ball") return 0
+        if (bullet.appearance === "donut" || bullet.appearance === "ball") return 0
         return bullet.radian
     }
 

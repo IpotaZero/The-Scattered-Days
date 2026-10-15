@@ -14,21 +14,21 @@ export class BulletCollision {
     private readonly unitVertices = new Map<Polygon.Type, Vec[]>()
 
     isColliding(b: Bullet, e: Circle) {
-        if (b.shape.collision === "rect") return this.isCollidingRect(e, b)
+        if (b.collision === "rect") return this.isCollidingRect(e, b)
 
         // rect 以外の形はすべて半径 r の円に収まるので、その円に触れていなければ細かい判定をせずに打ち切る
         const dx = b.p.x - e.p.x
         const dy = b.p.y - e.p.y
         if (dx * dx + dy * dy > (b.r + e.r) ** 2) return false
 
-        if (b.shape.collision === "circle") return true
+        if (b.collision === "circle") return true
 
         const cos = Math.cos(b.radian)
         const sin = Math.sin(b.radian)
 
-        if (b.shape.collision === "line") {
+        if (b.collision === "line") {
             return this.isCollidingLine(e, b.p.x + cos * b.r, b.p.y + sin * b.r, b.p.x - cos * b.r, b.p.y - sin * b.r)
-        } else if (b.shape.collision === "arrow") {
+        } else if (b.collision === "arrow") {
             const 右端x = b.p.x + cos * b.r
             const 右端y = b.p.y + sin * b.r
 
@@ -50,7 +50,7 @@ export class BulletCollision {
                 )
             )
         } else {
-            return this.isCollidingPolygon(e, b, b.shape.collision, cos, sin)
+            return this.isCollidingPolygon(e, b, b.collision, cos, sin)
         }
     }
 

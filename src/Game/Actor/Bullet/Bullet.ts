@@ -3,7 +3,7 @@ import { MathEx } from "../../../utils/Functions/MathEx"
 import { Actor } from "../Actor"
 import { Motion } from "./Motion"
 import { Boundary } from "./Boundary"
-import { Shape } from "./Shape"
+import { Polygon } from "./Polygon"
 import { uid } from "../../../utils/Functions/uid"
 import { Game } from "../../Game"
 import { IteratorManager } from "../../IteratorManager"
@@ -21,7 +21,7 @@ export class Bullet extends Actor {
     r: number = 12
     radian: number = 0
     speed: number = 8
-    // shape の当たり判定が rect のときだけ読まれる
+    // collision が rect のときだけ読まれる
     length: number = 0
     damage: number = 1
     isScorable: boolean = true
@@ -34,7 +34,19 @@ export class Bullet extends Actor {
     // 毎フレーム、motion で進み、boundary で消えるかを確かめてから scripts を進める
     motion: Motion.Type = Motion.straight
     boundary: Boundary.Type = Boundary.screen
-    shape: Shape.Type = Shape.donut
+    appearance:
+        | "donut"
+        | "ball"
+        | "line"
+        | "arrow"
+        /** 画面上の二点を結ぶ線分型の攻撃 */
+        | "laser"
+        /** 砲塔から延びる半直線型の攻撃 */
+        | "beam"
+        | "player"
+        | "score"
+        | Polygon.Type = "donut"
+    collision: "circle" | "line" | "arrow" | "rect" | Polygon.Type = "circle"
     type: "friend" | "enemy" | "neutral" | "effect" | "score" = "enemy"
     color: Color = "black"
     alpha: number = 1
@@ -221,7 +233,8 @@ export class Bullet extends Actor {
     // 元の弾がスコアに変わったときは、写し取るのをやめて自分もスコアになる(scorenize / scorenizeToFall が双子にも伝える)
     private becomeScore() {
         this.type = "score"
-        this.shape = Shape.score
+        this.appearance = "score"
+        this.collision = "circle"
         this.r = 8
         this.alpha = 0.8
         this.color = "#ecce74"

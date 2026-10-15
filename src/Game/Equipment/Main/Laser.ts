@@ -5,7 +5,6 @@ import { Behavior, remodel } from "../../Remodel"
 import type { Player } from "../../Actor/Player/Player"
 import type { MainEquipment } from "../types"
 import { Motion } from "../../Actor/Bullet/Motion"
-import { Shape } from "../../Actor/Bullet/Shape"
 
 const ビーム本数 = 2
 const 通常時間隔 = 180
@@ -34,7 +33,8 @@ export const laser: MainEquipment = {
             .p(player.p.clone())
             .length(ビーム長さ)
             .motion(Motion.still)
-            .shape(Shape.beam)
+            .appearance("beam")
+            .collision("rect")
             .isScorable(false)
             .r(通常時太さ)
             .damage(通常時威力)
@@ -93,7 +93,7 @@ function* 球弾を撃ち続ける(player: Player): Generator<void, void, void> 
             .type("friend")
             .color("white")
             .alpha(0.7)
-            .shape(Shape.ball)
+            .appearance("ball")
             .r(球弾半径)
             .damage(球弾威力)
             .speed(球弾速度)
@@ -119,7 +119,8 @@ function* リング弾を撃ち続ける(player: Player): Generator<void, void, 
             .type("friend")
             .color("white")
             .alpha(0.4)
-            .shape(Shape.wedge)
+            .appearance("wedge")
+            .collision("wedge")
             .r(16)
             .damage(リング弾威力)
             .speed(0)
