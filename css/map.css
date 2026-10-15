@@ -447,15 +447,16 @@
         flex-direction: column;
         gap: 0.25em;
         top: 1em;
-        left: 5%;
+        left: 1em;
 
         padding-left: 0.5em;
         border-left: 2px solid var(--sage);
 
-        font-size: 1.4em;
+        font-size: 1em;
 
         font-family: "Courier New", monospace;
         letter-spacing: 0.1em;
+        background-color: color-mix(in srgb, var(--forest) 30%, transparent);
     }
 
     .map-lives-count {
@@ -490,6 +491,8 @@
         white-space: nowrap;
         opacity: 0.8;
         pointer-events: none;
+
+        background-color: color-mix(in srgb, var(--forest) 30%, transparent);
     }
 
     /* 初雪までの日付は、帳面の日付のように右上へ縦書きで添える。一日進むたびに書き換わる */

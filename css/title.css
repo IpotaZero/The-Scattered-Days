@@ -81,28 +81,25 @@
         opacity 0.5s ease-out;
 }
 
+.title-top {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 .title-version,
 .title-copyright {
-    position: absolute;
-    top: 0.8em;
-
     font-family: "Courier New", monospace;
     font-size: 0.7em;
     letter-spacing: 0.2em;
     opacity: 0.6;
 }
 
-.title-version {
-    left: 1em;
-}
-
-.title-copyright {
-    right: 1em;
-}
-
 .title-fullscreen-toggle {
     position: absolute;
-    top: 2.4em;
+    top: 1em;
     right: 1em;
 
     width: 1.6em;
@@ -122,7 +119,7 @@
     left: 0;
     /* 左下のメニュー(#root)と被らないよう、ボタン自体の高さとは独立した
        固定量(rem = ルートフォントサイズ基準)だけ底から離す */
-    bottom: 8.8rem;
+    bottom: 7rem;
     padding: 0 0.15em;
 
     flex-direction: column;
@@ -131,7 +128,7 @@
     font-weight: 100;
     /* 幅が狭い(スマホ)・高さが低い(PCの横長ウィンドウ)のどちらでもはみ出さないよう、
        小さいほうの辺(vmin)を基準に縮小する */
-    font-size: clamp(3.2rem, 21vmin, 8.5rem);
+    font-size: clamp(3rem, 21vmin, 8rem);
     line-height: 0.92;
     letter-spacing: -0.01em;
 
@@ -180,6 +177,7 @@
     .option-row {
         width: 100%;
         height: fit-content;
+        gap: 0.3em;
     }
 
     .option {

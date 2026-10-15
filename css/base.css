@@ -28,7 +28,7 @@ body {
     background: #111;
     color: #ffffff;
 
-    font-size: 3dvh;
+    font-size: calc(3dvh + 0.5dvw);
 
     overflow: hidden;
     overscroll-behavior: none;
