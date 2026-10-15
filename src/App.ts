@@ -73,24 +73,24 @@ export namespace App {
         // 地図を縦に割って同じ枠に入る景色は同じ曲にしてあり、枠の中を行き来しても曲は切り替わらない
         export const sceneries: Readonly<Record<string, Track>> = {
             // 地図の左端
-            hive: { title: "Chopin: Berceuse Op. 57", src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 1 },
-            frost: { title: "Chopin: Berceuse Op. 57", src: `${base}/chopin-berceuse-op57.ogg`, trackVolume: 1 },
+            hive: { title: "Chopin: Berceuse Op. 57", src: `${base}/chopin-berceuse-op57.opus`, trackVolume: 1 },
+            frost: { title: "Chopin: Berceuse Op. 57", src: `${base}/chopin-berceuse-op57.opus`, trackVolume: 1 },
             // 疾風道場と網掛道場
-            gale: { title: "Chopin: Waltz Op. 64 No. 3", src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 1 },
-            web: { title: "Chopin: Waltz Op. 64 No. 3", src: `${base}/chopin-waltz-op64-3.ogg`, trackVolume: 1 },
+            gale: { title: "Chopin: Waltz Op. 64 No. 3", src: `${base}/chopin-waltz-op64-3.opus`, trackVolume: 0.5 },
+            web: { title: "Chopin: Waltz Op. 64 No. 3", src: `${base}/chopin-waltz-op64-3.opus`, trackVolume: 0.5 },
             // 霧隠・砂塵・陽炎・鉄壁の道場
-            mist: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
-            sand: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
-            haze: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
-            iron: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.ogg`, trackVolume: 1 },
+            mist: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.opus`, trackVolume: 0.8 },
+            sand: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.opus`, trackVolume: 0.8 },
+            haze: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.opus`, trackVolume: 0.8 },
+            iron: { title: "Chopin: Waltz Op. 69 No. 2", src: `${base}/chopin-waltz-op69-2.opus`, trackVolume: 0.8 },
             // 流星道場と月影道場
-            meteor: { title: "Chopin: Waltz Op. 64 No. 2", src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 1 },
-            moon: { title: "Chopin: Waltz Op. 64 No. 2", src: `${base}/chopin-waltz-op64-2.ogg`, trackVolume: 1 },
+            meteor: { title: "Chopin: Waltz Op. 64 No. 2", src: `${base}/chopin-waltz-op64-2.opus`, trackVolume: 0.7 },
+            moon: { title: "Chopin: Waltz Op. 64 No. 2", src: `${base}/chopin-waltz-op64-2.opus`, trackVolume: 0.7 },
             // 四天王とチャンピオン
             nest: {
                 title: "Chopin: Waltz Op. 69 No. 1 “Farewell”",
-                src: `${base}/chopin-waltz-op69-1.ogg`,
-                trackVolume: 1,
+                src: `${base}/chopin-waltz-op69-1.opus`,
+                trackVolume: 0.6,
             },
         }
 
