@@ -1,7 +1,7 @@
 import { Vec } from "@ipota/vec"
 import { T } from "../T"
 import { Bullet } from "./Actor/Bullet/Bullet"
-import { Polygon } from "./BulletDrawer/Polygon"
+import { Polygon } from "./Actor/Bullet/Polygon"
 
 type Circle = {
     p: Vec

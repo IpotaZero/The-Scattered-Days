@@ -1,4 +1,4 @@
-import type { Polygon } from "../../BulletDrawer/Polygon"
+import type { Polygon } from "./Polygon"
 
 // 弾の見た目と当たり判定の組。Bullet は見た目と当たり判定を別々には持たず、この組を一つ持つ
 export namespace Shape {
