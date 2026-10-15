@@ -474,18 +474,19 @@
         justify-content: start;
     }
 
-    /* 曲が切り替わったときの曲名。残機の書き付けと同じ縦線を添えて右上に置く(出し入れは src/Scene/SceneMap.ts) */
+    /* 曲が切り替わったときの曲名。右上の端に縦書きで置き、画面の端のUIと横に並んでも被らないようにする(出し入れは src/Scene/SceneMap.ts) */
     .map-bgm-title {
         position: absolute;
         top: 1em;
-        right: 5%;
+        right: 1em;
 
-        padding-right: 0.5em;
-        border-right: 2px solid var(--sage);
+        writing-mode: vertical-rl;
+        padding-top: 0.5em;
+        border-top: 2px solid var(--sage);
 
         font-family: "Courier New", monospace;
-        font-size: 1em;
-        letter-spacing: 0.1em;
+        font-size: 0.8em;
+        letter-spacing: 0.05em;
         white-space: nowrap;
         opacity: 0.8;
         pointer-events: none;
