@@ -1,7 +1,7 @@
 import { Ease } from "@ipota/functions"
 import { Vec, vec } from "@ipota/vec"
-import { T } from "../../T"
-import { Ctx } from "../../utils/Functions/Ctx"
+import { T } from "../../../T"
+import { Ctx } from "../../../utils/Functions/Ctx"
 
 const GOLD = "236, 206, 116"
 const IVORY = "255, 244, 220"

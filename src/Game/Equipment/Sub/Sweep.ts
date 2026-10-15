@@ -1,9 +1,9 @@
 import { Ease } from "@ipota/functions"
 import { vec } from "@ipota/vec"
-import type { Player } from "../Actor/Player"
-import { actionCooldown } from "./ActionCooldown"
+import type { Player } from "../../Actor/Player"
+import { actionCooldown } from "../ActionCooldown"
 import { SweepBell } from "./SweepBell"
-import type { SubEquipment } from "./types"
+import type { SubEquipment } from "../types"
 
 // 一掃は「盤面を白紙に戻す」装備。
 // 画面の弾をすべて花粉に変えるかわりに、次に使えるまでがとても長い。
@@ -48,6 +48,7 @@ function* sweepWave(player: Player): Generator<void, void, void> {
         ...[vec(0, 0), vec(WIDTH, 0), vec(0, HEIGHT), vec(WIDTH, HEIGHT)].map((c) => c.sub(center).magnitude()),
     )
 
+    player.game.camera.shake(8, 8)
     player.game.se.bomb.play()
 
     for (let i = 1; i <= 広がりフレーム + 余韻フレーム; i++) {
