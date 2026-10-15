@@ -614,6 +614,8 @@
         align-items: center;
         gap: 2em;
 
+        font-size: 0.8em;
+
         padding: 1.5em 2em;
 
         background: color-mix(in srgb, var(--map-ground) 96%, transparent);
