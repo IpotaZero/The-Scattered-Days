@@ -11,7 +11,7 @@ import type { SubEquipment } from "../types"
 const ためフレーム = 2
 const 閃光フレーム = 20
 const 広がりフレーム = 60
-const クールダウンフレーム = 1200
+const クールダウンフレーム = 1800
 
 export const sweep: SubEquipment = {
     label: "一掃",
