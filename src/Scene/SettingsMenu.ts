@@ -114,16 +114,16 @@ export class SettingsMenu {
                               } satisfies MenuOption,
                           ],
                       ]),
-                [
-                    {
-                        type: "select",
-                        label: this.debugUnlockAllLabel(),
-                        onSelect: () => {
-                            playerData.toggleDebugUnlockAll()
-                            this.menu.render()
-                        },
-                    },
-                ],
+                // [
+                //     {
+                //         type: "select",
+                //         label: this.debugUnlockAllLabel(),
+                //         onSelect: () => {
+                //             playerData.toggleDebugUnlockAll()
+                //             this.menu.render()
+                //         },
+                //     },
+                // ],
                 [
                     {
                         type: "submenu",
