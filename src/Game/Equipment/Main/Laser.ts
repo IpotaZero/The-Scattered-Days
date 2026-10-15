@@ -48,7 +48,7 @@ export const laser: MainEquipment = {
                 // 間隔はここに向かって毎フレーム少しずつ近づける(スナップさせず滑らかに変化させる)
                 let interval = 通常時間隔
 
-                while (!player.game.isGameOver) {
+                while (!player.game.isLose) {
                     // 低速時は狭く強く、通常時は広く弱くなる
                     const isFocused = player.game.input.isPressed("slow")
                     const targetInterval = isFocused ? 集中時間隔 : 通常時間隔

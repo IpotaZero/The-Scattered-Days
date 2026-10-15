@@ -16,6 +16,7 @@ import { Dom } from "../Dom"
 import { Scenery } from "../World/Scenery"
 import type { App } from "../App"
 import { TriangleParticle } from "./Actor/TriangleParticle"
+import { GenUtils } from "@ipota/functions"
 
 const FPS = 60
 
@@ -72,9 +73,8 @@ export class Game {
     enemies: Enemy[] = []
 
     // 敵の乱数のシード。Game はステージに入るたびに作り直されるので、n 体目の敵は毎回同じシードになる
-    readonly enemySeeds = (function* () {
-        for (let i = 0; ; i++) yield i
-    })()
+    readonly enemySeeds = GenUtils.naturalNumbers()
+
     bullets: Bullet[] = []
 
     readonly textBox: TextBox
@@ -84,15 +84,15 @@ export class Game {
 
     private readonly touchControls: TouchControls
 
-    private state: "playing" | "game-over" | "cleared" = "playing"
+    private state: "playing" | "lose" | "win" = "playing"
 
     get isPlaying(): boolean {
         return this.state === "playing"
     }
 
     // ゲームオーバー後は自機の更新・描画が止まる(クリア後は止まらない)
-    get isGameOver(): boolean {
-        return this.state === "game-over"
+    get isLose(): boolean {
+        return this.state === "lose"
     }
 
     private score = 0
@@ -105,7 +105,7 @@ export class Game {
     private static readonly bulletDrawer = new BulletDrawer()
     // スクリプトがupdate中に積む、ワールド座標の描画命令。描画はrAFごとに1回なので、update中に直接ctxへ描かず、ここに溜めてdraw()で再生する
     private readonly worldDrawings: ((ctx: CanvasRenderingContext2D) => void)[] = []
-    private bulletCollision = new BulletCollision()
+    private readonly bulletCollision = new BulletCollision()
 
     readonly WIDTH = 32 * 16
     // 画面回転やスマホのアドレスバー表示/非表示で画面比が変わった際、resizeCanvas()が更新する
@@ -237,7 +237,7 @@ export class Game {
     // 回収自体はクリア後も続き、終わった時点でonScoreCollectedが発火する
     win() {
         if (this.state !== "playing") return
-        this.state = "cleared"
+        this.state = "win"
         this.se.crush.play()
         this.onWin()
         this.scripts.add(() => this.waitScoreCollected())
@@ -246,7 +246,7 @@ export class Game {
     // ゲームオーバー。playingのときだけ効き、onLoseは1度だけ発火する
     lose() {
         if (this.state !== "playing") return
-        this.state = "game-over"
+        this.state = "lose"
         this.onLose(this.score)
     }
 
@@ -378,7 +378,7 @@ export class Game {
 
     // ゲームオーバー後は自機を更新しない。装備のスクリプト(射撃・技・クールタイム)もそこで止まる
     private updatePlayer(): void {
-        if (this.isGameOver) return
+        if (this.isLose) return
         this.player.update()
     }
 
@@ -407,7 +407,7 @@ export class Game {
         // 重なった敵の影が別の敵の線を暗くしないよう、影は先にまとめて描く
         this.enemies.forEach((e) => e.drawShade(ctx))
         this.enemies.forEach((e) => e.draw(ctx))
-        if (this.state !== "game-over") this.player.draw(ctx)
+        if (this.state !== "lose") this.player.draw(ctx)
         this.worldDrawings.forEach((f) => {
             ctx.save()
             f(ctx)
