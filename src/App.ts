@@ -1,5 +1,6 @@
 import { BgmManager } from "@ipota/bgm-manager"
 import { Sound } from "./utils/Sound"
+import { PageBgmManager } from "./utils/PageBgmManager"
 import { Dom } from "./Dom"
 import type { Scenery } from "./World/Scenery"
 import { SceneChanger } from "./utils/Scene/SceneChanger"
@@ -15,6 +16,16 @@ export namespace App {
     const context = new AudioContext()
     const master = context.createGain()
     master.connect(context.destination)
+
+    // ページが隠れたらSEを止める。戻った後は、次にSEを鳴らすときかクリック・タッチ・キー入力のときに再開する
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) context.suspend()
+    })
+    for (const type of ["click", "touchend", "keydown"]) {
+        document.addEventListener(type, () => {
+            if (!document.hidden && context.state === "suspended") context.resume()
+        })
+    }
 
     export namespace se {
         const base = `assets/se`
@@ -99,7 +110,7 @@ export namespace App {
         }
     }
 
-    export const bm = new BgmManager()
+    export const bm = new PageBgmManager()
 
     export const sc = new SceneChanger(Dom.container)
 
