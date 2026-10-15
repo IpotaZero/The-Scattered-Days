@@ -1,5 +1,5 @@
 import { Actor } from "./Actor"
-import { IteratorQueue } from "../IteratorQueue"
+import { IteratorManager } from "../IteratorManager"
 import { Game } from "../Game"
 import { vec, Vec } from "@ipota/vec"
 import { T } from "../../T"
@@ -47,7 +47,7 @@ export class Player extends Actor {
 
     readonly renderer = new PlayerRenderer()
 
-    readonly scripts = new IteratorQueue()
+    readonly scripts = new IteratorManager()
 
     private readonly equipments: readonly (MainEquipment | SubEquipment)[]
 

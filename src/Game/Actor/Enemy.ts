@@ -6,7 +6,7 @@ import { IEnemyRenderer } from "./IEnemyRenderer"
 import { EnemyRendererMob } from "./EnemyRendererMob"
 import { seededRandom } from "../../utils/Functions/seededRandom"
 import { Battery } from "./Battery"
-import { IteratorQueue } from "../IteratorQueue"
+import { IteratorManager } from "../IteratorManager"
 
 export abstract class Enemy extends Actor {
     private readonly baseR: number
@@ -20,7 +20,7 @@ export abstract class Enemy extends Actor {
 
     // 親への追従や被弾で膨らむ見た目など、充電中も止まらない体の動き。
     // 外からは足せないので、ここに演出を入れて充電中に動かすことはできない
-    private readonly figure = new IteratorQueue()
+    private readonly figure = new IteratorManager()
 
     readonly scripts = new EnemyScripts(this)
 
@@ -171,7 +171,7 @@ export abstract class Enemy extends Actor {
 }
 
 // 敵のスクリプト。スクリプトごとに乱数を初期化する。フェーズの長さやほかのスクリプトの消費量に関係なく、各スクリプトは毎回同じ列を使う
-class EnemyScripts extends IteratorQueue {
+class EnemyScripts extends IteratorManager {
     constructor(private readonly enemy: Enemy) {
         super()
     }

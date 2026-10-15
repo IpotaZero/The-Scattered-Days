@@ -6,7 +6,7 @@ import { Enemy } from "./Actor/Enemy"
 import { Bullet } from "./Actor/Bullet"
 import { BulletDrawer } from "./BulletDrawer/BulletDrawer"
 import { BulletCollision } from "./BulletCollision"
-import { IteratorQueue } from "./IteratorQueue"
+import { IteratorManager } from "./IteratorManager"
 import { Stage } from "../Stage/Stage"
 import { TextBox } from "@ipota/my-utils"
 import { FigureLayer } from "../utils/FigureLayer"
@@ -58,7 +58,7 @@ export type GameConfig = {
  */
 export class Game {
     // ゲーム全体を進めるスクリプト
-    readonly scripts = new IteratorQueue()
+    readonly scripts = new IteratorManager()
 
     readonly canvas: HTMLCanvasElement
     readonly ctx: CanvasRenderingContext2D
@@ -323,7 +323,13 @@ export class Game {
                     // 当たった弾の位置から、弾が来た向きへ白色の三角形を1つ飛ばす。レーザー(rect)はb.pが根元にあるので飛ばさない
                     if (b.collision !== "rect") {
                         this.scripts.add(() =>
-                            TriangleParticle.scatter(this, b.p.clone(), b.radian + Math.PI, Math.random() * 2 + 2, "#fff8"),
+                            TriangleParticle.scatter(
+                                this,
+                                b.p.clone(),
+                                b.radian + Math.PI,
+                                Math.random() * 2 + 2,
+                                "#fff8",
+                            ),
                         )
                     }
                 }

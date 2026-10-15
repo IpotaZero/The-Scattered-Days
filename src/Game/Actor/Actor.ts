@@ -1,5 +1,5 @@
 import { vec, Vec } from "@ipota/vec"
-import { IteratorQueue } from "../IteratorQueue"
+import { IteratorManager } from "../IteratorManager"
 import { Game } from "../Game"
 
 export abstract class Actor {
@@ -8,7 +8,7 @@ export abstract class Actor {
     life = 1
 
     // この者を動かすスクリプト。毎フレーム一歩ずつ進む
-    abstract readonly scripts: IteratorQueue
+    abstract readonly scripts: IteratorManager
 
     constructor(readonly game: Game) {}
 

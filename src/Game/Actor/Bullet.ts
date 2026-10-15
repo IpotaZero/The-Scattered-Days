@@ -4,7 +4,7 @@ import { Actor } from "./Actor"
 import { Polygon } from "../BulletDrawer/Polygon"
 import { uid } from "../../utils/Functions/uid"
 import { Game } from "../Game"
-import { IteratorQueue } from "../IteratorQueue"
+import { IteratorManager } from "../IteratorManager"
 
 // 鏡が取り去られた双子が薄れて消えるまで
 const TWIN_FADE_FRAMES = 24
@@ -26,7 +26,7 @@ export class Bullet extends Actor {
     delay: number = 0
 
     // cloneで作り直すのでreadonlyにしない
-    scripts = new IteratorQueue()
+    scripts = new IteratorManager()
 
     appearance:
         | "donut"
@@ -69,7 +69,7 @@ export class Bullet extends Actor {
         // 参照型のプロパティは共有しないよう作り直す
         b.p = this.p.clone()
         b.scriptReservations = [...this.scriptReservations]
-        b.scripts = new IteratorQueue()
+        b.scripts = new IteratorManager()
         b.twins = []
 
         return b

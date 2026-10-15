@@ -1,7 +1,7 @@
 import { vec, Vec } from "@ipota/vec"
 import { Actor } from "./Actor"
 import { Game } from "../Game"
-import { IteratorQueue } from "../IteratorQueue"
+import { IteratorManager } from "../IteratorManager"
 
 export type CameraTransform = {
     x: number
@@ -19,7 +19,7 @@ export class Camera extends Actor {
 
     private shakeP = vec(0, 0)
 
-    readonly scripts = new IteratorQueue()
+    readonly scripts = new IteratorManager()
 
     constructor(game: Game, firstPosition: Vec) {
         super(game)
@@ -34,7 +34,10 @@ export class Camera extends Actor {
     private *shakeG(intensity: number, frame: number): Generator<void, void, void> {
         for (let i = 0; i < frame; i++) {
             const attenuation = 1 - i / frame
-            this.shakeP = vec((Math.random() * 2 - 1) * intensity * attenuation, (Math.random() * 2 - 1) * intensity * attenuation)
+            this.shakeP = vec(
+                (Math.random() * 2 - 1) * intensity * attenuation,
+                (Math.random() * 2 - 1) * intensity * attenuation,
+            )
             yield
         }
 

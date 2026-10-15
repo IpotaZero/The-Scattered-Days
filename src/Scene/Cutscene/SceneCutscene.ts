@@ -1,6 +1,6 @@
 import { Ease, GenUtils } from "@ipota/functions"
 import { App } from "../../App"
-import { IteratorQueue } from "../../Game/IteratorQueue"
+import { IteratorManager } from "../../Game/IteratorManager"
 import { Scene } from "../../utils/Scene/Scene"
 import { Svg } from "./Svg"
 
@@ -15,7 +15,7 @@ export abstract class SceneCutscene extends Scene {
     private readonly svg = document.createElementNS(Svg.NS, "svg")
 
     // 絵の中のものの動き(ジェネレータ)を毎フレーム一歩ずつ進める
-    protected readonly queue = new IteratorQueue()
+    protected readonly queue = new IteratorManager()
 
     // 絵全体の上に重ねる幕。不透明にすると絵が見えなくなる
     private readonly veil = document.createElement("div")

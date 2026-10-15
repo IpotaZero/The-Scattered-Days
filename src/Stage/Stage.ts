@@ -1,10 +1,10 @@
 import { Enemy } from "../Game/Actor/Enemy"
 import { Game } from "../Game/Game"
-import { IteratorQueue } from "../Game/IteratorQueue"
+import { IteratorManager } from "../Game/IteratorManager"
 import { Figure } from "./Figure"
 
 export abstract class Stage {
-    readonly scripts = new IteratorQueue()
+    readonly scripts = new IteratorManager()
 
     private flashAlpha = 0
     private flashColor = "#ffffff"
