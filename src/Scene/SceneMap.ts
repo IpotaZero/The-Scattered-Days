@@ -60,13 +60,16 @@ export class SceneMap extends Scene {
 
         this.root.classList.add("scene-map", "paper-scene")
         this.root.innerHTML = `
-            <div class="map-seasons map-backdrop map-camera-layer"></div>
-            <div class="map-grid map-backdrop map-camera-layer"></div>
-            <div class="map-world map-camera-layer">
-                <svg class="map-edges">
-                    ${MapNodeViews.renderEdges(this.graph)}
-                </svg>
-                <div class="map-nodes"></div>
+            <div class="map-camera">
+                <div class="map-seasons map-backdrop"></div>
+                <div class="map-grid map-backdrop"></div>
+                <div class="map-world">
+                    <svg class="map-edges">
+                        ${MapNodeViews.renderEdges(this.graph)}
+                    </svg>
+                    <div class="map-nodes"></div>
+                </div>
+                <div class="texture-overlay map-backdrop"></div>
             </div>
             <div class="map-lives">
                 <div class="map-lives-count"></div>
@@ -78,13 +81,12 @@ export class SceneMap extends Scene {
                 <div data-control="open-equip"><span class="nowrap">型の変更</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
                 <div data-control="back-to-title"><span class="nowrap">タイトルへ戻る</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.cancel)})`}</div>
             </div>
-            <div class="texture-overlay map-backdrop map-camera-layer"></div>
         `
 
         // スマホは全体図のボタンを置かない代わりに、ピンチで縮めて広く見渡せるようにする
         this.camera = new MapCamera(
             this.root,
-            Array.from(this.root.querySelectorAll<HTMLElement>(".map-camera-layer")),
+            this.root.querySelector<HTMLElement>(".map-camera")!,
             this.graph.bounds(),
             isSmartPhone ? { min: 0.3, max: 2 } : { min: 1, max: 1 },
             () => !this.equipMenu && !this.minimap,

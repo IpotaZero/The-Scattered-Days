@@ -15,10 +15,10 @@
         var(--map-ground);
     color: var(--paper);
 
-    /* 暗い地では乗算だと質感が沈んで見えないので、ソフトライトで粒子だけを浮かせる */
+    /* ブレンドせず、ざらつきの画像を薄い透明度で地に重ねるだけにする(ブレンドは背面ごと描き直すのでスマホでは重い) */
     .texture-overlay {
-        mix-blend-mode: soft-light;
-        opacity: 0.4;
+        mix-blend-mode: normal;
+        opacity: 0.1;
     }
 
     /* スワイプ・ピンチを自前で処理するので、ブラウザ標準のスクロール/ズームジェスチャーには渡さない */
@@ -29,10 +29,21 @@
         cursor: grabbing;
     }
 
-    /* 方眼・紙の質感など、ワールドと一緒にtransformで動かす背景(src/Map/MapCamera.ts)。
+    /* カメラ(src/Map/MapCamera.ts)。背景とワールドをすべてこの1つの要素に入れ、そのtransformだけで動かす。
+       画面いっぱいの大きさで、拡大縮小の中心は画面中央 */
+    .map-camera {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 50%;
+
+        /* 常にカメラ専用のレイヤーにしておく。付けないと、移動のtransitionが始まるたびにレイヤーに分けられ、終わるたびに戻されて、
+           そのたびに中身(背景とワールド)全体を描き直す */
+        will-change: transform;
+    }
+
+    /* 方眼・紙の質感など、ワールドと一緒に動く背景。
        カメラは全ノードの範囲(--world-*)の中しか動かず、いちばん縮小したとき(--map-min-zoom)には画面1枚の1/--map-min-zoom倍が映るので、
-       その範囲+映る広さぶんを覆えば途切れない。
-       拡大縮小の中心はワールド(.map-world)と同じく画面中央に合わせる。この大きさなら、それは背景の中心から全ノードの範囲の中心ぶんずらした所になる */
+       その範囲+映る広さぶんを覆えば途切れない */
     .map-backdrop {
         position: absolute;
         inset: auto;
@@ -40,8 +51,6 @@
         top: calc(50% + var(--world-min-y) - 50% / var(--map-min-zoom) - 64px);
         width: calc(var(--world-width) + 100% / var(--map-min-zoom) + 128px);
         height: calc(var(--world-height) + 100% / var(--map-min-zoom) + 128px);
-        transform-origin: calc(50% - var(--world-min-x) - var(--world-width) / 2)
-            calc(50% - var(--world-min-y) - var(--world-height) / 2);
         pointer-events: none;
     }
 
@@ -67,7 +76,7 @@
         opacity: 0.25;
     }
 
-    /* ノードのワールド座標(px)の原点。ここを画面中央に置き、カメラ位置ぶんだけJSでtranslateして、ここを中心に拡大率ぶんscaleする */
+    /* ノードのワールド座標(px)の原点。ここを画面中央に置く。カメラ(.map-camera)が、カメラ位置ぶんだけtranslateして、画面中央を中心に拡大率ぶんscaleする */
     .map-world {
         position: absolute;
         left: 50%;
@@ -519,7 +528,7 @@
         bottom: 0.8em;
         left: 1em;
         right: 1em;
-        max-width: 20em;
+        max-width: 24em;
 
         display: flex;
         flex-direction: column;

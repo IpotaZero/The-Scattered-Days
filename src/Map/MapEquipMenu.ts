@@ -60,7 +60,7 @@ export class MapEquipMenu {
                 {
                     type: "submenu",
                     label: `針: ${mainEquipments[playerData.getLoadout().main]?.label ?? playerData.getLoadout().main}`,
-                    hides: [],
+                    hides: ["equip-root"],
                     onFocus: () => this.hideDescription(),
                     subMenu: () => this.buildMainSubMenu(),
                 },
