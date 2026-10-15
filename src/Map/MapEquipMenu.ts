@@ -188,8 +188,7 @@ export class MapEquipMenu {
     private buildSubOption(id: EquipmentId): MenuOption {
         const equipment = subEquipments[id]!
         const equip = () => {
-            playerData.setLoadout({ ...playerData.getLoadout(), sub: id })
-            this.menu.backToRoot()
+            this.menu.back(1)
         }
 
         if (playerData.getOwnedSubEquipmentIds().has(id)) {

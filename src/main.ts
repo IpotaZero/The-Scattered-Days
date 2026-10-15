@@ -1,4 +1,5 @@
 import { App } from "./App.js"
+import { playerData } from "./Data/PlayerData.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
     App.looper.start()
@@ -27,5 +28,5 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("contextmenu", (e) => {
     e.preventDefault()
 })
-
 ;(window as any).App = App
+;(window as any).data = playerData
