@@ -19,11 +19,16 @@ export class MapHud {
         this.scoreEl.textContent = `花粉 ${playerData.getTotalScore().toLocaleString()}`
     }
 
+    // 毎フレーム呼ばれる。文字が変わっていないときは書き換えず、画面を再描画させない
     updateLives(): void {
-        this.livesEl.textContent = `残機 ${playerData.getLives()} / ${playerData.getMaxLives()}`
+        MapHud.setText(this.livesEl, `残機 ${playerData.getLives()} / ${playerData.getMaxLives()}`)
 
         const remainingMs = playerData.getLifeRecoveryRemainingMs()
-        this.livesRecoveryEl.textContent = remainingMs > 0 ? `次の回復まで ${MapHud.formatMmSs(remainingMs)}` : ""
+        MapHud.setText(this.livesRecoveryEl, remainingMs > 0 ? `次の回復まで ${MapHud.formatMmSs(remainingMs)}` : "")
+    }
+
+    private static setText(el: HTMLElement, text: string) {
+        if (el.textContent !== text) el.textContent = text
     }
 
     private static formatMmSs(ms: number): string {

@@ -8,7 +8,8 @@ const DRAG_THRESHOLD = 6
 // ノード選択時、そのノードが画面中央に来るまでのカメラ移動にかける時間
 const PAN_MS = 250
 
-// 地図を映すカメラ。ワールド本体と、方眼・紙の質感などの背景(layers)をすべて同じtransformで動かすので、背景がワールドから遅れることがない。
+// 地図を映すカメラ。ワールド本体と、方眼・紙の質感などの背景をすべて1つの要素(camera)に入れ、その要素のtransformだけで動かす。
+// 背景がワールドから遅れることがなく、動かす要素も1つで済む。
 // 指一本のスワイプで動かし、指二本のピンチで拡大縮小する(拡大率はzoomRangeの中に収める)
 export class MapCamera {
     // 最後にピンチで決まった拡大率。アプリを開いている間だけ残り(セーブデータには入らない)、
@@ -18,6 +19,9 @@ export class MapCamera {
     // ワールド座標系でのカメラ位置(=画面中央に表示されるワールド座標)
     private pos: Point = { x: 0, y: 0 }
     private zoom: number
+    // cameraの中身を最後に描き直した時点の拡大率。cameraはmap.cssのwill-changeで描画済みの絵を拡大縮小するだけになるので、
+    // ピンチで拡大率が変わったら、指を離したときに描き直させる
+    private renderedZoom: number
 
     // 画面に触れている指(マウスなら左ボタン)ごとの現在位置(client座標)
     private readonly pointers = new Map<number, Point>()
@@ -36,7 +40,7 @@ export class MapCamera {
 
     constructor(
         private readonly root: HTMLElement,
-        private readonly layers: readonly HTMLElement[],
+        private readonly camera: HTMLElement,
         // カメラが動ける範囲(全ノードの範囲)。スワイプで無の空間へ延々と行けてしまわないようにする
         private readonly bounds: MapBounds,
         private readonly zoomRange: { readonly min: number; readonly max: number },
@@ -44,6 +48,7 @@ export class MapCamera {
         private readonly movable: () => boolean,
     ) {
         this.zoom = MapCamera.clamp(MapCamera.lastZoom, zoomRange.min, zoomRange.max)
+        this.renderedZoom = this.zoom
 
         // 背景はカメラが動ける範囲+いちばん縮小したときに映る広さを覆う大きさにする(map.cssの.map-backdrop参照)
         root.style.setProperty("--world-min-x", `${bounds.minX}px`)
@@ -64,12 +69,10 @@ export class MapCamera {
         this.apply(animate)
     }
 
-    // 拡大縮小の中心は画面中央(map.cssで各layerのtransform-originをそこに合わせている)
+    // 拡大縮小の中心は画面中央(cameraは画面いっぱいの大きさで、transform-originが中央)
     private apply(animate: boolean) {
-        for (const el of this.layers) {
-            el.style.transition = animate ? `transform ${PAN_MS}ms ease-out` : "none"
-            el.style.transform = `scale(${this.zoom}) translate(${-this.pos.x}px, ${-this.pos.y}px)`
-        }
+        this.camera.style.transition = animate ? `transform ${PAN_MS}ms ease-out` : "none"
+        this.camera.style.transform = `scale(${this.zoom}) translate(${-this.pos.x}px, ${-this.pos.y}px)`
     }
 
     private clampToBounds(pos: Point): Point {
@@ -128,6 +131,15 @@ export class MapCamera {
         }
 
         this.root.classList.remove("dragging")
+        if (this.zoom !== this.renderedZoom) this.rerender()
+    }
+
+    // will-changeを一度外して付け直し、いまの拡大率に合った解像度でcameraの中身を描き直させる。
+    // 外した状態を1フレーム以上見せてから付け直さないと、ブラウザが外したことに気づかない
+    private rerender() {
+        this.renderedZoom = this.zoom
+        this.camera.style.willChange = "auto"
+        requestAnimationFrame(() => requestAnimationFrame(() => (this.camera.style.willChange = "")))
     }
 
     private restartGesture() {
