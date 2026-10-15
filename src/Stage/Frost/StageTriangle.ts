@@ -61,7 +61,6 @@ class EnemyLine extends Enemy {
         yield* remodel(this)
             .format("line")
             .color("#ffbfbf")
-            .r(28)
             .g(function* (me) {
                 yield* Behavior.reaccel(me, 20, 40, 30, 14)
             })

@@ -103,7 +103,6 @@ class EnemyPlanet extends Enemy {
     private *ring() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#ffd0a0")
             .p(this.p.clone())
             .speed(4)

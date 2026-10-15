@@ -107,7 +107,6 @@ class EnemyBoss extends Enemy {
     private *ring() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#ffffff")
             .p(this.p.clone())
             .speed(2.8)
@@ -183,7 +182,6 @@ namespace Tiger {
         for (let k = 0; k < 5; k++) {
             yield* remodel(me)
                 .format("small-ball")
-                .r(5)
                 .color("#f0f0f0")
                 .p(me.p.clone())
                 .speed(4.4)
@@ -233,7 +231,6 @@ class HindLeg extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(6)
             .color("#d0e8ff")
             .p(this.p.clone())
             .speed(5.2)
@@ -286,7 +283,6 @@ class Cub extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#fff0d0")
             .p(this.p.clone())
             .speed(1.2)
@@ -316,7 +312,6 @@ class Young extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#f0f0ff")
             .p(this.p.clone())
             .speed(3.2)

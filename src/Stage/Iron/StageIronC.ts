@@ -76,7 +76,6 @@ class ShieldBearer extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(6)
             .color("#c8d4e8")
             .p(this.p.clone())
             .speed(4)

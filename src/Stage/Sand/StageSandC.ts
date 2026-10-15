@@ -57,7 +57,6 @@ class EnemyMaster extends Enemy {
 
                 yield* remodel(this)
                     .format("small-ball")
-                    .r(5)
                     .color("#ffe8b8")
                     .p(ant.p.clone())
                     .speed(2.2)
@@ -104,7 +103,6 @@ class Ant extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(6)
             .color("#ffd890")
             .p(this.p.clone())
             .speed(1.2)

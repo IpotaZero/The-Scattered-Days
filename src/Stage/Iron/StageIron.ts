@@ -95,7 +95,6 @@ class EnemyKabuto extends Enemy {
         for (let f = 0; f < 90; f += 5) {
             yield* remodel(this)
                 .format("small-ball")
-                .r(6)
                 .color("#ffffff")
                 .p(this.p.clone())
                 .speed(5)

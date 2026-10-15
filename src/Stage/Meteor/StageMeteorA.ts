@@ -98,7 +98,6 @@ class EnemyStardust extends Enemy {
     private *ring() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#b8d8ff")
             .p(this.p.clone())
             .speed(4)

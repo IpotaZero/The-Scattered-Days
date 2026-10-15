@@ -89,7 +89,6 @@ export namespace Meteor {
                     if (f % config.tailInterval === 0) {
                         yield* remodel(this)
                             .format("small-ball")
-                            .r(5)
                             .color(config.color)
                             .p(me.p.clone())
                             .speed(0)
@@ -167,7 +166,6 @@ export namespace Meteor {
                     if (f % 2 === 0) {
                         yield* remodel(this)
                             .format("small-ball")
-                            .r(5)
                             .color(color)
                             .p(me.p.clone())
                             .speed(0)
@@ -220,7 +218,6 @@ export namespace Meteor {
 
         yield* remodel(e)
             .format("small-ball")
-            .r(5)
             .color(color)
             .speed(0.5)
             .radian(Math.cos(normal - away) > 0 ? normal : normal + Math.PI)

@@ -49,7 +49,6 @@ class EnemyPupil extends Enemy {
     private *ring() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#e0d8ff")
             .p(this.p.clone())
             .speed(4.5)

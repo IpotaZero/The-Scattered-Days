@@ -65,8 +65,7 @@ class EnemyBoss extends Enemy {
 
         yield* remodel(this)
             .p(this.p.clone())
-            .shape(Shape.ball)
-            .r(4)
+            .format("small-ball")
             .speed(8)
             .color("#ffffff")
             .aim(this.game.player)
@@ -117,8 +116,7 @@ class EnemySatellite extends Enemy {
 
         yield* remodel(this)
             .p(this.p.clone())
-            .shape(Shape.donut)
-            .r(12)
+            .format("donut")
             .speed(6)
             .color("#ff3366")
             .aim(this.game.player)

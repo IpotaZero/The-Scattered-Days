@@ -79,7 +79,6 @@ class EnemyBoss extends Enemy {
     private *ring(generation: number) {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#ffc0a0")
             .p(this.p.clone())
             .speed(3.5)
@@ -165,7 +164,6 @@ class Wing extends Part {
         for (let f = 0; f < 60; f += 3) {
             yield* remodel(this)
                 .format("small-ball")
-                .r(6)
                 .color("#ff8a50")
                 .p(this.p.clone())
                 .speed(5.5)
@@ -216,7 +214,6 @@ class TailFeather extends Part {
 
         yield* remodel(this)
             .format("small-ball")
-            .r(6)
             .color("#ffd070")
             .p(this.p.clone())
             .speed(5)
@@ -234,7 +231,6 @@ class TailFeather extends Part {
 
                 yield* remodel(this)
                     .format("small-ball")
-                    .r(4)
                     .color("#ffb070")
                     .p(b.p.clone())
                     .speed(3.5)

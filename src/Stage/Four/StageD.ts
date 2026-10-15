@@ -85,7 +85,6 @@ class EnemyBoss extends Enemy {
     private *ring() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#90d0ff")
             .p(this.p.clone())
             .speed(3.5)
@@ -104,7 +103,6 @@ class EnemyBoss extends Enemy {
         for (let k = 0; k < rows; k++) {
             yield* remodel(this)
                 .format("small-ball")
-                .r(6)
                 .color("#70b8ff")
                 .speed(3)
                 .radian(T / 4)
@@ -236,7 +234,6 @@ class SnakeBody extends Part {
 
         yield* remodel(this)
             .format("small-ball")
-            .r(6)
             .color("#b0e8ff")
             .p(this.p.clone())
             .speed(0.5)
@@ -293,7 +290,6 @@ class SmallShell extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#b0e8ff")
             .p(this.p.clone())
             .speed(3.5)

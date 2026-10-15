@@ -86,7 +86,6 @@ class EnemySuzumushi extends Enemy {
     private *ring() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#e0d8ff")
             .p(this.p.clone())
             .speed(3.5)
@@ -166,7 +165,6 @@ namespace Suzumushi {
         for (let k = 0; k < 3; k++) {
             yield* remodel(me)
                 .format("small-ball")
-                .r(5)
                 .color("#fff0b0")
                 .p(me.p.clone())
                 .speed(4)
@@ -257,7 +255,6 @@ class Bell extends Part {
 
                 yield* remodel(this)
                     .format("small-ball")
-                    .r(5)
                     .color("#fff8d8")
                     .p(b.p.clone())
                     .speed(4.5)
@@ -317,7 +314,6 @@ class SmallBell extends Part {
 
                 yield* remodel(this)
                     .format("small-ball")
-                    .r(4)
                     .color("#fff8d8")
                     .p(b.p.clone())
                     .speed(4)

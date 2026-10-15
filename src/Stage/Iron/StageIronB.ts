@@ -59,7 +59,6 @@ class EnemyMaster extends Enemy {
 
                 yield* remodel(this)
                     .format("small-ball")
-                    .r(5)
                     .color("#ffd8c0")
                     .p(b.p.clone())
                     .speed(3.5)

@@ -66,7 +66,6 @@ class EnemyKagerou extends Enemy {
 
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#ffb0d0")
             .p(this.p.clone())
             .speed(bare ? 5 : 3)
@@ -123,7 +122,6 @@ class HindWing extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#fff0d0")
             .p(this.p.clone())
             .speed(0)
@@ -158,7 +156,6 @@ class Tail extends Part {
         for (let f = 0; f < 70; f += 4) {
             yield* remodel(this)
                 .format("small-ball")
-                .r(5)
                 .color("#c8d0f0")
                 .p(this.p.clone())
                 .speed(5.5)

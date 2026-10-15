@@ -103,7 +103,6 @@ class EnemyUsuba extends Enemy {
 
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#fff0c0")
             .p(this.p.clone())
             .speed(3.5)
@@ -120,7 +119,6 @@ class EnemyUsuba extends Enemy {
         for (let k = 0; k < 2; k++) {
             yield* remodel(this)
                 .format("small-ball")
-                .r(6)
                 .color("#ffc870")
                 .p(this.p.clone())
                 .speed(6)
@@ -178,7 +176,6 @@ class Jaw extends Part {
         for (let f = 0; f < 60; f += 3) {
             yield* remodel(this)
                 .format("small-ball")
-                .r(6)
                 .color("#ffd890")
                 .p(this.p.clone())
                 .speed(5)
@@ -248,7 +245,6 @@ class Sandbag extends Part {
 
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#fff0c0")
             .p(this.p.clone())
             .speed(0.5)
@@ -282,7 +278,6 @@ class Leg extends Part {
 
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#f0c878")
             .p(this.p.clone())
             .duplicate(10)
@@ -322,7 +317,6 @@ class Wing extends Part {
 
                 yield* remodel(this)
                     .format("small-ball")
-                    .r(5)
                     .color("#ffe8c0")
                     .p(b.p.clone())
                     .speed(5)

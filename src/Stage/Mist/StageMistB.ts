@@ -53,7 +53,6 @@ class EnemyMaster extends Enemy {
     private *ring() {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#ffb0d0")
             .p(this.p.clone())
             .speed(5)

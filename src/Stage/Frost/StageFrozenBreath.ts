@@ -73,10 +73,9 @@ class EnemyPupil extends Enemy {
         const base = this.random() * T
 
         yield* remodel(this)
-            .shape(Shape.ball)
+            .format("small-ball")
             .color("#dff6ff")
             .p(this.p.clone())
-            .r(4)
             .radian(base)
             .ex(SHARDS_PER_RING)
             .duplicate(RING_COUNT, (b, i) => {

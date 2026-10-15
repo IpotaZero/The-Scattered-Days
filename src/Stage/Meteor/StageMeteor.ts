@@ -38,7 +38,6 @@ namespace Hotaru {
     export function* lights(e: Enemy, clock: Enemy, count: number, speed: number, life: number) {
         yield* remodel(e)
             .format("small-ball")
-            .r(6)
             .color("#d8ff90")
             .p(e.p.clone())
             .speed(0)
@@ -397,7 +396,6 @@ class BigFirefly extends Part {
         for (let f = 0; f < 60; f += 4) {
             yield* remodel(this)
                 .format("small-ball")
-                .r(5)
                 .color("#e8ffb0")
                 .p(this.p.add(vec(-42 + f * 1.4, 0)))
                 .speed(0)
@@ -429,7 +427,6 @@ class LittleFirefly extends Part {
     protected *attack() {
         yield* remodel(this)
             .format("small-ball")
-            .r(4)
             .color("#f0ffd0")
             .p(this.p.clone())
             .speed(3)

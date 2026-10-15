@@ -115,7 +115,6 @@ class EnemyHornet extends Enemy {
             yield* Charge.burst(this, "#ffd060")
             yield* remodel(this)
                 .format("small-ball")
-                .r(6)
                 .color("#ffe0a0")
                 .p(this.p.clone())
                 .speed(1.5)
@@ -164,7 +163,6 @@ class EnemyHornet extends Enemy {
     private *ring(generation: number) {
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#ffd060")
             .p(this.p.clone())
             .speed(3.5)
@@ -276,7 +274,6 @@ namespace Hornet {
         for (let k = 0; k < 10 + generation * 2; k++) {
             yield* remodel(me)
                 .format("small-ball")
-                .r(5)
                 .color("#e8f0ff")
                 .p(me.p.clone())
                 .speed(4.5)
@@ -491,7 +488,6 @@ class Worker extends Part {
 
         yield* remodel(this)
             .format("small-ball")
-            .r(5)
             .color("#ffe890")
             .p(this.p.clone())
             .speed(5)
