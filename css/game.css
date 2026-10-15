@@ -38,11 +38,11 @@
         #root {
             width: 10em;
             max-width: 100%;
-            font-size: 1.6em;
+            font-size: 1.4em;
             padding: 0 1em;
-            
+
             border-radius: 0.1em;
-            
+
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -61,7 +61,7 @@
                 width: 3.8em;
                 text-align: center;
 
-                span{
+                span {
                     font-size: 0.7em;
                 }
             }
