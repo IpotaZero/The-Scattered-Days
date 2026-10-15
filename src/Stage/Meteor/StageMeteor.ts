@@ -1,17 +1,17 @@
 import { vec } from "@ipota/vec"
 import { Ease } from "@ipota/functions"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Stage } from "../Stage"
 import { T } from "../../T"
 import { Curves } from "../../utils/Functions/Curves"
-import { EnemyRendererBoss } from "../../Game/Actor/EnemyRendererBoss"
+import { EnemyRendererBoss } from "../../Game/Actor/Enemy/EnemyRendererBoss"
 import { Part } from "../Part"
 import { Meteor } from "./Meteor"
 import { Charge } from "../Charge"
 import { Size } from "../Size"
-import { Bullet } from "../../Game/Actor/Bullet"
+import { Bullet } from "../../Game/Actor/Bullet/Bullet"
 
 // 蛍の光。胴の frame にそろって、150フレームごとに一度光る
 namespace Hotaru {

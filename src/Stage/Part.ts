@@ -1,5 +1,5 @@
 import { Vec } from "@ipota/vec"
-import { Enemy } from "../Game/Actor/Enemy"
+import { Enemy } from "../Game/Actor/Enemy/Enemy"
 import { Game } from "../Game/Game"
 
 // ボスの部位(子機)。親について動き、決まった攻撃を一つだけくり返す。親が倒れると一緒に倒れる。

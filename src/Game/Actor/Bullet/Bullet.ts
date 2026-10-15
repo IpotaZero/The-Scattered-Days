@@ -1,12 +1,12 @@
 import { Vec, vec } from "@ipota/vec"
-import { MathEx } from "../../utils/Functions/MathEx"
-import { Actor } from "./Actor"
+import { MathEx } from "../../../utils/Functions/MathEx"
+import { Actor } from "../Actor"
 import { Motion } from "./Motion"
 import { Boundary } from "./Boundary"
 import { Shape } from "./Shape"
-import { uid } from "../../utils/Functions/uid"
-import { Game } from "../Game"
-import { IteratorManager } from "../IteratorManager"
+import { uid } from "../../../utils/Functions/uid"
+import { Game } from "../../Game"
+import { IteratorManager } from "../../IteratorManager"
 
 // 鏡が取り去られた双子が薄れて消えるまで
 const TWIN_FADE_FRAMES = 24

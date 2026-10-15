@@ -1,5 +1,5 @@
 import { Vec, vec } from "@ipota/vec"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { T } from "../../T"
 
@@ -41,7 +41,7 @@ export namespace Mochi {
                 const fall = Math.sqrt((2 * down) / config.gravity)
                 let v = vec((landing.x - me.p.x) / (rise + fall), -config.gravity * rise)
 
-                for (let bounce = 0; bounce < config.bounces && me.life > 0;) {
+                for (let bounce = 0; bounce < config.bounces && me.life > 0; ) {
                     v = v.add(vec(0, config.gravity))
                     me.p = me.p.add(v)
 

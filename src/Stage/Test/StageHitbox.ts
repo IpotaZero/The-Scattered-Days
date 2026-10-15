@@ -1,10 +1,10 @@
 import { vec } from "@ipota/vec"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, Format, Remodel, remodel } from "../../Game/Remodel"
 import { BulletCollision } from "../../Game/BulletCollision"
 import { Stage } from "../Stage"
-import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
+import { EnemyRendererCore } from "../../Game/Actor/Enemy/EnemyRendererCore"
 import { T } from "../../T"
 import { Size } from "../Size"
 

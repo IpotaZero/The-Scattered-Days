@@ -1,6 +1,6 @@
 import { vec, Vec } from "@ipota/vec"
-import { T } from "../../T"
-import { Ctx } from "../../utils/Functions/Ctx"
+import { T } from "../../../T"
+import { Ctx } from "../../../utils/Functions/Ctx"
 import type { Player } from "./Player"
 
 // 残像1コマ分のスナップショット

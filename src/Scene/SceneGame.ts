@@ -1,7 +1,7 @@
 import { playerData } from "../Data/PlayerData"
 import { Game } from "../Game/Game"
 import { mainEquipments, subEquipments } from "../Game/Equipment/PlayerEquipment"
-import type { PlayerConfig } from "../Game/Actor/Player"
+import type { PlayerConfig } from "../Game/Actor/Player/Player"
 import { MapGraph, type MapNode } from "../Map/MapGraph"
 import { Menu } from "../utils/Menu/Menu"
 import { Scene } from "../utils/Scene/Scene"

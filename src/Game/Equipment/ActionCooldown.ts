@@ -1,4 +1,4 @@
-import type { Player } from "../Actor/Player"
+import type { Player } from "../Actor/Player/Player"
 import { actionReadyEffect } from "./ActionReadyEffect"
 
 // 技を使った後のクールタイム。終わるまで自機のまわりに残り時間を描かせ、明けた瞬間に知らせる。

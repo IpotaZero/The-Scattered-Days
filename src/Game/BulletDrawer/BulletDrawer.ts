@@ -1,8 +1,8 @@
-import { Bullet } from "../Actor/Bullet"
+import { Bullet } from "../Actor/Bullet/Bullet"
 import { CameraTransform } from "../Actor/Camera"
 import { BulletGpuBatchRenderer } from "./BulletGpuBatchRenderer"
 import { Polygon } from "./Polygon"
-import type { Shape } from "../Actor/Shape"
+import type { Shape } from "../Actor/Bullet/Shape"
 
 // スプライトの種類。弾の見た目のほかに、ビームの根元の光を別のスプライトにしている
 type SpriteKind = Shape.Appearance | "beam-flare"

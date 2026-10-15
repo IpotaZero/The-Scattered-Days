@@ -1,15 +1,15 @@
-import { Actor } from "./Actor"
-import { IteratorManager } from "../IteratorManager"
-import { Game } from "../Game"
+import { Actor } from "../Actor"
+import { IteratorManager } from "../../IteratorManager"
+import { Game } from "../../Game"
 import { vec, Vec } from "@ipota/vec"
-import { T } from "../../T"
-import { Ctx } from "../../utils/Functions/Ctx"
-import { Behavior, remodel } from "../Remodel"
+import { T } from "../../../T"
+import { Ctx } from "../../../utils/Functions/Ctx"
+import { Behavior, remodel } from "../../Remodel"
 import { Ease } from "@ipota/functions"
-import type { MainEquipment, SubEquipment } from "../Equipment/PlayerEquipment"
+import type { MainEquipment, SubEquipment } from "../../Equipment/PlayerEquipment"
 import { PlayerRenderer } from "./PlayerRenderer"
 import { TriangleParticle } from "./TriangleParticle"
-import { Shape } from "./Shape"
+import { Shape } from "../Bullet/Shape"
 
 const HIT_SHAKE_INTENSITY = 12
 const HIT_SHAKE_FRAME = 60

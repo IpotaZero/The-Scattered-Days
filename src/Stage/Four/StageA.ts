@@ -1,13 +1,13 @@
 import { vec, Vec } from "@ipota/vec"
 import { Ease, GenUtils } from "@ipota/functions"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
-import { Shape } from "../../Game/Actor/Shape"
+import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Stage } from "../Stage"
 import { T } from "../../T"
-import { EnemyRendererBoss } from "../../Game/Actor/EnemyRendererBoss"
-import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
+import { EnemyRendererBoss } from "../../Game/Actor/Enemy/EnemyRendererBoss"
+import { EnemyRendererCore } from "../../Game/Actor/Enemy/EnemyRendererCore"
 import { Size } from "../Size"
 
 // 前作の StageDust(蛇)を移したもの。前作は30fps・幅630の画面だったので、時間は2倍、速さと大きさは0.81倍にしてある。

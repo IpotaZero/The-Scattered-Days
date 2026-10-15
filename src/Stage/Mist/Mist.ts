@@ -1,7 +1,7 @@
 import { Vec } from "@ipota/vec"
 import { Ease } from "@ipota/functions"
 import { Actor } from "../../Game/Actor/Actor"
-import { Bullet } from "../../Game/Actor/Bullet"
+import { Bullet } from "../../Game/Actor/Bullet/Bullet"
 import { Game } from "../../Game/Game"
 import { Behavior, Remodel, remodel } from "../../Game/Remodel"
 import { T } from "../../T"

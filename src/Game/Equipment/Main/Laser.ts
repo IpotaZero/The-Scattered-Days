@@ -2,10 +2,10 @@ import { vec } from "@ipota/vec"
 import { T } from "../../../T"
 import { GenUtils } from "@ipota/functions"
 import { Behavior, remodel } from "../../Remodel"
-import type { Player } from "../../Actor/Player"
+import type { Player } from "../../Actor/Player/Player"
 import type { MainEquipment } from "../types"
-import { Motion } from "../../Actor/Motion"
-import { Shape } from "../../Actor/Shape"
+import { Motion } from "../../Actor/Bullet/Motion"
+import { Shape } from "../../Actor/Bullet/Shape"
 
 const ビーム本数 = 2
 const 通常時間隔 = 180

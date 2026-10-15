@@ -1,5 +1,5 @@
 import { GenUtils } from "@ipota/functions"
-import type { Player } from "../../Actor/Player"
+import type { Player } from "../../Actor/Player/Player"
 import { actionCooldown } from "../ActionCooldown"
 import type { SubEquipment } from "../types"
 

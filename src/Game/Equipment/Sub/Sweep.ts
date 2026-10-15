@@ -1,6 +1,6 @@
 import { Ease } from "@ipota/functions"
 import { vec } from "@ipota/vec"
-import type { Player } from "../../Actor/Player"
+import type { Player } from "../../Actor/Player/Player"
 import { actionCooldown } from "../ActionCooldown"
 import { SweepBell } from "./SweepBell"
 import type { SubEquipment } from "../types"

@@ -1,11 +1,11 @@
 import { Ease, GenUtils } from "@ipota/functions"
 import { Vec } from "@ipota/vec"
-import { Behavior, remodel } from "../Remodel"
-import { T } from "../../T"
-import { Game } from "../Game"
+import { Behavior, remodel } from "../../Remodel"
+import { T } from "../../../T"
+import { Game } from "../../Game"
 import { Enemy } from "./Enemy"
-import { Dom } from "../../Dom"
-import { shakeElement } from "../../utils/Functions/shakeElement"
+import { Dom } from "../../../Dom"
+import { shakeElement } from "../../../utils/Functions/shakeElement"
 
 // ボス撃破演出は30FPSだった前作からの移植。同じ速さに見えるよう、フレーム数はこの倍率で伸ばし、速度は割る
 const SCALE = 2

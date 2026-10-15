@@ -1,4 +1,4 @@
-import { Enemy } from "../Game/Actor/Enemy"
+import { Enemy } from "../Game/Actor/Enemy/Enemy"
 import { Game } from "../Game/Game"
 import { IteratorManager } from "../Game/IteratorManager"
 import { Figure } from "./Figure"

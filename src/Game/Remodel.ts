@@ -1,13 +1,13 @@
 import { Ease, GenUtils } from "@ipota/functions"
 import { Vec, vec } from "@ipota/vec"
-import { Bullet, Reflector } from "./Actor/Bullet"
+import { Bullet, Reflector } from "./Actor/Bullet/Bullet"
 import { T } from "../T"
 import type { NumberKeys } from "@ipota/my-utils"
 import { Actor } from "./Actor/Actor"
-import { Enemy } from "./Actor/Enemy"
-import { Motion } from "./Actor/Motion"
-import { Boundary } from "./Actor/Boundary"
-import { Shape } from "./Actor/Shape"
+import { Enemy } from "./Actor/Enemy/Enemy"
+import { Motion } from "./Actor/Bullet/Motion"
+import { Boundary } from "./Actor/Bullet/Boundary"
+import { Shape } from "./Actor/Bullet/Shape"
 import { seededRandom } from "../utils/Functions/seededRandom"
 
 export function remodel<Parent extends Actor>(e: Parent) {

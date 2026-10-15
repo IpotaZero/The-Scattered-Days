@@ -2,7 +2,7 @@ import { vec } from "@ipota/vec"
 import { Ease } from "@ipota/functions"
 import { T } from "../../T"
 import { Ctx } from "../../utils/Functions/Ctx"
-import type { Player } from "../Actor/Player"
+import type { Player } from "../Actor/Player/Player"
 
 const 演出フレーム = 45
 

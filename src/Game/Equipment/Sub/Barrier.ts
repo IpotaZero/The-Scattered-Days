@@ -1,6 +1,6 @@
 import { Ease } from "@ipota/functions"
 import { Ctx } from "../../../utils/Functions/Ctx"
-import type { Player } from "../../Actor/Player"
+import type { Player } from "../../Actor/Player/Player"
 import { actionCooldown } from "../ActionCooldown"
 import type { SubEquipment } from "../types"
 

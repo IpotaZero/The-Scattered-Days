@@ -1,13 +1,13 @@
 import { vec } from "@ipota/vec"
 import { Ease, GenUtils } from "@ipota/functions"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { SpiderWeb } from "./SpiderWeb"
 import { Stage } from "../Stage"
 import { T } from "../../T"
-import { EnemyRendererBoss } from "../../Game/Actor/EnemyRendererBoss"
-import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
+import { EnemyRendererBoss } from "../../Game/Actor/Enemy/EnemyRendererBoss"
+import { EnemyRendererCore } from "../../Game/Actor/Enemy/EnemyRendererCore"
 import { Size } from "../Size"
 
 const WEB: SpiderWeb.Config = {

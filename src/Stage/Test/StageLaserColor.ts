@@ -1,9 +1,9 @@
 import { vec } from "@ipota/vec"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { remodel } from "../../Game/Remodel"
 import { Stage } from "../Stage"
-import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
+import { EnemyRendererCore } from "../../Game/Actor/Enemy/EnemyRendererCore"
 import { Size } from "../Size"
 
 export default class extends Stage {
@@ -29,9 +29,7 @@ class EnemyTarget extends Enemy {
 
     // 色相 0, 60, ..., 300 と白のビームを、30° から 150° の向きへ 20° おきに並べる
     private *beams() {
-        for (const [i, color] of (
-            [0, 60, 120, 180, 240, 300].map((h) => `hsl(${h},100%,50%)`) as Color[]
-        )
+        for (const [i, color] of ([0, 60, 120, 180, 240, 300].map((h) => `hsl(${h},100%,50%)`) as Color[])
             .concat(["white"])
             .entries()) {
             yield* remodel(this)

@@ -1,12 +1,12 @@
 import { vec, Vec } from "@ipota/vec"
-import { Actor } from "./Actor"
+import { Actor } from "../Actor"
 import { Ease } from "@ipota/functions"
-import { Game } from "../Game"
+import { Game } from "../../Game"
 import { IEnemyRenderer } from "./IEnemyRenderer"
 import { EnemyRendererMob } from "./EnemyRendererMob"
-import { seededRandom } from "../../utils/Functions/seededRandom"
+import { seededRandom } from "../../../utils/Functions/seededRandom"
 import { Battery } from "./Battery"
-import { IteratorManager } from "../IteratorManager"
+import { IteratorManager } from "../../IteratorManager"
 
 export abstract class Enemy extends Actor {
     private readonly baseR: number

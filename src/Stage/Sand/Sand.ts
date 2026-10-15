@@ -1,5 +1,5 @@
 import { vec } from "@ipota/vec"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { remodel } from "../../Game/Remodel"
 import { T } from "../../T"
 

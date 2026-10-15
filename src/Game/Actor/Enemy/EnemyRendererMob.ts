@@ -1,4 +1,4 @@
-import { Ctx } from "../../utils/Functions/Ctx"
+import { Ctx } from "../../../utils/Functions/Ctx"
 import { vec } from "@ipota/vec"
 import { Enemy } from "./Enemy"
 import { IEnemyRenderer } from "./IEnemyRenderer"

@@ -1,6 +1,6 @@
 import { Vec } from "@ipota/vec"
 import { T } from "../T"
-import { Bullet } from "./Actor/Bullet"
+import { Bullet } from "./Actor/Bullet/Bullet"
 import { Polygon } from "./BulletDrawer/Polygon"
 
 type Circle = {
@@ -27,13 +27,7 @@ export class BulletCollision {
         const sin = Math.sin(b.radian)
 
         if (b.shape.collision === "line") {
-            return this.isCollidingLine(
-                e,
-                b.p.x + cos * b.r,
-                b.p.y + sin * b.r,
-                b.p.x - cos * b.r,
-                b.p.y - sin * b.r,
-            )
+            return this.isCollidingLine(e, b.p.x + cos * b.r, b.p.y + sin * b.r, b.p.x - cos * b.r, b.p.y - sin * b.r)
         } else if (b.shape.collision === "arrow") {
             const 右端x = b.p.x + cos * b.r
             const 右端y = b.p.y + sin * b.r

@@ -1,9 +1,9 @@
 import { Vec, vec } from "@ipota/vec"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
-import { Motion } from "../../Game/Actor/Motion"
-import { Shape } from "../../Game/Actor/Shape"
+import { Motion } from "../../Game/Actor/Bullet/Motion"
+import { Shape } from "../../Game/Actor/Bullet/Shape"
 import { Ease, GenUtils } from "@ipota/functions"
 import { T } from "../../T"
 

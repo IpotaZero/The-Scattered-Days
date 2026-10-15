@@ -1,14 +1,14 @@
 import { vec } from "@ipota/vec"
 import { Ease, GenUtils } from "@ipota/functions"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Game } from "../../Game/Game"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { Stage } from "../Stage"
 import { Figure } from "../Figure"
 import { T } from "../../T"
 import { Curves } from "../../utils/Functions/Curves"
-import { EnemyRendererBoss } from "../../Game/Actor/EnemyRendererBoss"
-import { EnemyRendererCore } from "../../Game/Actor/EnemyRendererCore"
+import { EnemyRendererBoss } from "../../Game/Actor/Enemy/EnemyRendererBoss"
+import { EnemyRendererCore } from "../../Game/Actor/Enemy/EnemyRendererCore"
 import { Size } from "../Size"
 
 const ENTRANCE_FRAMES = 150

@@ -1,6 +1,6 @@
 import { Vec, vec } from "@ipota/vec"
 import { Ease, GenUtils } from "@ipota/functions"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { Behavior, remodel } from "../../Game/Remodel"
 import { T } from "../../T"
 import { Mirage } from "./Mirage"

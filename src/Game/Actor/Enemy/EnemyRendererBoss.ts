@@ -1,9 +1,9 @@
 import { Enemy } from "./Enemy"
 import { IEnemyRenderer } from "./IEnemyRenderer"
 import { DeathEffect } from "./DeathEffect"
-import { Ctx } from "../../utils/Functions/Ctx"
+import { Ctx } from "../../../utils/Functions/Ctx"
 import { vec } from "@ipota/vec"
-import { T } from "../../T"
+import { T } from "../../../T"
 
 const WHITE = "#ffffff80"
 const IVORY = "rgba(240, 230, 205, 0.4)"

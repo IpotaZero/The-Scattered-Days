@@ -1,7 +1,7 @@
 import { Vec, vec } from "@ipota/vec"
 import { GenUtils } from "@ipota/functions"
-import { Bullet } from "../../Game/Actor/Bullet"
-import { Enemy } from "../../Game/Actor/Enemy"
+import { Bullet } from "../../Game/Actor/Bullet/Bullet"
+import { Enemy } from "../../Game/Actor/Enemy/Enemy"
 import { remodel } from "../../Game/Remodel"
 import { T } from "../../T"
 

@@ -1,7 +1,7 @@
 import { vec, Vec } from "@ipota/vec"
-import { T } from "../../T"
-import { Ctx } from "../../utils/Functions/Ctx"
-import { Game } from "../Game"
+import { T } from "../../../T"
+import { Ctx } from "../../../utils/Functions/Ctx"
+import { Game } from "../../Game"
 
 // 当たり判定を持たない、回転しながら縮んで消えていく三角形の粒子。描画はgame.drawInWorldで予約する
 export namespace TriangleParticle {
