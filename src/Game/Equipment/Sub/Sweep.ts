@@ -11,7 +11,6 @@ import type { SubEquipment } from "../types"
 const ためフレーム = 2
 const 閃光フレーム = 20
 const 広がりフレーム = 60
-const 余韻フレーム = 80
 const クールダウンフレーム = 900
 
 export const sweep: SubEquipment = {
@@ -33,7 +32,7 @@ export const sweep: SubEquipment = {
 
 // 使うと、ためのあいだは弾に何もせず、自機のまわりで輪が縮む(自機は動ける)。
 // ためが終わった瞬間、画面全体が一瞬光り、その自機の位置から波が広がって、画面のいちばん遠い角まで届く。
-// 届いたあとは弾に何もせず、見た目(SweepBell)だけが余韻のぶん続く
+// 届いたあとは弾に何もせず、見た目(SweepBell)がすべて透明になりきるまで続く
 function* sweepWave(player: Player): Generator<void, void, void> {
     const { WIDTH, HEIGHT } = player.game
 
@@ -51,7 +50,7 @@ function* sweepWave(player: Player): Generator<void, void, void> {
     player.game.camera.shake(8, 8)
     player.game.se.bomb.play()
 
-    for (let i = 1; i <= 広がりフレーム + 余韻フレーム; i++) {
+    for (let i = 1; i / 広がりフレーム < SweepBell.END; i++) {
         const radius = Ease.Out(Math.min(i, 広がりフレーム) / 広がりフレーム) * far
 
         if (i <= 広がりフレーム) {

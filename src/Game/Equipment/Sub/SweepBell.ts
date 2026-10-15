@@ -11,6 +11,17 @@ const IVORY = "255, 244, 220"
 // elapsedは、波が画面のいちばん遠い角に届く瞬間を1とした経過時間で、届いたあとも増え続ける。
 // 波の先端より外には何も描かない。弾を花粉に変える境界と、見える境界が一致する。
 export namespace SweepBell {
+    // 波の先端が透明になりきるelapsed
+    const FRONT_LIFE = 1.5
+    // 最初の波紋が広がり始めるelapsed、波紋どうしの間隔、波紋ひとつが広がって透明になりきるまでの長さ
+    const ECHO_START = 0.4
+    const ECHO_GAP = 0.55
+    const ECHO_LIFE = 1
+    const ECHO_COUNT = 4
+
+    // 最後の波紋まで含めて、すべてが透明になりきるelapsed。これ以降、drawは何も描かない
+    export const END = Math.max(FRONT_LIFE, ECHO_START + ECHO_GAP * (ECHO_COUNT - 1) + ECHO_LIFE)
+
     // 波が出る直前のため。自機のまわりで三重の輪が加速しながら縮み、縮むほど濃くなる。
     // いちばん外の輪の内側には刻み目が並び、輪とともに縮んで、中心に寄ると薄れる。
     // progressは、ための始まりを0、波が出る瞬間を1とする
@@ -48,7 +59,7 @@ export namespace SweepBell {
     }
 
     export function draw(ctx: CanvasRenderingContext2D, center: Vec, far: number, radius: number, elapsed: number) {
-        const fade = Math.max(0, 1 - elapsed / 1.5) ** 1.5
+        const fade = Math.max(0, 1 - elapsed / FRONT_LIFE) ** 1.5
 
         glow(ctx, center, radius, fade)
         front(ctx, center, radius, elapsed, fade)
@@ -96,10 +107,10 @@ export namespace SweepBell {
         }
     }
 
-    // 打たれた場所から、輪が間を置いて四つ広がる。あとのものほど薄く、広がりきる前に消える
+    // 打たれた場所から、輪が間を置いて順に広がる。あとのものほど薄く、広がりきったところで透明になる
     function echoes(ctx: CanvasRenderingContext2D, center: Vec, far: number, elapsed: number) {
-        for (let k = 0; k < 4; k++) {
-            const progress = elapsed - 0.4 - 0.55 * k
+        for (let k = 0; k < ECHO_COUNT; k++) {
+            const progress = (elapsed - ECHO_START - ECHO_GAP * k) / ECHO_LIFE
             if (progress < 0 || progress >= 1) continue
 
             ctx.globalAlpha = (1 - progress) * 0.4 * 0.75 ** k
