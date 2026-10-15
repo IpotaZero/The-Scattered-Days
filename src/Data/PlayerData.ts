@@ -162,7 +162,7 @@ export class PlayerData {
         return this.lives
     }
 
-    // ステージ終了時(SceneGameの終了時)に呼び、ステージ中に変化した残機をそのまま引き継ぐ
+    // ステージ中の被弾・自爆のたびに呼び、変化した残機をそのまま引き継ぐ
     setLives(lives: number) {
         this.lives = Math.min(MAX_LIVES, Math.max(0, lives))
         this.save()

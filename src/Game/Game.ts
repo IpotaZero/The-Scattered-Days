@@ -46,6 +46,8 @@ export type GameConfig = {
     onWin: () => void
     onLose: (score: number) => void
     onScoreCollected: (score: number) => void
+    // 自機が被弾・自爆するたびに、減った後のlifeを渡して呼ばれる
+    onPlayerHit: (life: number) => void
     playerConfig: PlayerConfig
     // ゲーム全体の更新速度を変える(ボス撃破時のスローモーション用)
     setFPS: (fps: number) => void
@@ -116,6 +118,7 @@ export class Game {
     private readonly onWin: () => void
     private readonly onLose: (score: number) => void
     private readonly onScoreCollected: (score: number) => void
+    readonly onPlayerHit: (life: number) => void
     private readonly setFPS: (fps: number) => void
 
     private constructor({
@@ -127,6 +130,7 @@ export class Game {
         onWin,
         onLose,
         onScoreCollected,
+        onPlayerHit,
         playerConfig,
         setFPS,
         scenery,
@@ -138,6 +142,7 @@ export class Game {
         this.onWin = onWin
         this.onLose = onLose
         this.onScoreCollected = onScoreCollected
+        this.onPlayerHit = onPlayerHit
 
         // 弾のテクスチャはステージをまたいで使い回す。ステージに入るとき、軽量の切り替えがあったか半分を超えて埋まっていれば空にする
         Game.bulletDrawer.useLite(liteBullets)

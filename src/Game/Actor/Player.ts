@@ -14,7 +14,7 @@ const HIT_SHAKE_INTENSITY = 12
 const HIT_SHAKE_FRAME = 60
 
 // Player自身はセーブデータ(Data層)を知らない。呼び出し側(Scene層)が
-// playerDataから読んだ値をここに詰めて渡す。被弾等で変化したlifeはScene層が終了時に読み取って保存する
+// playerDataから読んだ値をここに詰めて渡す。被弾等で変化したlifeはgame.onPlayerHit経由でScene層へ渡る
 export type PlayerConfig = {
     readonly initialLife: number
     readonly maxLife: number
@@ -102,6 +102,7 @@ export class Player extends Actor {
         } else {
             this.life = Math.max(-1, this.life - damage)
         }
+        this.game.onPlayerHit(this.life)
         this.game.se.hit.play()
         this.game.camera.shake(HIT_SHAKE_INTENSITY, HIT_SHAKE_FRAME)
 
@@ -118,6 +119,7 @@ export class Player extends Actor {
     selfDestruct() {
         this.hitCount++
         this.life = Math.max(-1, this.life - 1)
+        this.game.onPlayerHit(this.life)
 
         this.game.se.hit.play()
         this.game.camera.shake(HIT_SHAKE_INTENSITY, HIT_SHAKE_FRAME)
