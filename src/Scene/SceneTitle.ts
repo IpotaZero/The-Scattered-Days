@@ -21,7 +21,7 @@ export class SceneTitle extends Scene {
             "beforeend",
             `
             <div class="title-content">
-                <div class="title-version">ver. dev</div>
+                <div class="title-version">ver. 1.0.0</div>
                 <div class="title-copyright">&copy; ososikirackets</div>
                 <div class="title-logo">
                     <span class="title-logo-line">The</span>
