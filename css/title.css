@@ -136,6 +136,15 @@
     max-width: 100%;
 }
 
+/* スマホ以外(マウスなど細かく指せるポインタを持つ端末)の上書き。
+   上の.title-logoがスマホ用の既定値で、PCでだけ変えたい項目をここに並べる。
+   PCではメニューが右下に離れるので、ロゴだけ底へ近づく */
+@media (hover: hover) and (pointer: fine) {
+    .title-logo {
+        bottom: 3rem;
+    }
+}
+
 /* 1行ずつ静かに浮かび上がらせる。装飾は真ん中の行の金色だけに絞る */
 .title-logo-line {
     font-size: inherit;
@@ -223,10 +232,10 @@
     #root {
         position: absolute;
         bottom: 2em;
-        left: 1em;
 
         display: flex;
-        max-width: 20em;
+        width: 16em;
+        max-width: calc(100% - 2em);
         right: 1em;
 
         transition:
