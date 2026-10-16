@@ -1,4 +1,5 @@
 import { GenUtils } from "@ipota/functions"
+import { App } from "../../App"
 import { seededRandom } from "../../utils/Functions/seededRandom"
 import { Scene } from "../../utils/Scene/Scene"
 import { SceneCutscene } from "./SceneCutscene"
@@ -87,6 +88,12 @@ export class SceneEnding extends SceneCutscene {
         this.bee.y = 150 - 37 * 1.5
         this.bee.scale = 1.5
         this.bee.render()
+    }
+
+    // 地図や道場の曲が鳴っていれば、1秒かけて消して止める。EDの絵はフェードを待たずに始まる
+    protected override async onStart(): Promise<void> {
+        await super.onStart()
+        if (App.bm.isPlaying()) App.bm.fadeOut(1)
     }
 
     protected *script(): Generator<void, void, void> {
