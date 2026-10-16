@@ -1,6 +1,7 @@
 import { App } from "../App"
 import { Dom } from "../Dom"
 import { playerData } from "../Data/PlayerData"
+import { mainEquipments, type MainEquipment } from "../Game/Equipment/PlayerEquipment"
 import { MapGraph, MapNodeId } from "../Map/MapGraph"
 import { MapEquipMenu } from "../Map/MapEquipMenu"
 import { MapHud } from "../Map/MapHud"
@@ -8,7 +9,7 @@ import { MapNavigation, type Direction } from "../Map/MapNavigation"
 import { MapNodeViews } from "../Map/MapNodeViews"
 import { MapMinimap } from "../Map/MapMinimap"
 import { MapBee } from "../Map/MapBee"
-import { MapBadgeSeals } from "../Map/MapBadgeSeals"
+import { MapEdgeSeals } from "../Map/MapEdgeSeals"
 import { MapCamera } from "../Map/MapCamera"
 import { MapProps } from "../Map/MapProps"
 import { InputCode } from "../utils/InputCode"
@@ -95,8 +96,8 @@ export class SceneMap extends Scene {
         const nodesEl = this.root.querySelector<HTMLElement>(".map-nodes")!
         // 塊のまわりの小物は、辺より手前・ノードより奥に置く
         nodesEl.before(new MapProps(this.graph, playerData).el)
-        // 最後の場所への関所の辺には、免状の印を辺より手前・ノードより奥に並べる
-        nodesEl.before(new MapBadgeSeals(this.graph, playerData).el)
+        // 条件のある辺には、条件の印を辺より手前・ノードより奥に並べる
+        nodesEl.before(new MapEdgeSeals(this.graph, playerData).el)
         this.nodeViews = new MapNodeViews(this.graph, nodesEl, (id) => {
             // スワイプ・ピンチの指を離した直後に発火するclickをタップ選択として扱わない
             if (this.camera.dragged) return
@@ -118,7 +119,7 @@ export class SceneMap extends Scene {
             this.openEquipMenu()
         })
 
-        this.bee = new MapBee(this.graph.node(this.selectedId))
+        this.bee = new MapBee(this.graph.node(this.selectedId), this.wieldedNeedle())
         this.root.querySelector(".map-world")!.appendChild(this.bee.el)
 
         this.hud = new MapHud(this.root.querySelector<HTMLElement>(".map-lives")!)
@@ -273,6 +274,7 @@ export class SceneMap extends Scene {
             () => {
                 this.hud.updateScore()
                 this.hud.updateLives()
+                this.bee.wield(this.wieldedNeedle())
             },
             () => this.closeEquipMenu(),
         )
@@ -281,5 +283,10 @@ export class SceneMap extends Scene {
     private closeEquipMenu() {
         this.equipMenu?.fadeOutAndRemove(OVERLAY_FADE_OUT_MS)
         this.equipMenu = undefined
+    }
+
+    // いま装備している針。消した針を装備したままの保存データでは、ゲームと同じく拡散として扱う(SceneGame)
+    private wieldedNeedle(): MainEquipment {
+        return mainEquipments[playerData.getLoadout().main] ?? mainEquipments.standard
     }
 }

@@ -6,6 +6,7 @@ import type { Bullet } from "../../Actor/Bullet/Bullet"
 import type { Enemy } from "../../Actor/Enemy/Enemy"
 import type { Player } from "../../Actor/Player/Player"
 import type { MainEquipment } from "../types"
+import { SvgFile } from "../../../utils/SvgFile"
 
 const 連射間隔 = 6
 const 弾数 = 7
@@ -30,6 +31,7 @@ const 最大角速度 = T / 50
 export const standard: MainEquipment = {
     label: "拡散",
     description: "前方に打ち込み。追尾弾を添えて。",
+    icon: new SvgFile("assets/image/needle/standard.svg"),
     *fire(player) {
         // メインの弾とホーミング弾は間隔が違うので、別々のループとして並行に走らせる
         yield* GenUtils.all({

@@ -13,10 +13,10 @@ export class MapEquipMenu {
     private readonly menu: Menu
     private readonly descriptionEl: HTMLElement
 
-    // pollenChangedは花粉の量が変わったとき(技の習得・残機の回復)、closeは閉じたいときに呼ばれる
+    // changedは型か花粉の量が変わったとき(針の選び直し・技の習得・残機の回復)、closeは閉じたいときに呼ばれる
     constructor(
         parent: HTMLElement,
-        private readonly pollenChanged: () => void,
+        private readonly changed: () => void,
         private readonly close: () => void,
     ) {
         this.menu = new Menu(
@@ -108,7 +108,7 @@ export class MapEquipMenu {
                     () => {
                         // 確認を開いている間に実時間で満タンまで回復していたら、何も払わずに戻る
                         if (playerData.canBuyLife()) playerData.buyLife()
-                        this.pollenChanged()
+                        this.changed()
                         this.menu.back(1)
                     },
                     {
@@ -144,6 +144,7 @@ export class MapEquipMenu {
                     onFocus: () => this.showDescription(mainEquipments[id]?.description ?? ""),
                     onSelect: () => {
                         playerData.setLoadout({ ...playerData.getLoadout(), main: id })
+                        this.changed()
                         this.menu.backToRoot()
                     },
                 },
@@ -214,7 +215,7 @@ export class MapEquipMenu {
                     this.menu,
                     () => {
                         playerData.learnSubEquipment(id, equipment.price)
-                        this.pollenChanged()
+                        this.changed()
                         equip()
                         this.menu.back(1)
                     },

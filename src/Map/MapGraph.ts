@@ -172,7 +172,7 @@ export class MapGraph {
     static fromCanvas(canvas: JsonCanvas): MapGraph {
         const nodes = canvas.nodes.filter((card) => card.type === "text").map((card) => MapNode.fromCanvas(card))
         const nodesById = new Map(nodes.map((node) => [node.id, node]))
-        const badges = new Set(nodes.flatMap((node) => (node.badge ? [node.badge] : [])))
+        const masters = nodes.filter((node) => node.badge)
 
         const findNode = (id: string): MapNode => {
             const node = nodesById.get(id)
@@ -185,7 +185,7 @@ export class MapGraph {
                 new MapEdge(
                     findNode(edge.fromNode),
                     findNode(edge.toNode),
-                    EdgeCondition.fromLabel(edge.label?.trim() || undefined, badges),
+                    EdgeCondition.fromLabel(edge.label?.trim() || undefined, masters),
                 ),
         )
 

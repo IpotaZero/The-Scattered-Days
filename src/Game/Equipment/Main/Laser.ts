@@ -5,6 +5,7 @@ import { Behavior, remodel } from "../../Remodel"
 import type { Player } from "../../Actor/Player/Player"
 import type { MainEquipment } from "../types"
 import { Motion } from "../../Actor/Bullet/Motion"
+import { SvgFile } from "../../../utils/SvgFile"
 
 const ビーム本数 = 2
 const 通常時間隔 = 180
@@ -23,6 +24,7 @@ const 集中時威力 = 1
 export const laser: MainEquipment = {
     label: "貫通",
     description: "自機の左右から常時光線を出し続ける。",
+    icon: new SvgFile("assets/image/needle/laser.svg"),
     *fire(player) {
         while (!player.game.isPlaying) yield
 

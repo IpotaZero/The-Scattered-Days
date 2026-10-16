@@ -1,9 +1,12 @@
 import type { Player } from "../Actor/Player/Player"
+import type { SvgFile } from "../../utils/SvgFile"
 
 // 主装備: 攻撃の仕方に対応する
 export type MainEquipment = {
     readonly label: string
     readonly description: string
+    // 地図でこの針を表す印(assets/image/needle/ のSVGファイル、viewBox="-12 -12 24 24"、線は currentColor)
+    readonly icon: SvgFile
     fire(player: Player): Generator<void, void, void>
 }
 
