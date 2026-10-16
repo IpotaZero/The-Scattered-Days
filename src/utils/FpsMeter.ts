@@ -33,9 +33,9 @@ export class FpsMeter {
 
     private render() {
         this.element.textContent = [
-            `画面 ${this.frames.fps.toFixed(0)}`,
-            `描画 ${this.draws.fps.toFixed(0)} (最大${this.draws.worstMs.toFixed(0)}ms)`,
-            `更新 ${this.updates.fps.toFixed(0)}`,
+            `画面 ${this.frames.fps.toFixed(1)} (最大${this.frames.worstMs.toFixed(0)}ms)`,
+            `描画 ${this.draws.fps.toFixed(1)} (最大${this.draws.worstMs.toFixed(0)}ms)`,
+            `更新 ${this.updates.fps.toFixed(1)} (最大${this.updates.worstMs.toFixed(0)}ms)`,
         ].join("\n")
     }
 }

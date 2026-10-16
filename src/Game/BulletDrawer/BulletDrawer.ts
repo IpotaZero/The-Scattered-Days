@@ -478,10 +478,14 @@ export class BulletDrawer {
 
     private drawDonut(bullet: Look, halfCanvasSize: number) {
         const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
+
+        if (!this.lite) {
+            ctx.shadowColor = bullet.color
+            ctx.shadowBlur = bullet.r
+        }
+
         ctx.beginPath()
         ctx.arc(center, center, bullet.r, 0, Math.PI * 2)
-        ctx.shadowColor = bullet.color
-        ctx.shadowBlur = bullet.r
         ctx.strokeStyle = bullet.color
         ctx.lineWidth = 3
         ctx.stroke()
@@ -492,15 +496,20 @@ export class BulletDrawer {
         ctx.stroke()
         ctx.lineWidth = 1
         ctx.stroke()
+
         return canvas
     }
 
     private drawBall(bullet: Look, halfCanvasSize: number) {
         const { canvas, ctx, center } = this.createOffscreenCanvas(halfCanvasSize)
+
+        if (!this.lite) {
+            ctx.shadowColor = bullet.color
+            ctx.shadowBlur = 14
+        }
+
         ctx.beginPath()
         ctx.arc(center, center, bullet.r, 0, Math.PI * 2)
-        ctx.shadowColor = bullet.color
-        ctx.shadowBlur = 14
         ctx.fillStyle = bullet.color
         ctx.fill()
 
@@ -510,6 +519,7 @@ export class BulletDrawer {
         ctx.shadowColor = "white"
         ctx.fillStyle = "white"
         ctx.fill()
+
         return canvas
     }
 
@@ -523,6 +533,7 @@ export class BulletDrawer {
         ctx.translate(center, center)
         ctx.fillStyle = bullet.color
         ctx.fillRect(-bullet.r, -bullet.r, bullet.r * 2, bullet.r * 2)
+
         return canvas
     }
 

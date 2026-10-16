@@ -10,10 +10,10 @@ const remote = execFileSync("git", ["remote", "get-url", "origin"], { cwd: root 
 
 execFileSync("npx", ["vite", "build"], { cwd: root, stdio: "inherit", shell: true })
 
-// index.html・css・assets・distをそのままの配置で一時ディレクトリに写し、新規リポジトリにしてgh-pagesへ強制pushする
+// index.html・manifest・sw.js・css・assets・distをそのままの配置で一時ディレクトリに写し、新規リポジトリにしてgh-pagesへ強制pushする
 const tmp = mkdtempSync(join(tmpdir(), "deploy-"))
 try {
-    for (const name of ["index.html", "css", "assets", "dist"]) {
+    for (const name of ["index.html", "manifest.webmanifest", "sw.js", "css", "assets", "dist"]) {
         cpSync(join(root, name), join(tmp, name), {
             recursive: true,
             filter: (src) => !src.includes(".obsidian"),
