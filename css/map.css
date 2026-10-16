@@ -76,6 +76,25 @@
         opacity: 0.25;
     }
 
+    /* スマホ。背景3枚はカメラの外に出て(src/Scene/SceneMap.ts)、画面と同じ大きさで画面に固定される。
+       方眼と質感はカメラが動いても動かない。
+       季節のグラデーションは画面の幅の10倍に引き伸ばし、選んだノードの位置(--season)のところだけが画面いっぱいに出る。
+       ノードを移るたびに色が切り替わる */
+    &.fixed-backdrop {
+        .map-backdrop {
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-seasons {
+            background-size: 1000% 100%;
+            background-repeat: no-repeat;
+            background-position-x: calc(var(--season, 0) * 100%);
+        }
+    }
+
     /* ノードのワールド座標(px)の原点。ここを画面中央に置く。カメラ(.map-camera)が、カメラ位置ぶんだけtranslateして、画面中央を中心に拡大率ぶんscaleする */
     .map-world {
         position: absolute;
@@ -94,10 +113,10 @@
         line {
             stroke: var(--paper);
             stroke-width: 1.5;
-            opacity: 0.4;
+            opacity: 0.6;
 
             &.locked {
-                opacity: 0.1;
+                opacity: 0.2;
             }
 
             /* 主装備standardでのクリアが条件の辺は破線 */

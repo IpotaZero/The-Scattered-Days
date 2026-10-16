@@ -2,7 +2,7 @@ import { App } from "../App"
 import { Dom } from "../Dom"
 import { playerData } from "../Data/PlayerData"
 import { mainEquipments, type MainEquipment } from "../Game/Equipment/PlayerEquipment"
-import { MapGraph, MapNodeId } from "../Map/MapGraph"
+import { MapGraph, MapNode, MapNodeId } from "../Map/MapGraph"
 import { MapEquipMenu } from "../Map/MapEquipMenu"
 import { MapHud } from "../Map/MapHud"
 import { MapNavigation, type Direction } from "../Map/MapNavigation"
@@ -84,12 +84,22 @@ export class SceneMap extends Scene {
             </div>
         `
 
-        // スマホは全体図のボタンを置かない代わりに、ピンチで縮めて広く見渡せるようにする
+        const cameraEl = this.root.querySelector<HTMLElement>(".map-camera")!
+        if (isSmartPhone) {
+            // スマホは背景3枚をカメラの外に出し、画面に固定する。背景はカメラと一緒には動かなくなる(map.cssの.fixed-backdrop)。
+            // カメラの中に入れると、世界の広さ×縮小ぶんの巨大なレイヤーになり、メモリを食う
+            this.root.classList.add("fixed-backdrop")
+            cameraEl.before(...Array.from(cameraEl.querySelectorAll(".map-seasons, .map-grid")))
+            cameraEl.after(...Array.from(cameraEl.querySelectorAll(".texture-overlay")))
+        }
+
+        // スマホは全体図のボタンを置かない代わりに、ピンチで縮めて広く見渡せるようにする。
+        // 縮めるほど一度に描く範囲が広がってメモリを食うので、縮めすぎないようにする
         this.camera = new MapCamera(
             this.root,
-            this.root.querySelector<HTMLElement>(".map-camera")!,
+            cameraEl,
             this.graph.bounds(),
-            isSmartPhone ? { min: 0.3, max: 2 } : { min: 1, max: 1 },
+            isSmartPhone ? { min: 0.6, max: 2 } : { min: 1, max: 1 },
             () => !this.equipMenu && !this.minimap,
         )
 
@@ -126,6 +136,7 @@ export class SceneMap extends Scene {
 
         // 初期カメラは選択中ノードを中央に据えた状態から始める(アニメーションなし)
         this.camera.lookAt(this.graph.node(this.selectedId), false)
+        this.tintSeason(this.graph.node(this.selectedId))
 
         this.crossfadeToSceneryBgm()
     }
@@ -186,7 +197,15 @@ export class SceneMap extends Scene {
         this.minimap?.select(id)
         this.bee.flyTo(this.graph.node(id))
         this.camera.lookAt(this.graph.node(id), true)
+        this.tintSeason(this.graph.node(id))
         this.crossfadeToSceneryBgm()
+    }
+
+    // 地図の左端を0、右端を1として、node の位置を --season に入れる。
+    // 背景が画面に固定のとき(map.cssの.fixed-backdrop)、季節の色はこの位置の色だけが画面いっぱいに出る
+    private tintSeason(node: MapNode) {
+        const { minX, maxX } = this.graph.bounds()
+        this.root.style.setProperty("--season", `${(node.x - minX) / (maxX - minX)}`)
     }
 
     // 選んでいるノードの景色の曲へクロスフェードする。曲が載っていない景色や読み込めなかった曲では、いまの曲のまま
