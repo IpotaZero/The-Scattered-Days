@@ -11,13 +11,13 @@ import type { SubEquipment } from "../types"
 const 持続フレーム = 300
 const 展開フレーム = 8
 const 消滅フレーム = 20
-const クールダウンフレーム = 900
+const クールダウンフレーム = 1200
 const 半径倍率 = 4
 
 export const barrier: SubEquipment = {
     label: "障壁",
     description: "その場に結界を張る。中に入った敵弾を花粉に変える。",
-    price: 1000,
+    price: 10000,
     manual: true,
     *action(player) {
         while (true) {
