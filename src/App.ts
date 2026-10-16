@@ -1,6 +1,5 @@
-import { BgmManager } from "@ipota/bgm-manager"
 import { Sound } from "./utils/Sound"
-import { PageBgmManager } from "./utils/PageBgmManager"
+import { BgmPlayer } from "./utils/BgmPlayer"
 import { Dom } from "./Dom"
 import type { Scenery } from "./World/Scenery"
 import { SceneChanger } from "./utils/Scene/SceneChanger"
@@ -76,7 +75,7 @@ export namespace App {
         const base = `assets/bgm`
 
         // 地図の上で鳴らす曲。titleは切り替わったときに右上へ出す曲名
-        export type Track = BgmManager.LoadConfig & { title: string }
+        export type Track = BgmPlayer.Track & { title: string }
 
         export const title = { src: `${base}/title.mp3`, trackVolume: 0.8 }
 
@@ -110,7 +109,7 @@ export namespace App {
         }
     }
 
-    export const bm = new PageBgmManager()
+    export const bm = new BgmPlayer()
 
     export const sc = new SceneChanger(Dom.container)
 

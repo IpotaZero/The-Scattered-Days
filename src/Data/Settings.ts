@@ -84,7 +84,7 @@ type SerializedSettings = {
     liteBullets?: boolean
 }
 
-// 設定の反映先。音量はBgmManager/SEのマスター、キーコンフィグはDigitalInputとAnalogInput、描画fpsはFrameLimiter、fps表示はFpsMeterへ渡す
+// 設定の反映先。音量はBgmPlayer/SEのマスター、キーコンフィグはDigitalInputとAnalogInput、描画fpsはFrameLimiter、fps表示はFpsMeterへ渡す
 type SettingsTarget = Record<VolumeKind, { setVolume(volume: number): void }> & {
     input: { updateConfig(config: KeyConfigMap): void }
     analogInput: { updateConfig(config: KeyConfigMap): void }
