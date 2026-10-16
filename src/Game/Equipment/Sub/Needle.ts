@@ -30,7 +30,7 @@ const 揺れフレーム = 15
 export const needle: SubEquipment = {
     label: "大針",
     description: "真上へ大きな針を飛ばす。最初に触れた敵ひとつに大きな傷を与える。",
-    price: 3000,
+    price: 1000,
     manual: true,
     *action(player) {
         while (true) {

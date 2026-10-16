@@ -17,8 +17,8 @@ export const mainEquipments: Record<EquipmentId, MainEquipment> = {
 
 export const subEquipments: Record<EquipmentId, SubEquipment> = {
     dash,
-    sweep,
     needle,
+    sweep,
     extraLife,
     barrier,
 }

@@ -16,7 +16,7 @@ const クールダウンフレーム = 1800
 export const sweep: SubEquipment = {
     label: "一掃",
     description: "自機から波を広げ、画面の敵弾をすべて花粉に変える。",
-    price: 1000,
+    price: 3000,
     manual: true,
     *action(player) {
         while (true) {
