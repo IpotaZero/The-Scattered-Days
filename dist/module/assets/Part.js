@@ -1,0 +1,2 @@
+import{i as e}from"./Remodel.js";var t=class extends e{parent;constructor(e,t,n,r,i,{charge:a=0}={}){super(e,n,r,{charge:a}),this.parent=t,this.setParent(t,()=>this.place()),this.scripts.add(()=>this.attack(),{loop:1/0,margin:i})}guardedBy(e){this.isInvincible=!0,this.scripts.add(()=>this.guard(e),{loop:1/0,id:`guard`})}*guard(e){this.isInvincible=e.some(e=>e.life>0),yield}};export{t as Part};
+//# sourceMappingURL=Part.js.map

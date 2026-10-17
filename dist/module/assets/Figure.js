@@ -1,0 +1,2 @@
+var e=class e{id;src;offsetPercent;constructor(e,t,n){this.id=e,this.src=t,this.offsetPercent=n}static hachinoko=new e(`hachinoko`,`assets/figure/Hachinoko.webp`,-30);static hachinokoSmile=new e(`hachinoko`,`assets/figure/Hachinoko-smile.webp`,-30);static yukimushi=new e(`yukimushi`,`assets/figure/Yukimushi.webp`,30);static yukimushiDefeat=new e(`yukimushi`,`assets/figure/Yukimushi-defeat.webp`,30)};export{e as Figure};
+//# sourceMappingURL=Figure.js.map

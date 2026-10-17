@@ -1,0 +1,70 @@
+/* SceneGame 内で使うUI(ゲーム本編キャンバス・ポーズ/クリア/ゲームオーバー用メニュー・会話テキストボックス)。 */
+
+.scene-game {
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    #main {
+        max-width: 100%;
+        max-height: 100%;
+        min-width: 0;
+        min-height: 0;
+
+        /* 後ろに敷いたGameBackdrop(position: absolute)より手前に描かせるため */
+        position: relative;
+
+        touch-action: none;
+
+        /* 場所ごとの地の色(css/scenery.css)。どれもほぼ黒 */
+        background-color: var(--field);
+
+        /* 夜の草むらに馴染むよう、枠線は紙色を薄くして控えめにする */
+        border: 1px solid color-mix(in srgb, var(--paper) 35%, transparent);
+
+        /* width/height:100%は縦横比が合わない場合(非全画面でアドレスバー分だけ低くなる等)に
+           キャンバスを歪めて引き伸ばしてしまうため使わない。max-width/max-heightによる
+           アスペクト比を保った縮小のみに任せ、スマホでは枠線だけ消す */
+        &.smartphone {
+            border: none;
+        }
+    }
+
+    .menu {
+        #root {
+            width: 10em;
+            max-width: 100%;
+            font-size: 1.4em;
+            padding: 0 1em;
+
+            border-radius: 0.1em;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .menu-title {
+                border-bottom: 4px #fff8 double;
+                border-top: 4px #fff8 double;
+                width: 100%;
+                padding: 0.3em 0.8em;
+            }
+
+            .option {
+                background-color: #1118;
+                border: white 1px solid;
+                padding: 0.125em 1em;
+                width: 3.8em;
+                text-align: center;
+
+                span {
+                    font-size: 0.7em;
+                }
+            }
+        }
+    }
+}

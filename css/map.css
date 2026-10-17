@@ -1,0 +1,784 @@
+/* SceneMap 専用のUI(ステージ選択用のノード・エッジ画面)。
+   色はタイトルと同じく base.css の4色(paper / sage / forest / gold)だけを使う。
+   ただし戦闘画面(黒地)との明るさの差を小さくするため、タイトルとは逆に「暗い地に紙色で描く」配色にする。 */
+
+.scene-map {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+
+    /* 墨緑をさらに黒へ寄せた夜の地。四隅はほぼ黒まで落とし、戦闘画面の黒地へ自然につなげる */
+    --map-ground: var(--night);
+    background:
+        radial-gradient(ellipse at center, transparent 40%, color-mix(in srgb, black 60%, transparent)),
+        var(--map-ground);
+    color: var(--paper);
+
+    /* ブレンドせず、ざらつきの画像を薄い透明度で地に重ねるだけにする(ブレンドは背面ごと描き直すのでスマホでは重い) */
+    .texture-overlay {
+        mix-blend-mode: normal;
+        opacity: 0.1;
+    }
+
+    /* スワイプ・ピンチを自前で処理するので、ブラウザ標準のスクロール/ズームジェスチャーには渡さない */
+    touch-action: none;
+    cursor: grab;
+
+    &.dragging {
+        cursor: grabbing;
+    }
+
+    /* カメラ(src/Map/MapCamera.ts)。背景とワールドをすべてこの1つの要素に入れ、そのtransformだけで動かす。
+       画面いっぱいの大きさで、拡大縮小の中心は画面中央 */
+    .map-camera {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 50%;
+
+        /* 常にカメラ専用のレイヤーにしておく。付けないと、移動のtransitionが始まるたびにレイヤーに分けられ、終わるたびに戻されて、
+           そのたびに中身(背景とワールド)全体を描き直す */
+        will-change: transform;
+    }
+
+    /* 方眼・紙の質感など、ワールドと一緒に動く背景。
+       カメラは全ノードの範囲(--world-*)の中しか動かず、いちばん縮小したとき(--map-min-zoom)には画面1枚の1/--map-min-zoom倍が映るので、
+       その範囲+映る広さぶんを覆えば途切れない */
+    .map-backdrop {
+        position: absolute;
+        inset: auto;
+        left: calc(50% + var(--world-min-x) - 50% / var(--map-min-zoom) - 64px);
+        top: calc(50% + var(--world-min-y) - 50% / var(--map-min-zoom) - 64px);
+        width: calc(var(--world-width) + 100% / var(--map-min-zoom) + 128px);
+        height: calc(var(--world-height) + 100% / var(--map-min-zoom) + 128px);
+        pointer-events: none;
+    }
+
+    /* 一年の移ろい。地図の左から右へ、地の色がはっきり移る。
+       霜の野の冬(紙の白)、早春の風(若い緑)、春の藪(若草色)、梅雨の沢(湿った灰緑)、盛夏の石垣(金)、夏の夜の河原(ほぼ黒)、
+       秋の夜の草むら(暗い琥珀)、晩秋の巣(金)の順。
+       文字の代わりに、先へ進むほど季節が進んでいくことを感じさせる。
+       帯の両端は、カメラが地図の端にいるときに映る余白にあたるので、地図の左端と右端は、帯の端から少し内側に来る */
+    .map-seasons {
+        background: linear-gradient(
+            90deg,
+            color-mix(in srgb, color-mix(in srgb, var(--paper) 70%, var(--gold)) 16%, transparent) 0%,
+            color-mix(in srgb, var(--paper) 26%, transparent) 10%,
+            color-mix(in srgb, var(--paper) 24%, transparent) 17%,
+            color-mix(in srgb, var(--sage) 32%, transparent) 26%,
+            color-mix(in srgb, color-mix(in srgb, var(--sage) 70%, var(--gold)) 36%, transparent) 34%,
+            color-mix(in srgb, color-mix(in srgb, var(--sage) 60%, var(--forest)) 40%, transparent) 43%,
+            color-mix(in srgb, var(--gold) 36%, transparent) 51%,
+            color-mix(in srgb, black 55%, transparent) 61%,
+            color-mix(in srgb, color-mix(in srgb, var(--gold) 45%, black) 40%, transparent) 69%,
+            color-mix(in srgb, var(--gold) 38%, transparent) 83%,
+            color-mix(in srgb, var(--gold) 30%, transparent) 100%
+        );
+    }
+
+    /* 紙に打たれた方眼の点 */
+    .map-grid {
+        background-image: radial-gradient(circle, var(--sage) 1.2px, transparent 1.6px);
+        background-size: 48px 48px;
+        opacity: 0.25;
+    }
+
+    /* スマホ。背景3枚はカメラの外に出て(src/Scene/SceneMap.ts)、画面と同じ大きさで画面に固定される。
+       方眼と質感はカメラが動いても動かない。
+       季節のグラデーションは画面の幅の10倍に引き伸ばし、選んだノードの位置(--season)のところだけが画面いっぱいに出る。
+       ノードを移るたびに色が切り替わる */
+    &.fixed-backdrop {
+        .map-backdrop {
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-seasons {
+            background-size: 1000% 100%;
+            background-repeat: no-repeat;
+            background-position-x: calc(var(--season, 0) * 100%);
+        }
+    }
+
+    /* ノードのワールド座標(px)の原点。ここを画面中央に置く。カメラ(.map-camera)が、カメラ位置ぶんだけtranslateして、画面中央を中心に拡大率ぶんscaleする */
+    .map-world {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 0;
+        height: 0;
+    }
+
+    .map-edges {
+        position: absolute;
+        left: 0;
+        top: 0;
+        overflow: visible;
+
+        line {
+            stroke: var(--paper);
+            stroke-width: 1.5;
+            opacity: 0.6;
+
+            &.locked {
+                opacity: 0.1;
+            }
+
+            /* 主装備standardでのクリアが条件の辺は破線 */
+            &.standard {
+                stroke-dasharray: 6 6;
+            }
+
+            /* 主装備laserでのクリアが条件の辺は二重線(2本の線はSceneMap側で引く) */
+            &.laser {
+                stroke-width: 1;
+            }
+
+            /* すべての免状が条件の辺は金の糸。免状の印(.map-edge-seal)を数珠のように通す */
+            &.badges {
+                stroke: var(--gold);
+            }
+        }
+    }
+
+    .map-nodes {
+        position: absolute;
+        inset: 0;
+    }
+
+    .map-node {
+        position: absolute;
+        transform: translate(-50%, -50%);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background: var(--map-ground);
+        border: 2px solid color-mix(in srgb, var(--paper) 70%, transparent);
+
+        font-size: 0.8em;
+        text-align: center;
+
+        cursor: pointer;
+
+        transition:
+            background 0.3s ease-out,
+            border-color 0.3s ease-out,
+            box-shadow 0.3s ease-out,
+            transform 0.3s ease-out;
+
+        &:hover {
+            border-color: var(--gold);
+        }
+
+        /* 選択中は紙色で塗り、地の色の余白を挟んだ金の細い枠で囲む。絵柄は地の色で描く */
+        &.selected {
+            color: var(--map-ground);
+            background: var(--paper);
+            border-color: var(--paper);
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow:
+                0 0 0 4px var(--map-ground),
+                0 0 0 5px var(--gold);
+        }
+
+        &.locked {
+            background: transparent;
+            border-color: var(--sage);
+            border-style: dashed;
+            opacity: 0.45;
+            cursor: default;
+        }
+
+        /* クリア済みのステージは右上に銀の星、ノーミスでクリア済みなら金の星 */
+        &.cleared::after {
+            content: "★";
+            position: absolute;
+            top: -0.65em;
+            right: -0.65em;
+            font-size: 1.5em;
+            line-height: 1;
+            color: var(--silver);
+            pointer-events: none;
+        }
+
+        &.no-miss::after {
+            color: var(--gold);
+        }
+
+        /* まだ行けない場所は、どんな所なのかを伏せておく */
+        &.locked .map-node-motif {
+            visibility: hidden;
+        }
+    }
+
+    /* ノードに描く、その場所の景色の絵柄(src/World/Scenery.ts)。ノードの大きさに合わせて大きくなる */
+    .map-node-motif {
+        width: 55%;
+        height: 55%;
+
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+
+        pointer-events: none;
+    }
+
+    /* 塊のまわりに置く、その場所を特徴づける小物(src/Map/MapProps.ts, src/World/Prop.ts)。
+       ノードより控えめに、薄く描く。まだ行けない塊の小物は伏せておく */
+    .map-props {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .map-props-cluster.locked {
+        visibility: hidden;
+    }
+
+    .map-prop {
+        position: absolute;
+        transform: translate(-50%, -50%) rotate(var(--tilt)) scaleX(var(--flip));
+        opacity: 0.45;
+
+        &.tone-paper {
+            color: var(--paper);
+        }
+
+        &.tone-sage {
+            color: var(--sage);
+        }
+
+        &.tone-gold {
+            color: var(--gold);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .solid {
+            fill: currentColor;
+            stroke: none;
+        }
+
+        /* 動きは小物ごとに --delay でずらし、そろって動かないようにする */
+        &.motion-bob svg {
+            animation: map-prop-bob 2.6s ease-in-out var(--delay) infinite alternate;
+        }
+
+        &.motion-sway svg {
+            transform-origin: 50% 100%;
+            animation: map-prop-sway 4s ease-in-out var(--delay) infinite alternate;
+        }
+
+        &.motion-hang svg {
+            transform-origin: 50% 0%;
+            animation: map-prop-sway 3.2s ease-in-out var(--delay) infinite alternate;
+        }
+
+        &.motion-twinkle svg {
+            animation: map-prop-twinkle 3s ease-in-out var(--delay) infinite alternate;
+        }
+
+        &.motion-turn svg {
+            animation: map-prop-turn 40s linear var(--delay) infinite;
+        }
+    }
+
+    /* 条件のある辺に数珠のように通す、条件の印(src/Map/MapEdgeSeals.ts)。
+       針が条件の辺にはその針の絵柄、すべての免状が条件の辺には道場主ごとにその場所の絵柄を丸の中に描く。
+       満たした印は塗り、まだのものは輪だけ、まだ行けない場所にかかわる印は絵柄を伏せた破線の輪にする */
+    .map-edge-seals {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .map-edge-seal {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        transform: translate(-50%, -50%);
+        align-items: center;
+
+        border-radius: 50%;
+        /* 下を通る辺の線を隠して、糸に通した玉に見せる */
+        background: var(--map-ground);
+        border: 1.5px solid color-mix(in srgb, var(--paper) 60%, transparent);
+        color: color-mix(in srgb, var(--paper) 70%, transparent);
+
+        .map-node-motif {
+            width: 75%;
+            height: 75%;
+        }
+
+        &.earned {
+            background: var(--paper);
+            border-color: var(--paper);
+            color: var(--map-ground);
+        }
+
+        /* 授かった免状は金で塗る */
+        &.badges.earned {
+            background: var(--gold);
+            border-color: var(--gold);
+            box-shadow: 0 0 6px color-mix(in srgb, var(--gold) 60%, transparent);
+        }
+
+        &.locked {
+            border-color: var(--sage);
+            border-style: dashed;
+            opacity: 0.6;
+
+            .map-node-motif {
+                visibility: hidden;
+            }
+        }
+    }
+
+    /* 地図の上の自分(src/Map/MapBee.ts)。選んだノードの上にとまり、ノードを移るとカメラと同じ速さで飛んでいく */
+    .map-bee {
+        position: absolute;
+        width: 4rem;
+        height: 4rem;
+        transform: translate(-50%, -95%);
+
+        color: var(--paper);
+        pointer-events: none;
+        z-index: 50;
+
+        transition:
+            left 0.4s ease-out,
+            top 0.4s ease-out;
+
+        svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        &.facing-left svg {
+            transform: scaleX(-1);
+        }
+
+        /* 左を向いているときは、針の印を反対側の尾の先へ移す */
+        &.facing-left .map-bee-needle {
+            left: calc(100% + 4px);
+        }
+
+        .wing {
+            transform-box: fill-box;
+            transform-origin: bottom center;
+            animation: map-bee-wing 0.07s linear infinite alternate;
+        }
+    }
+
+    /* 尾の先に提げる、いま装備している針の印。辺に通す印(.map-edge-seal)と同じ形で、塗った印にする */
+    .map-bee-needle {
+        left: -4px;
+        top: 55%;
+    }
+
+    /* とまっている間も、ふわふわと少しだけ浮き沈みする */
+    .map-bee-body {
+        width: 100%;
+        height: 100%;
+        animation: map-bee-hover 1.6s ease-in-out infinite alternate;
+    }
+
+    /* 全ノードを一画面に収めた全体図。SVGのviewBoxで縮尺を合わせる */
+    .map-minimap {
+        position: absolute;
+        inset: 0;
+        z-index: 200;
+
+        background: color-mix(in srgb, var(--map-ground) 90%, transparent);
+        cursor: default;
+
+        animation: fade-in 0.15s ease-out;
+    }
+
+    .map-minimap-svg {
+        width: 100%;
+        height: 100%;
+        padding: 1.5em;
+
+        line {
+            stroke: var(--paper);
+            stroke-width: 1.5;
+            opacity: 0.4;
+            vector-effect: non-scaling-stroke;
+        }
+
+        rect {
+            fill: var(--map-ground);
+            stroke: var(--paper);
+            stroke-width: 1.5;
+            vector-effect: non-scaling-stroke;
+            cursor: pointer;
+
+            &.cleared {
+                fill: var(--silver);
+            }
+
+            &.no-miss {
+                fill: var(--gold);
+            }
+
+            /* 選択中はノード自身の枠も金で太くする(塗りはクリア状況を見せるためそのまま) */
+            &.selected {
+                stroke: var(--gold);
+                stroke-width: 3;
+            }
+        }
+
+        /* 選択中のノードを外側から囲む金の枠。ゆっくり点滅させ、ノード間を移るときは滑らせる */
+        .map-minimap-cursor {
+            fill: none;
+            stroke: var(--gold);
+            stroke-width: 3;
+            pointer-events: none;
+
+            transition:
+                x 0.2s ease-out,
+                y 0.2s ease-out,
+                width 0.2s ease-out,
+                height 0.2s ease-out;
+            animation: map-minimap-cursor-blink 0.8s ease-in-out infinite alternate;
+        }
+    }
+
+    /* 画面下部の操作ボタン類。タイトルのボタンと同じく細い罫線だけで、触れると紙色で塗る */
+    .map-minimap-back,
+    .map-controls > div {
+        background-color: #1118;
+        border: 1px solid color-mix(in srgb, var(--paper) 60%, transparent);
+        color: var(--paper);
+
+        cursor: pointer;
+        transition:
+            background 0.3s ease-out,
+            color 0.3s ease-out;
+
+        &:hover {
+            background: var(--paper);
+            color: var(--forest);
+        }
+    }
+
+    .map-minimap-back {
+        position: absolute;
+        bottom: 1.2em;
+        left: 50%;
+        transform: translateX(-50%);
+
+        padding: 0.5em 1.5em;
+
+        font-size: 0.7em;
+        letter-spacing: 0.15em;
+        white-space: nowrap;
+    }
+
+    /* 残機・スコアは帳面の書き付けのように、金の縦線を添えて左上に置く */
+    .map-lives {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25em;
+        top: 1em;
+        left: 1em;
+
+        padding-left: 0.5em;
+        border-left: 2px solid var(--sage);
+
+        font-size: 1em;
+
+        font-family: "Courier New", monospace;
+        letter-spacing: 0.1em;
+        background-color: color-mix(in srgb, var(--forest) 30%, transparent);
+    }
+
+    .map-lives-count {
+        justify-content: start;
+        font-size: 0.8em;
+    }
+
+    .map-lives-recovery {
+        justify-content: start;
+        font-size: 0.6em;
+        opacity: 0.6;
+    }
+
+    .map-score {
+        font-size: 0.8em;
+        justify-content: start;
+    }
+
+    /* 曲が切り替わったときの曲名。右上の端に縦書きで置き、画面の端のUIと横に並んでも被らないようにする(出し入れは src/Scene/SceneMap.ts) */
+    .map-bgm-title {
+        position: absolute;
+        top: 1em;
+        right: 1em;
+
+        writing-mode: vertical-rl;
+        padding-top: 0.5em;
+        border-top: 2px solid var(--sage);
+
+        font-family: "Courier New", monospace;
+        font-size: 0.8em;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        opacity: 0.8;
+        pointer-events: none;
+
+        background-color: color-mix(in srgb, var(--forest) 30%, transparent);
+    }
+
+    /* 初雪までの日付は、帳面の日付のように右上へ縦書きで添える。一日進むたびに書き換わる */
+    .map-day {
+        position: absolute;
+        top: 0.8em;
+        right: 5%;
+
+        writing-mode: vertical-rl;
+        padding-top: 0.5em;
+        border-top: 2px solid var(--sage);
+
+        font-size: 1.1em;
+        letter-spacing: 0.3em;
+        white-space: nowrap;
+
+        &:empty {
+            display: none;
+        }
+    }
+
+    .map-controls {
+        position: absolute;
+        bottom: 0.8em;
+        left: 1em;
+        right: 1em;
+        max-width: 24em;
+
+        display: flex;
+        flex-direction: column;
+        gap: 0.4em;
+
+        font-family: "Courier New", monospace;
+        font-size: 0.7em;
+        letter-spacing: 0.05em;
+
+        > div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            /* 文の途中(「戻る」等)で改行されないようにする。それでも入りきらない場合は
+               このspanの手前(和文の区切り)で改行される */
+            .nowrap {
+                font-size: inherit;
+                white-space: nowrap;
+            }
+
+            font-size: inherit;
+
+            padding: 0.5em 0.5em;
+            /* 折り返して2行になるボタンとならないボタンとで高さが不揃いにならないようにする */
+            text-align: center;
+        }
+    }
+
+    #equip-root {
+        width: 100%;
+        max-width: 20em;
+        flex-direction: column;
+    }
+
+    #equip-main-options {
+        flex-direction: column;
+        width: 100%;
+        max-width: 20em;
+    }
+
+    #equip-sub-options,
+    #equip-learn,
+    #equip-life {
+        flex-direction: column;
+        width: 100%;
+        max-width: 20em;
+    }
+
+    /* まだ習得していない技に添える、習得に払う花粉の量 */
+    .equip-price {
+        font-size: 0.8em;
+        color: var(--gold);
+    }
+
+    .equip-description {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        padding: 0.8em 1em;
+
+        background: var(--forest);
+        border-top: 2px solid var(--gold);
+        color: var(--paper);
+
+        font-size: 0.65em;
+        line-height: 1.6;
+        letter-spacing: 0.05em;
+
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease-out;
+
+        &.visible {
+            opacity: 1;
+        }
+    }
+
+    .map-equip-modal {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+        gap: 2em;
+
+        font-size: 0.8em;
+
+        padding: 1.5em 2em;
+
+        background: color-mix(in srgb, var(--map-ground) 96%, transparent);
+
+        animation: fade-in 0.15s ease-out;
+
+        .menu-title {
+            display: flex;
+            margin-bottom: 0.5em;
+            width: 100%;
+            justify-content: center;
+            white-space: nowrap;
+            letter-spacing: 0.15em;
+            color: var(--paper);
+        }
+
+        .option-row {
+            width: 100%;
+        }
+
+        .option {
+            width: 100%;
+            text-align: center;
+            padding: 0.3em 0.5em;
+
+            background: transparent;
+            border: 1px solid color-mix(in srgb, var(--paper) 60%, transparent);
+            border-radius: 0;
+            color: var(--paper);
+            letter-spacing: 0.1em;
+
+            transition:
+                background 0.1s ease-out,
+                color 0.1s ease-out;
+
+            &.selected {
+                background: var(--paper);
+                color: var(--forest);
+                box-shadow: 0 0.25em 0 -0.15em var(--gold);
+            }
+
+            /* 花粉が足りない技は行ごと薄くする。menu.cssの既定はspanごとに重ねて薄くなり、値段まで読めなくなる */
+            &.disabled {
+                opacity: 0.4;
+
+                span {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+}
+
+@keyframes map-minimap-cursor-blink {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.3;
+    }
+}
+
+@keyframes map-bee-wing {
+    from {
+        transform: rotate(-20deg);
+    }
+    to {
+        transform: rotate(15deg);
+    }
+}
+
+@keyframes map-bee-hover {
+    from {
+        transform: translateY(-0.15rem);
+    }
+    to {
+        transform: translateY(0.15rem);
+    }
+}
+
+@keyframes map-prop-bob {
+    from {
+        transform: translateY(-2px);
+    }
+    to {
+        transform: translateY(2px);
+    }
+}
+
+@keyframes map-prop-sway {
+    from {
+        transform: rotate(-5deg);
+    }
+    to {
+        transform: rotate(5deg);
+    }
+}
+
+@keyframes map-prop-twinkle {
+    from {
+        opacity: 0.35;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes map-prop-turn {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
