@@ -24,7 +24,7 @@
 		{"id":"830af84d77e4673c","type":"text","text":"網掛道場・高弟\nStageWebB","x":2480,"y":960,"width":160,"height":160},
 		{"id":"166d9f9191ad1a93","type":"text","text":"網掛道場・師範代\nStageWebC","x":2720,"y":960,"width":160,"height":160},
 		{"id":"70041c417988cd82","type":"text","text":"網掛道場・道場主\nStageWebD\nbadge:網掛","x":2960,"y":800,"width":480,"height":480},
-		{"id":"35c5577f1a6c4709","type":"text","text":"師匠の庵\nStageTest","x":0,"y":0,"width":160,"height":160},
+		{"id":"35c5577f1a6c4709","type":"text","text":"師匠の庵\nStageTwilight1 \n","x":0,"y":0,"width":160,"height":160},
 		{"id":"f840811f7f798aeb","type":"text","text":"霜月道場・門下生\nStageFrozenBreath","x":400,"y":0,"width":160,"height":160},
 		{"id":"31f7d87e5e5e2323","type":"text","text":"霜月道場・高弟\nStageRikka","x":640,"y":0,"width":160,"height":160},
 		{"id":"3b69dc58c8ff5df6","type":"text","text":"霜月道場・師範代\nStageTriangle","x":880,"y":0,"width":160,"height":160},

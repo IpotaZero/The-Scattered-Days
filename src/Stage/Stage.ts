@@ -42,7 +42,7 @@ export abstract class Stage {
         }
     }
 
-    protected scorenizeAllBullets() {
+    scorenizeAllBullets() {
         this.game.bullets.filter((b) => b.type === "enemy" || b.type === "neutral").forEach((b) => b.scorenize())
     }
 

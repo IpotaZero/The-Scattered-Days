@@ -26,6 +26,9 @@ export abstract class Enemy extends Actor {
 
     isInvincible = false
 
+    // 画面の外へ去ったか。去った敵は倒れたときと違い、音も演出もなく消え、撃った弾も花粉に変わらず残る
+    hasLeft = false
+
     readonly renderer: IEnemyRenderer
 
     // 弾幕用の乱数のシード。n 体目の敵は、ステージに入り直すたびに同じシードになる
@@ -151,6 +154,12 @@ export abstract class Enemy extends Actor {
     }
 
     private *followParent(parent: Enemy, position: () => Vec) {
+        if (parent.hasLeft) {
+            this.hasLeft = true
+            yield
+            return
+        }
+
         if (parent.life <= 0) {
             this.life = 0
             // ここでyieldせずreturnすると、addのloop:Infinityが
@@ -161,6 +170,25 @@ export abstract class Enemy extends Actor {
 
         this.p = parent.p.add(position().scale(Ease.Out(Math.min(1, this.frame / 60))))
         yield
+    }
+
+    // 毎フレーム v ずつ流れていき、進む向きの画面の端を体ごと越えると去る
+    protected *drift(v: Vec) {
+        while (!this.isBeyond(v)) {
+            this.p = this.p.add(v)
+            yield
+        }
+
+        this.hasLeft = true
+    }
+
+    private isBeyond(v: Vec) {
+        return (
+            (v.x < 0 && this.p.x < -this.r) ||
+            (v.x > 0 && this.p.x > this.game.WIDTH + this.r) ||
+            (v.y < 0 && this.p.y < -this.r) ||
+            (v.y > 0 && this.p.y > this.game.HEIGHT + this.r)
+        )
     }
 
     protected *randomMove(frames: number) {

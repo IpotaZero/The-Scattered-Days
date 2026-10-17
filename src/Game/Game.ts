@@ -352,6 +352,8 @@ export class Game {
         this.bullets.length = aliveCount
 
         const aliveEnemies = this.enemies.filter((e) => {
+            if (e.hasLeft) return false
+
             if (e.life <= 0) {
                 this.se.crush.play()
                 this.scripts.add(() => e.onDead())
