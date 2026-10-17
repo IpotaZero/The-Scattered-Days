@@ -612,7 +612,6 @@
         flex-direction: column;
         width: 100%;
         max-width: 20em;
-        padding-top: 0.5em;
     }
 
     #equip-sub-options,
@@ -621,7 +620,6 @@
         flex-direction: column;
         width: 100%;
         max-width: 20em;
-        padding-top: 0.5em;
     }
 
     /* まだ習得していない技に添える、習得に払う花粉の量 */
