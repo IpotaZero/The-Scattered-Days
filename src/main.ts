@@ -2,7 +2,6 @@ import { App } from "./App.js"
 import { playerData } from "./Data/PlayerData.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
-    navigator.serviceWorker?.register("./sw.js")
     App.looper.start()
     App.sc.goto(async () => await import("./Scene/ScenePreTitle.js").then(({ ScenePreTitle }) => new ScenePreTitle()))
 })

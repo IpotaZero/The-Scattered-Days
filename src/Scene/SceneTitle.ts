@@ -90,7 +90,7 @@ export class SceneTitle extends Scene {
         textureOverlay.className = "texture-overlay"
         this.root.appendChild(textureOverlay)
 
-        if (document.fullscreenEnabled) {
+        if (document.fullscreenEnabled && !App.pwa.installed) {
             const fullscreenToggle = document.createElement("button")
             fullscreenToggle.className = "title-fullscreen-toggle"
             fullscreenToggle.textContent = "⛶"
