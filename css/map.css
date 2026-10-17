@@ -54,18 +54,25 @@
         pointer-events: none;
     }
 
-    /* 一年の移ろい。地図の左から右へ、冬(紙の白)、春(若草)、夏(金)、夏の夜(墨緑)、晩秋(金)と、地の色がほんのわずかに移る。
-       文字の代わりに、先へ進むほど季節が進んでいくことを感じさせる */
+    /* 一年の移ろい。地図の左から右へ、地の色がはっきり移る。
+       霜の野の冬(紙の白)、早春の風(若い緑)、春の藪(若草色)、梅雨の沢(湿った灰緑)、盛夏の石垣(金)、夏の夜の河原(ほぼ黒)、
+       秋の夜の草むら(暗い琥珀)、晩秋の巣(金)の順。
+       文字の代わりに、先へ進むほど季節が進んでいくことを感じさせる。
+       帯の両端は、カメラが地図の端にいるときに映る余白にあたるので、地図の左端と右端は、帯の端から少し内側に来る */
     .map-seasons {
         background: linear-gradient(
             90deg,
-            color-mix(in srgb, var(--paper) 7%, transparent) 0%,
-            color-mix(in srgb, var(--paper) 6%, transparent) 12%,
-            color-mix(in srgb, var(--sage) 9%, transparent) 25%,
-            color-mix(in srgb, var(--gold) 7%, transparent) 42%,
-            color-mix(in srgb, var(--forest) 18%, transparent) 60%,
-            color-mix(in srgb, var(--gold) 9%, transparent) 80%,
-            color-mix(in srgb, var(--gold) 5%, transparent) 100%
+            color-mix(in srgb, color-mix(in srgb, var(--paper) 70%, var(--gold)) 16%, transparent) 0%,
+            color-mix(in srgb, var(--paper) 26%, transparent) 10%,
+            color-mix(in srgb, var(--paper) 24%, transparent) 17%,
+            color-mix(in srgb, var(--sage) 32%, transparent) 26%,
+            color-mix(in srgb, color-mix(in srgb, var(--sage) 70%, var(--gold)) 36%, transparent) 34%,
+            color-mix(in srgb, color-mix(in srgb, var(--sage) 60%, var(--forest)) 40%, transparent) 43%,
+            color-mix(in srgb, var(--gold) 36%, transparent) 51%,
+            color-mix(in srgb, black 55%, transparent) 61%,
+            color-mix(in srgb, color-mix(in srgb, var(--gold) 45%, black) 40%, transparent) 69%,
+            color-mix(in srgb, var(--gold) 38%, transparent) 83%,
+            color-mix(in srgb, var(--gold) 30%, transparent) 100%
         );
     }
 
