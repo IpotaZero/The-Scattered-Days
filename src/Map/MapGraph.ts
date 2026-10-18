@@ -104,6 +104,13 @@ export class MapNode {
         if (this.badge) playerData.awardBadge(this.badge)
     }
 
+    // このステージの達成度。ノーミスでクリアしていれば満点、ミスありのクリアはその半分、未クリアなら0
+    achievement(playerData: PlayerData): number {
+        if (playerData.isStageClearedWithoutMiss(this.id)) return 1
+        if (playerData.isStageCleared(this.id)) return 0.5
+        return 0
+    }
+
     async stage(game: Game): Promise<Stage> {
         const { default: StageClass } = await this.loader.load()
         return new StageClass(game)
@@ -248,6 +255,11 @@ export class MapGraph {
             clusters.set(find(node), cluster)
         }
         return [...clusters.values()]
+    }
+
+    // 全ステージの達成度の平均。全ステージをノーミスでクリアすると1になる
+    achievement(playerData: PlayerData): number {
+        return this.nodes.reduce((sum, node) => sum + node.achievement(playerData), 0) / this.nodes.length
     }
 
     // 全ノードを囲む範囲

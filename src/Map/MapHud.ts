@@ -1,17 +1,25 @@
 import { playerData } from "../Data/PlayerData"
+import type { MapGraph } from "./MapGraph"
 
-// 地図画面の左上に出す、残機・次の回復までの時間・花粉の表示
+// 地図画面の左上に出す、残機・次の回復までの時間・花粉・達成度の表示
 export class MapHud {
     private readonly livesEl: HTMLElement
     private readonly livesRecoveryEl: HTMLElement
     private readonly scoreEl: HTMLElement
 
-    constructor(el: HTMLElement) {
+    constructor(el: HTMLElement, graph: MapGraph) {
         this.livesEl = el.querySelector<HTMLElement>(".map-lives-count")!
         this.livesRecoveryEl = el.querySelector<HTMLElement>(".map-lives-recovery")!
         this.scoreEl = el.querySelector<HTMLElement>(".map-score")!
         this.updateLives()
         this.updateScore()
+
+        // 達成度はステージをクリアしたときにしか変わらず、クリア後は地図画面ごと作り直されるので、ここで一度だけ書く。
+        // 終点をクリアするまでは空のまま。切り捨てて表示するので、全ステージをノーミスでクリアするまで100%にはならない
+        if (playerData.isStageCleared(graph.goal.id)) {
+            el.querySelector<HTMLElement>(".map-achievement")!.textContent =
+                `達成度 ${Math.floor(graph.achievement(playerData) * 100)}%`
+        }
     }
 
     // 花粉はステージで稼ぐか技の習得で払ったときにだけ変わるので、毎フレームではなくその都度表示し直す

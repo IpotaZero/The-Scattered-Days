@@ -528,6 +528,16 @@
         justify-content: start;
     }
 
+    /* 達成度は花粉の下に置く。終点をクリアするまでは空なので、行ごと消して隙間を残さない */
+    .map-achievement {
+        font-size: 0.8em;
+        justify-content: start;
+
+        &:empty {
+            display: none;
+        }
+    }
+
     /* 曲が切り替わったときの曲名。右上の端に縦書きで置き、画面の端のUIと横に並んでも被らないようにする(出し入れは src/Scene/SceneMap.ts) */
     .map-bgm-title {
         position: absolute;

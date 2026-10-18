@@ -76,6 +76,7 @@ export class SceneMap extends Scene {
                 <div class="map-lives-count"></div>
                 <div class="map-lives-recovery"></div>
                 <div class="map-score"></div>
+                <div class="map-achievement"></div>
             </div>
             <div class="map-controls">
                 ${isSmartPhone ? "" : `<div data-control="toggle-minimap"><span class="nowrap">全体図</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.slow)})`}</div>`}
@@ -132,7 +133,7 @@ export class SceneMap extends Scene {
         this.bee = new MapBee(this.graph.node(this.selectedId), this.wieldedNeedle())
         this.root.querySelector(".map-world")!.appendChild(this.bee.el)
 
-        this.hud = new MapHud(this.root.querySelector<HTMLElement>(".map-lives")!)
+        this.hud = new MapHud(this.root.querySelector<HTMLElement>(".map-lives")!, this.graph)
 
         // 初期カメラは選択中ノードを中央に据えた状態から始める(アニメーションなし)
         this.camera.lookAt(this.graph.node(this.selectedId), false)
