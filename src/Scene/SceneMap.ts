@@ -115,10 +115,6 @@ export class SceneMap extends Scene {
             if (this.camera.dragged) return
             this.handleNodeTap(id)
         })
-        for (const node of this.graph.nodes) {
-            const view = nodesEl.children.item(this.graph.nodes.indexOf(node)) as HTMLElement | null
-            if (view) view.title = Language.mapLabel(node.label)
-        }
         // 初期選択ノードにも見た目上selectedを反映しておく(そうしないと最初の移動まで枠が出ない)
         this.nodeViews.select(this.selectedId)
 

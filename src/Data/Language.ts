@@ -4,7 +4,7 @@ const names: Record<LanguageCode, string> = { ja: "日本語", en: "English" }
 
 const translations: Record<string, Record<LanguageCode, string>> = {
     settings: { ja: "設定", en: "Settings" },
-    language: { ja: "言語", en: "Language" },
+    language: { ja: "Language", en: "Language" },
     keyConfig: { ja: "キーコンフィグ", en: "Key Config" },
     deleteData: { ja: "データの削除", en: "Delete Data" },
     back: { ja: "戻る", en: "Back" },
