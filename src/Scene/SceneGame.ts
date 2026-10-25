@@ -7,6 +7,7 @@ import { Menu } from "../utils/Menu/Menu"
 import { Scene } from "../utils/Scene/Scene"
 import { App } from "../App"
 import { GameBackdrop } from "./GameBackdrop"
+import { Language } from "../Data/Language"
 
 export class SceneGame extends Scene {
     private game?: Game
@@ -29,12 +30,18 @@ export class SceneGame extends Scene {
             onWin: () => {
                 // 追加残機で受けた被弾も数えるので、一度も被弾せずにクリアしたときだけノーミスになる
                 this.node.recordClear(playerData, playerData.getLoadout().main, this.game!.player.hitCount === 0)
-                this.showResultMenu("--:: 前進 ::--", "Next", () => this.sceneAfterWin())
+                this.showResultMenu(
+                    () => Language.text("proceed"),
+                    Language.text("next"),
+                    () => this.sceneAfterWin(),
+                )
             },
             onLose: (score) => {
                 playerData.addScore(score)
-                this.showResultMenu("--:: 停滞 ::--", "Back", () =>
-                    import("./SceneMap").then(({ SceneMap }) => SceneMap.create()),
+                this.showResultMenu(
+                    () => Language.text("runEnded"),
+                    Language.text("previous"),
+                    () => import("./SceneMap").then(({ SceneMap }) => SceneMap.create()),
                 )
             },
             onScoreCollected: (score) => playerData.addScore(score),
@@ -66,7 +73,7 @@ export class SceneGame extends Scene {
 
     // クリア/ゲームオーバー時に、やり直すか次の場面(next)へ進むかを選ぶメニューを重ねて表示する。
     // 進むボタンは、勝てば「Next」、負ければ引き返す「Back」と呼び分ける
-    private showResultMenu(title: string, nextLabel: string, next: () => Promise<Scene>) {
+    private showResultMenu(title: () => string, nextLabel: string, next: () => Promise<Scene>) {
         if (this.resultMenu) return
 
         this.resultMenu = new Menu(
@@ -78,7 +85,7 @@ export class SceneGame extends Scene {
                     [
                         {
                             type: "select",
-                            label: "Retry",
+                            label: Language.text("retry"),
                             onSelect: () => {
                                 App.sc.goto(async () => new SceneGame(this.node))
                             },
@@ -112,7 +119,9 @@ export class SceneGame extends Scene {
                         playerData.markCutsceneSeen("ending")
                         return import("./Cutscene/SceneCredits").then(
                             ({ SceneCredits }) =>
-                                new SceneCredits(() => import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle())),
+                                new SceneCredits(() =>
+                                    import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle()),
+                                ),
                         )
                     }),
             )

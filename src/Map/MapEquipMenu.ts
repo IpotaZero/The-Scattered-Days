@@ -7,6 +7,7 @@ import { InputCode } from "../utils/InputCode"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import { Menu, MenuOption, MenuOptionBox } from "../utils/Menu/Menu"
 import { MenuPreset } from "../utils/Menu/MenuPreset"
+import { Language } from "../Data/Language"
 
 // 所持している主装備・副装備の中から選び直せる、右側に開くモーダル
 export class MapEquipMenu {
@@ -29,7 +30,7 @@ export class MapEquipMenu {
              <div class="texture-overlay"></div>`,
             {
                 elementId: "equip-root",
-                title: "--:: 型 ::--",
+                title: () => Language.text("changeType"),
                 options: () => this.buildRootOptions(),
             },
             App.input,
@@ -59,7 +60,7 @@ export class MapEquipMenu {
             [
                 {
                     type: "submenu",
-                    label: `針: ${mainEquipments[playerData.getLoadout().main]?.label ?? playerData.getLoadout().main}`,
+                    label: `${Language.text("needle")}: ${Language.equipment(playerData.getLoadout().main, "label", mainEquipments[playerData.getLoadout().main]?.label ?? playerData.getLoadout().main)}`,
                     hides: ["equip-root"],
                     onFocus: () => this.hideDescription(),
                     subMenu: () => this.buildMainSubMenu(),
@@ -68,7 +69,7 @@ export class MapEquipMenu {
             [
                 {
                     type: "submenu",
-                    label: `技: ${this.getSubLabel()}`,
+                    label: `${Language.text("technique")}: ${this.getSubLabel()}`,
                     // 技の一覧を開いている間はルートを隠す(並べると画面からはみ出す)
                     hides: ["equip-root"],
                     onFocus: () => this.hideDescription(),
@@ -83,7 +84,7 @@ export class MapEquipMenu {
     private buildBackOption(): MenuOption {
         return {
             type: "select",
-            label: `戻る`,
+            label: Language.text("back"),
             onFocus: () => this.hideDescription(),
             onSelect: () => {
                 this.menu.back(1)
@@ -94,14 +95,14 @@ export class MapEquipMenu {
 
     // 残機が満タンか花粉が足りなければ選べない。選ぶと回復するかを尋ね、「はい」で花粉を払って残機を1つ回復し、ルートへ戻る
     private buildLifeOption(): MenuOption {
-        const price = `<span class="equip-price">花粉 ${LIFE_PRICE.toLocaleString()}</span>`
+        const price = `<span class="equip-price">${Language.text("pollen")} ${LIFE_PRICE.toLocaleString()}</span>`
 
         return {
             type: "submenu",
-            label: `残機: ${playerData.getLives()} / ${playerData.getMaxLives()}　${price}`,
+            label: `${Language.text("lives")}: ${playerData.getLives()} / ${playerData.getMaxLives()}　${price}`,
             hides: ["equip-root"],
             disabled: () => !playerData.canBuyLife(),
-            onFocus: () => this.showDescription("花粉を払って残機を1つ回復する。"),
+            onFocus: () => this.showDescription(Language.text("restoreLifeDescription")),
             subMenu: () =>
                 MenuPreset.buildConfirmBox(
                     this.menu,
@@ -112,9 +113,10 @@ export class MapEquipMenu {
                         this.menu.back(1)
                     },
                     {
-                        title: "--:: 回復する? ::--",
+                        title: () => Language.text("restoreLife"),
                         elementId: "equip-life",
-                        confirmLabel: `はい　${price}`,
+                        confirmLabel: `${Language.text("yes")}　${price}`,
+                        cancelLabel: Language.text("no"),
                     },
                 ),
         }
@@ -123,7 +125,7 @@ export class MapEquipMenu {
     private buildMainSubMenu(): MenuOptionBox {
         return {
             elementId: "equip-main-options",
-            title: "--:: 針を選択 ::--",
+            title: () => Language.text("chooseNeedle"),
             options: () => this.buildMainOptions(),
             // 開いた瞬間、現在装備している主装備にカーソルを合わせる
             initialCursor: () => {
@@ -139,9 +141,9 @@ export class MapEquipMenu {
             ...Object.keys(mainEquipments).map((id) => [
                 {
                     type: "select" as const,
-                    label: mainEquipments[id]?.label ?? id,
+                    label: Language.equipment(id, "label", mainEquipments[id]?.label ?? id),
                     disabled: () => !playerData.getOwnedMainEquipmentIds().has(id),
-                    onFocus: () => this.showDescription(mainEquipments[id]?.description ?? ""),
+                    onFocus: () => this.showDescription(Language.equipment(id, "description", mainEquipments[id]?.description ?? "")),
                     onSelect: () => {
                         playerData.setLoadout({ ...playerData.getLoadout(), main: id })
                         this.changed()
@@ -156,7 +158,7 @@ export class MapEquipMenu {
     private buildSubSubMenu(): MenuOptionBox {
         return {
             elementId: "equip-sub-options",
-            title: "--:: 技を選択 ::--",
+            title: () => Language.text("chooseTechnique"),
             options: () => this.buildSubOptions(),
             // 開いた瞬間、現在装備している副装備にカーソルを合わせる(「なし」は先頭行)
             initialCursor: () => {
@@ -172,8 +174,8 @@ export class MapEquipMenu {
             [
                 {
                     type: "select",
-                    label: "なし",
-                    onFocus: () => this.showDescription("技を使用しない。"),
+                    label: Language.text("none"),
+                    onFocus: () => this.showDescription(Language.text("noAbility")),
                     onSelect: () => {
                         playerData.setLoadout({ ...playerData.getLoadout(), sub: null })
                         this.menu.backToRoot()
@@ -195,8 +197,8 @@ export class MapEquipMenu {
         if (playerData.getOwnedSubEquipmentIds().has(id)) {
             return {
                 type: "select",
-                label: equipment.label,
-                onFocus: () => this.showDescription(this.describeSub(equipment)),
+                label: Language.equipment(id, "label", equipment.label),
+                onFocus: () => this.showDescription(this.describeSub(id, equipment)),
                 onSelect: () => {
                     equip()
                     this.menu.back(1)
@@ -206,10 +208,10 @@ export class MapEquipMenu {
 
         return {
             type: "submenu",
-            label: `${equipment.label}　<span class="equip-price">花粉 ${equipment.price.toLocaleString()}</span>`,
+            label: `${Language.equipment(id, "label", equipment.label)}　<span class="equip-price">${Language.text("pollen")} ${equipment.price.toLocaleString()}</span>`,
             hides: ["equip-sub-options"],
             disabled: () => playerData.getTotalScore() < equipment.price,
-            onFocus: () => this.showDescription(this.describeSub(equipment)),
+            onFocus: () => this.showDescription(this.describeSub(id, equipment)),
             subMenu: () => ({
                 ...MenuPreset.buildConfirmBox(
                     this.menu,
@@ -220,10 +222,11 @@ export class MapEquipMenu {
                         this.menu.back(1)
                     },
                     {
-                        title: "--:: 習得して装備する? ::--",
+                        title: () => Language.text("learnEquip"),
                         elementId: "equip-learn",
                         // 題に値段まで入れるとスマホの幅からはみ出すので、払う量は「はい」の側に添える
-                        confirmLabel: `はい　<span class="equip-price">花粉 ${equipment.price.toLocaleString()}</span>`,
+                        confirmLabel: `${Language.text("yes")}　<span class="equip-price">${Language.text("pollen")} ${equipment.price.toLocaleString()}</span>`,
+                        cancelLabel: Language.text("no"),
                     },
                 ),
             }),
@@ -243,20 +246,22 @@ export class MapEquipMenu {
     // ステージ中に技を使う操作の説明。スマホは2本指タップ、それ以外は技に割り当てたキー
     private actionHint(): string {
         return isSmartPhone
-            ? "ステージ中、2本の指で画面をタップすると技を使う。"
-            : `ステージ中、${InputCode.primaryLabel(App.settings.keyConfig.action)}キーを押すと技を使う。`
+            ? Language.text("actionHintMobile")
+            : Language.text("actionHintKeyboard", { key: InputCode.primaryLabel(App.settings.keyConfig.action) })
     }
 
     // 説明文。action入力で使う技には、使い方を続ける
-    private describeSub(equipment: SubEquipment): string {
-        return equipment.manual ? `${equipment.description}${this.actionHint()}` : equipment.description
+    private describeSub(id: string, equipment: SubEquipment): string {
+        const description = Language.equipment(id, "description", equipment.description)
+        return equipment.manual ? `${description} ${this.actionHint()}` : description
     }
 
     private getSubLabel(): string {
         const subId = playerData.getLoadout().sub
-        if (!subId) return "なし"
+        if (!subId) return Language.text("none")
 
         // 削除した技を装備したままの保存データもある。ゲームでは技なしとして扱われる(SceneGame)ので、表示もそれに合わせる
-        return subEquipments[subId]?.label ?? "なし"
+        const equipment = subEquipments[subId]
+        return equipment ? Language.equipment(subId, "label", equipment.label) : Language.text("none")
     }
 }

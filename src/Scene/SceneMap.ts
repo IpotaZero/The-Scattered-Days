@@ -17,6 +17,7 @@ import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import { Scene } from "../utils/Scene/Scene"
 import { SvgFile } from "../utils/SvgFile"
 import type { Scenery } from "../World/Scenery"
+import { Language } from "../Data/Language"
 
 // 全体図・型と残機の画面を閉じるときのフェードアウトにかける時間
 const OVERLAY_FADE_OUT_MS = 200
@@ -79,9 +80,9 @@ export class SceneMap extends Scene {
                 <div class="map-achievement"></div>
             </div>
             <div class="map-controls">
-                ${isSmartPhone ? "" : `<div data-control="toggle-minimap"><span class="nowrap">全体図</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.slow)})`}</div>`}
-                <div data-control="open-equip"><span class="nowrap">型の変更</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
-                <div data-control="back-to-title"><span class="nowrap">タイトルへ戻る</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.cancel)})`}</div>
+                ${isSmartPhone ? "" : `<div data-control="toggle-minimap"><span class="nowrap">${Language.text("map")}</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.slow)})`}</div>`}
+                <div data-control="open-equip"><span class="nowrap">${Language.text("changeType")}</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.action)})`}</div>
+                <div data-control="back-to-title"><span class="nowrap">${Language.text("title")}</span>${isSmartPhone ? `` : `(${InputCode.primaryLabel(App.settings.keyConfig.cancel)})`}</div>
             </div>
         `
 
@@ -114,6 +115,10 @@ export class SceneMap extends Scene {
             if (this.camera.dragged) return
             this.handleNodeTap(id)
         })
+        for (const node of this.graph.nodes) {
+            const view = nodesEl.children.item(this.graph.nodes.indexOf(node)) as HTMLElement | null
+            if (view) view.title = Language.mapLabel(node.label)
+        }
         // 初期選択ノードにも見た目上selectedを反映しておく(そうしないと最初の移動まで枠が出ない)
         this.nodeViews.select(this.selectedId)
 

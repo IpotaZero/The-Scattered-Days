@@ -6,6 +6,7 @@ import { Scene } from "../utils/Scene/Scene"
 import { SvgFile } from "../utils/SvgFile"
 import { SettingsMenu } from "./SettingsMenu"
 import { TitleMeadow } from "./TitleMeadow"
+import { Language } from "../Data/Language"
 
 export class SceneTitle extends Scene {
     private menu?: Menu
@@ -42,7 +43,7 @@ export class SceneTitle extends Scene {
                     [
                         {
                             type: "select",
-                            label: "Start",
+                            label: Language.text("start"),
                             onSelect: () => {
                                 App.se.start.play()
 
@@ -70,7 +71,7 @@ export class SceneTitle extends Scene {
                     [
                         {
                             type: "submenu",
-                            label: "Settings",
+                            label: Language.text("titleSettings"),
                             // #rootはtitle.css側で横へ退場させるので、ここでは隠さない
                             hides: [],
                             subMenu: () => new SettingsMenu(menu).box(),

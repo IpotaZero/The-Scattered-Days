@@ -5,11 +5,12 @@ export namespace MenuPreset {
         menu: Menu,
         onConfirm: () => void,
         {
-            title = "ほんとに?",
-            elementId = "yes-no",
+            title,
+            elementId,
             confirmSound,
-            confirmLabel = "はい",
-        }: { title?: string; elementId?: string; confirmSound?: MenuSoundPattern; confirmLabel?: string } = {},
+            confirmLabel,
+            cancelLabel,
+        }: { title: () => string; elementId: string; confirmSound?: MenuSoundPattern; confirmLabel: string; cancelLabel: string },
     ): MenuOptionBox => ({
         elementId,
         title,
@@ -27,7 +28,7 @@ export namespace MenuPreset {
             [
                 {
                     type: "select",
-                    label: "いいえ",
+                    label: cancelLabel,
                     sound: "cancel",
                     onSelect: () => {
                         menu.back(1)

@@ -1,5 +1,6 @@
 import { playerData } from "../Data/PlayerData"
 import type { MapGraph } from "./MapGraph"
+import { Language } from "../Data/Language"
 
 // 地図画面の左上に出す、残機・次の回復までの時間・花粉・達成度の表示
 export class MapHud {
@@ -18,21 +19,21 @@ export class MapHud {
         // 終点をクリアするまでは空のまま。切り捨てて表示するので、全ステージをノーミスでクリアするまで100%にはならない
         if (playerData.isStageCleared(graph.goal.id)) {
             el.querySelector<HTMLElement>(".map-achievement")!.textContent =
-                `達成度 ${Math.floor(graph.achievement(playerData) * 100)}%`
+                `${Language.text("achievement")} ${Math.floor(graph.achievement(playerData) * 100)}%`
         }
     }
 
     // 花粉はステージで稼ぐか技の習得で払ったときにだけ変わるので、毎フレームではなくその都度表示し直す
     updateScore(): void {
-        this.scoreEl.textContent = `花粉 ${playerData.getTotalScore().toLocaleString()}`
+        this.scoreEl.textContent = `${Language.text("pollen")} ${playerData.getTotalScore().toLocaleString()}`
     }
 
     // 毎フレーム呼ばれる。文字が変わっていないときは書き換えず、画面を再描画させない
     updateLives(): void {
-        MapHud.setText(this.livesEl, `残機 ${playerData.getLives()} / ${playerData.getMaxLives()}`)
+        MapHud.setText(this.livesEl, `${Language.text("lives")} ${playerData.getLives()} / ${playerData.getMaxLives()}`)
 
         const remainingMs = playerData.getLifeRecoveryRemainingMs()
-        MapHud.setText(this.livesRecoveryEl, remainingMs > 0 ? `次の回復まで ${MapHud.formatMmSs(remainingMs)}` : "")
+        MapHud.setText(this.livesRecoveryEl, remainingMs > 0 ? `${Language.text("nextLife")} ${MapHud.formatMmSs(remainingMs)}` : "")
     }
 
     private static setText(el: HTMLElement, text: string) {

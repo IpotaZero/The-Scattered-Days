@@ -37,7 +37,7 @@ export type MenuOptionBox = {
     // renderのたびに再評価される (前回描画後に変化しうる内容を表示する場合に使う)
     options: () => MenuOption[][]
     // 一番上に表示
-    title?: string
+    title?: () => string
     // 一度に表示する最大行数。指定時、それを超える分は疑似スクロール（表示範囲の入れ替えと▲▼インジケーター）で扱う
     maxVisibleRows?: number
     // このボックスが開かれた瞬間のカーソル位置。省略時は{row: 0, col: 0}
@@ -503,10 +503,11 @@ export class Menu {
             this.optionElements = []
         }
 
-        if (layer.box.title) {
+        const titleText = layer.box.title?.()
+        if (titleText) {
             const title = document.createElement("span")
             title.className = "menu-title"
-            title.textContent = layer.box.title
+            title.textContent = titleText
             boxElement.appendChild(title)
         }
 

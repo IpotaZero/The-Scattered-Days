@@ -1,4 +1,7 @@
 import { playerData } from "../Data/PlayerData"
+import { App } from "../App"
+import { Language } from "../Data/Language"
+import { InputCode } from "../utils/InputCode"
 import { MapGraph, MapNode, MapNodeId } from "./MapGraph"
 
 // ミニマップの外周、カーソル枠のさらに外に取る余白(ワールド座標px)
@@ -28,7 +31,7 @@ export class MapMinimap {
                 <g class="map-minimap-edges">${edges.map((edge) => this.renderEdge(edge.from, edge.to)).join("")}</g>
                 <g class="map-minimap-nodes"></g>
             </svg>
-            <span class="map-minimap-back">戻る: cancel(X)</span>
+            <span class="map-minimap-back">${Language.text("minimapBack", { key: InputCode.primaryLabel(App.settings.keyConfig.cancel) })}</span>
             <div class="texture-overlay"></div>
         `
         this.el.querySelector<HTMLElement>(".map-minimap-back")!.addEventListener("click", onBack)

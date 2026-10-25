@@ -14,6 +14,7 @@ import { isSmartPhone } from "../utils/Functions/isSmartPhone"
 import type { Menu, MenuOption, MenuOptionBox } from "../utils/Menu/Menu"
 import { MenuPreset } from "../utils/Menu/MenuPreset"
 import { SceneTitle } from "./SceneTitle"
+import { Language } from "../Data/Language"
 
 const VOLUME_LABELS: Record<VolumeKind, string> = {
     bgm: "BGM",
@@ -21,17 +22,7 @@ const VOLUME_LABELS: Record<VolumeKind, string> = {
 }
 
 // キーコンフィグに並べる順もこの順にする
-const ACTION_LABELS: Record<InputAction, string> = {
-    up: "上",
-    down: "下",
-    left: "左",
-    right: "右",
-    slow: "低速",
-    action: "技",
-    suicide: "自爆",
-    ok: "決定",
-    cancel: "キャンセル",
-}
+const ACTIONS: InputAction[] = ["up", "down", "left", "right", "slow", "action", "suicide", "ok", "cancel"]
 
 /**
  * 音量・描画fps・fps表示・弾の軽量描画・ドラッグ係数・キーコンフィグ・デバッグ用の全ステージ解放・セーブデータの削除をまとめた設定メニュー。
@@ -53,8 +44,18 @@ export class SettingsMenu {
     box(): MenuOptionBox {
         return {
             elementId: "settings",
-            title: "設定",
+            title: () => Language.text("settings"),
             options: () => [
+                [
+                    {
+                        type: "select",
+                        label: this.languageLabel(),
+                        onSelect: () => {
+                            App.settings.changeLanguage(Language.currentLanguage() === "ja" ? "en" : "ja")
+                            this.menu.render()
+                        },
+                    },
+                ],
                 this.volumeRow("bgm"),
                 this.volumeRow("se"),
                 [
@@ -108,7 +109,7 @@ export class SettingsMenu {
                           [
                               {
                                   type: "submenu",
-                                  label: "キーコンフィグ",
+                                  label: Language.text("keyConfig"),
                                   hides: ["settings"],
                                   subMenu: () => this.keyConfigBox(),
                               } satisfies MenuOption,
@@ -127,7 +128,7 @@ export class SettingsMenu {
                 [
                     {
                         type: "submenu",
-                        label: "データの削除",
+                        label: Language.text("deleteData"),
                         hides: ["settings"],
                         subMenu: () => this.deleteDataBox(),
                     },
@@ -136,7 +137,7 @@ export class SettingsMenu {
                 [
                     {
                         type: "select",
-                        label: "OP",
+                        label: Language.text("opening"),
                         disabled: () => !playerData.hasSeenCutscene("opening"),
                         onSelect: () => {
                             App.sc.goto(async () =>
@@ -148,7 +149,7 @@ export class SettingsMenu {
                     },
                     {
                         type: "select",
-                        label: "ED",
+                        label: Language.text("ending"),
                         disabled: () => !playerData.hasSeenCutscene("ending"),
                         onSelect: () => {
                             App.sc.goto(async () =>
@@ -160,7 +161,7 @@ export class SettingsMenu {
                     },
                     {
                         type: "select",
-                        label: "Credits",
+                        label: Language.text("credits"),
                         onSelect: () => {
                             App.sc.goto(async () =>
                                 import("./Cutscene/SceneCredits").then(
@@ -173,7 +174,7 @@ export class SettingsMenu {
                 [
                     {
                         type: "select",
-                        label: "戻る",
+                        label: Language.text("back"),
                         sound: "cancel",
                         onSelect: () => this.menu.back(1),
                     },
@@ -225,7 +226,7 @@ export class SettingsMenu {
         const el = document.createElement("span")
         el.className = "settings-row"
         el.innerHTML = `
-            <span>ドラッグ</span>
+            <span>${Language.text("drag")}</span>
             <span>×${(App.settings.dragScaleLevel / 10).toFixed(1)}</span>
         `
         return el
@@ -254,7 +255,7 @@ export class SettingsMenu {
         const el = document.createElement("span")
         el.className = "settings-row"
         el.innerHTML = `
-            <span>描画fps</span>
+            <span>${Language.text("drawFps")}</span>
             <span>${App.settings.drawFps}</span>
         `
         return el
@@ -264,7 +265,7 @@ export class SettingsMenu {
         const el = document.createElement("span")
         el.className = "settings-row"
         el.innerHTML = `
-            <span>fps表示</span>
+            <span>${Language.text("showFps")}</span>
             <span>${App.settings.showFps ? "ON" : "OFF"}</span>
         `
         return el
@@ -274,7 +275,7 @@ export class SettingsMenu {
         const el = document.createElement("span")
         el.className = "settings-row"
         el.innerHTML = `
-            <span>弾の軽量描画</span>
+            <span>${Language.text("liteBullets")}</span>
             <span>${App.settings.liteBullets ? "ON" : "OFF"}</span>
         `
         return el
@@ -304,11 +305,11 @@ export class SettingsMenu {
 
     // アクションの一覧。選ぶとそのアクションのキーを追加・削除するサブメニューが開く
     private keyConfigBox(): MenuOptionBox {
-        const actions = Object.keys(ACTION_LABELS) as InputAction[]
+        const actions = ACTIONS
 
         return {
             elementId: "settings-keyconfig",
-            title: "キーコンフィグ",
+            title: () => Language.text("keyConfig"),
             options: () => [
                 ...actions.map((action): MenuOption[] => [
                     {
@@ -321,7 +322,7 @@ export class SettingsMenu {
                 [
                     {
                         type: "select",
-                        label: "初期設定に戻す",
+                        label: Language.text("reset"),
                         onSelect: () => {
                             App.settings.resetKeyConfig()
                             this.menu.render()
@@ -331,7 +332,7 @@ export class SettingsMenu {
                 [
                     {
                         type: "select",
-                        label: "戻る",
+                        label: Language.text("back"),
                         sound: "cancel",
                         onSelect: () => this.menu.back(1),
                     },
@@ -346,7 +347,7 @@ export class SettingsMenu {
         const el = document.createElement("span")
         el.className = "settings-row"
         el.innerHTML = `
-            <span>${ACTION_LABELS[action]}</span>
+            <span>${Language.text(action)}</span>
             <span class="settings-keys">${keys}</span>
         `
         return el
@@ -358,13 +359,13 @@ export class SettingsMenu {
     private keyBindBox(action: InputAction): MenuOptionBox {
         return {
             elementId: "settings-keybind",
-            title: ACTION_LABELS[action],
+            title: () => Language.text(action),
             maxVisibleRows: 10,
             options: () => [
                 [
                     {
                         type: "select",
-                        label: this.waiting ? "キーを押してください" : "＋ 追加",
+                        label: this.waiting ? Language.text("pressKey") : Language.text("add"),
                         onSelect: () => {
                             this.toggleWaiting(action)
                         },
@@ -390,7 +391,7 @@ export class SettingsMenu {
                 [
                     {
                         type: "select",
-                        label: "戻る",
+                        label: Language.text("back"),
                         sound: "cancel",
                         disabled: () => this.waiting !== undefined,
                         onSelect: () => this.menu.back(1),
@@ -503,10 +504,22 @@ export class SettingsMenu {
                     playerData.reset()
                     this.menu.back(1)
                 },
-                { title: "セーブデータを消す?", elementId: "settings-delete" },
+                {
+                    title: () => Language.text("deleteSave"),
+                    elementId: "settings-delete",
+                    confirmLabel: Language.text("yes"),
+                    cancelLabel: Language.text("no"),
+                },
             ),
             // うっかり消してしまわないよう、最初は「いいえ」に合わせておく
             initialCursor: () => ({ row: 1, col: 0 }),
         }
+    }
+
+    private languageLabel(): HTMLElement {
+        const el = document.createElement("span")
+        el.className = "settings-row"
+        el.innerHTML = `<span>${Language.text("language")}</span><span>${Language.name()}</span>`
+        return el
     }
 }

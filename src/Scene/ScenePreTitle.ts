@@ -1,5 +1,6 @@
 import { App } from "../App"
 import { Scene } from "../utils/Scene/Scene"
+import { Language } from "../Data/Language"
 
 /**
  * ブラウザはユーザー操作があるまで音を鳴らさせてくれないので、
@@ -15,7 +16,7 @@ export class ScenePreTitle extends Scene {
         this.root.insertAdjacentHTML(
             "beforeend",
             `
-                <div class="pre-title-message">Click or Press Any Key</div>
+                <div class="pre-title-message">${Language.text("pressAnyKey")}</div>
             `,
         )
 

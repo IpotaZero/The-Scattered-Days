@@ -1,6 +1,7 @@
 import type { DigitalInput, Source } from "@ipota/input"
 import { InputCode } from "../utils/InputCode"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
+import { Language, type LanguageCode } from "./Language"
 
 export type InputAction = "up" | "down" | "left" | "right" | "slow" | "action" | "suicide" | "ok" | "cancel"
 
@@ -76,6 +77,7 @@ export type DrawFps = 60 | 30
 const STORAGE_KEY = "danmaku-kari.settings.v1"
 
 type SerializedSettings = {
+    language?: LanguageCode
     volumeLevels?: Partial<Record<VolumeKind, number>>
     keyConfig?: Partial<KeyConfigMap>
     drawFps?: DrawFps
@@ -116,6 +118,7 @@ export class Settings {
 
     constructor(private readonly target: SettingsTarget) {
         this.load()
+        Language.set(Language.currentLanguage())
         this.applyVolume("bgm")
         this.applyVolume("se")
         this.target.input.updateConfig(this.keyConfig)
@@ -127,6 +130,11 @@ export class Settings {
     toggleShowFps() {
         this.showFps = !this.showFps
         this.target.fpsMeter.show(this.showFps)
+        this.save()
+    }
+
+    changeLanguage(language: LanguageCode) {
+        Language.set(language)
         this.save()
     }
 
@@ -210,6 +218,8 @@ export class Settings {
 
             const data: SerializedSettings = JSON.parse(raw)
 
+            if (data.language === "ja" || data.language === "en") Language.set(data.language)
+
             for (const kind of ["bgm", "se"] as const) {
                 const level = data.volumeLevels?.[kind]
                 if (typeof level === "number") this.volumeLevels[kind] = Math.min(VOLUME_MAX_LEVEL, Math.max(0, level))
@@ -240,6 +250,7 @@ export class Settings {
 
     private save() {
         const data: SerializedSettings = {
+            language: Language.currentLanguage(),
             volumeLevels: this.volumeLevels,
             keyConfig: this.keyConfig,
             drawFps: this.drawFps,
