@@ -69,6 +69,14 @@ body {
     white-space: pre;
 }
 
+.now-loading {
+    position: fixed;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    z-index: 10001;
+    pointer-events: none;
+}
+
 /* タイトル・マップなど、ゲーム外の画面で使う色はこの4色だけ。濃淡は透明度で作る */
 :root {
     --paper: #f2ecdc;
