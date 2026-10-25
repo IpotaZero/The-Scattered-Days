@@ -9,6 +9,7 @@
     "scripts": {
         "build": "npx vite build",
         "build:watch": "npx vite build --watch",
+        "package:itch": "npm run build && node scripts/package-itch.mjs",
         "map": "node scripts/map.mjs",
         "deploy": "node scripts/deploy.mjs"
     }
