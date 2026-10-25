@@ -60,8 +60,8 @@ const translations: Record<string, Record<LanguageCode, string>> = {
         ja: "ステージ中、{key}キーを押すと技を使う。",
         en: "Press {key} during a stage to use your ability.",
     },
-    proceed: { ja: "前進", en: "Proceed" },
-    runEnded: { ja: "停滞", en: "Run Ended" },
+    proceed: { ja: "--:: 前進 ::--", en: "--:: Proceed ::--" },
+    runEnded: { ja: "--:: 停滞 ::--", en: "--:: Stagnation ::--" },
     minimapBack: { ja: "戻る: cancel({key})", en: "Back: cancel({key})" },
     pressAnyKey: { ja: "Click or Press Any Key", en: "Click or Press Any Key" },
 }
