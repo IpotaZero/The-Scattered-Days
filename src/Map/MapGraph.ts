@@ -229,11 +229,14 @@ export class MapGraph {
         return playerData.debugMode || edge.isOpen(playerData)
     }
 
-    // スタート地点は常に解放。それ以外は、入ってくる辺のうち1つでも開いていれば解放される(デバッグ用の全解放中は無条件)
+    // スタート地点は常に解放。それ以外は、入ってくる辺のうち1つでも通れれば解放される(デバッグ用の全解放中は無条件)
     isUnlocked(node: MapNode, playerData: PlayerData): boolean {
-        if (node === this.start || playerData.debugMode) return true
+        return this.isReached(node, (edge) => this.isPassable(edge, playerData))
+    }
 
-        return this.edges.filter((edge) => edge.to === node).some((edge) => edge.isOpen(playerData))
+    // スタート地点は常にたどり着ける。それ以外は、入ってくる辺のうち1つでもpassableならたどり着ける
+    isReached(node: MapNode, passable: (edge: MapEdge) => boolean): boolean {
+        return node === this.start || this.edges.some((edge) => edge.to === node && passable(edge))
     }
 
     // 塊。同じ景色のノードが辺でつながったまとまり(地図の上の、ひとつの場所)

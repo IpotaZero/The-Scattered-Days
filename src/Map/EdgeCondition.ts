@@ -2,7 +2,8 @@ import { EquipmentId } from "../Data/Equipment"
 import { PlayerData } from "../Data/PlayerData"
 import { mainEquipments, type MainEquipment } from "../Game/Equipment/PlayerEquipment"
 // MapGraphとは互いに参照し合うので、型としてだけ読み込む
-import type { MapGraph, MapNode } from "./MapGraph"
+import type { MapNode } from "./MapGraph"
+import type { MapSight } from "./MapSight"
 
 // 辺に数珠のように通す印の一つ(MapEdgeSeals)
 export type EdgeSeal = {
@@ -21,8 +22,8 @@ export abstract class EdgeCondition {
 
     abstract isMet(from: MapNode, playerData: PlayerData): boolean
 
-    // 辺のfrom側から順に並べる印
-    abstract seals(from: MapNode, graph: MapGraph, playerData: PlayerData): EdgeSeal[]
+    // 辺のfrom側から順に並べる印。行けるかどうかは、地図に見せている解放の様子(sight)に合わせる
+    abstract seals(from: MapNode, sight: MapSight, playerData: PlayerData): EdgeSeal[]
 
     // ラベルなし: 追加の条件なし / "badges": 全免状 / それ以外: 主装備のID
     static fromLabel(label: string | undefined, masters: readonly MapNode[]): EdgeCondition {
@@ -61,12 +62,12 @@ class MainEquipmentCondition extends EdgeCondition {
     }
 
     // 辺の根元に、その針の印を一つ置く。fromをその針でクリアすれば塗る。fromにまだ行けなければ伏せる
-    seals(from: MapNode, graph: MapGraph, playerData: PlayerData): EdgeSeal[] {
+    seals(from: MapNode, sight: MapSight, playerData: PlayerData): EdgeSeal[] {
         return [
             {
                 motif: this.equipment.icon.content,
                 earned: this.isMet(from, playerData),
-                locked: !graph.isUnlocked(from, playerData),
+                locked: !sight.isUnlocked(from),
             },
         ]
     }
@@ -92,11 +93,11 @@ class AllBadgesCondition extends EdgeCondition {
     }
 
     // 道場主ごとに、その場所の絵柄の印を一つ。授かった免状は塗る。まだ行けない場所の絵柄は伏せる
-    seals(_from: MapNode, graph: MapGraph, playerData: PlayerData): EdgeSeal[] {
+    seals(_from: MapNode, sight: MapSight, playerData: PlayerData): EdgeSeal[] {
         return this.masters.map((master) => ({
             motif: master.scenery.motif.content,
             earned: playerData.hasBadge(master.badge!),
-            locked: !graph.isUnlocked(master, playerData),
+            locked: !sight.isUnlocked(master),
         }))
     }
 }

@@ -1,6 +1,6 @@
-import { PlayerData } from "../Data/PlayerData"
 import { seededRandom } from "../utils/Functions/seededRandom"
 import type { MapGraph, MapNode } from "./MapGraph"
+import type { MapSight } from "./MapSight"
 
 // 置いた小物の位置と大きさ(半径)。ほかの小物と重ならないように覚えておく
 type Placed = { readonly x: number; readonly y: number; readonly r: number }
@@ -22,22 +22,33 @@ export class MapProps {
     readonly el = document.createElement("div")
 
     private readonly placed: Placed[] = []
+    // 塊ごとの、小物をまとめた要素と、その塊のノード
+    private readonly groups: { readonly el: HTMLElement; readonly cluster: readonly MapNode[] }[] = []
 
     constructor(
         private readonly graph: MapGraph,
-        playerData: PlayerData,
+        private readonly sight: MapSight,
     ) {
         this.el.className = "map-props"
 
         for (const cluster of graph.clusters()) {
             const group = document.createElement("div")
             group.className = "map-props-cluster"
-            group.classList.toggle(
-                "locked",
-                cluster.every((node) => !graph.isUnlocked(node, playerData)),
-            )
             this.scatter(cluster).forEach((el) => group.appendChild(el))
             this.el.appendChild(group)
+            this.groups.push({ el: group, cluster })
+        }
+
+        this.refresh()
+    }
+
+    // 地図に見せている解放の様子(sight)で、まだどのノードにも行けない塊の小物を伏せる。様子が変わったら呼ぶ
+    refresh(): void {
+        for (const { el, cluster } of this.groups) {
+            el.classList.toggle(
+                "locked",
+                cluster.every((node) => !this.sight.isUnlocked(node)),
+            )
         }
     }
 

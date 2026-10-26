@@ -1,5 +1,6 @@
 import { PlayerData } from "../Data/PlayerData"
 import type { MapGraph } from "./MapGraph"
+import type { MapSight } from "./MapSight"
 
 // 並べる印どうしの間隔(ワールド座標px)
 const SEAL_SPACING = 36
@@ -13,15 +14,25 @@ const SEAL_MARGIN = 60
 export class MapEdgeSeals {
     readonly el = document.createElement("div")
 
-    constructor(graph: MapGraph, playerData: PlayerData) {
+    constructor(
+        private readonly graph: MapGraph,
+        private readonly sight: MapSight,
+        private readonly playerData: PlayerData,
+    ) {
         this.el.className = "map-edge-seals"
+        this.refresh()
+    }
 
-        for (const edge of graph.edges) {
+    // 印をすべて並べ直す。地図に見せている解放の様子(sight)が変わったら呼ぶ
+    refresh(): void {
+        this.el.replaceChildren()
+
+        for (const edge of this.graph.edges) {
             // 辺の手前側(fromのノードのすぐ外)から、辺に沿って並べる。fromを選んだときに画面の中に収まるようにする
             const len = Math.hypot(edge.to.x - edge.from.x, edge.to.y - edge.from.y) || 1
             const start = Math.hypot(edge.from.width, edge.from.height) / 2 + SEAL_MARGIN
 
-            edge.condition.seals(edge.from, graph, playerData).forEach((seal, i) => {
+            edge.condition.seals(edge.from, this.sight, this.playerData).forEach((seal, i) => {
                 const offset = start + i * SEAL_SPACING
 
                 const el = document.createElement("div")

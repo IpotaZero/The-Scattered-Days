@@ -29,6 +29,23 @@
         cursor: grabbing;
     }
 
+    /* 解放の演出の間(src/Scene/SceneMap.ts)は、ノード・ボタン・スワイプのどれにも触れられない */
+    &.unlocking {
+        pointer-events: none;
+    }
+
+    /* 解放の演出で、ノードが行けるようになった瞬間に画面を覆う光。画面中央(解放されたノード)ほど明るい */
+    .map-unlock-flash {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+            circle at center,
+            var(--paper) 0%,
+            color-mix(in srgb, var(--paper) 60%, transparent) 100%
+        );
+    }
+
     /* カメラ(src/Map/MapCamera.ts)。背景とワールドをすべてこの1つの要素に入れ、そのtransformだけで動かす。
        画面いっぱいの大きさで、拡大縮小の中心は画面中央 */
     .map-camera {

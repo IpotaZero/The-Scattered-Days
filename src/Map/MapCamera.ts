@@ -1,3 +1,4 @@
+import { Awaits } from "@ipota/functions"
 import type { MapBounds } from "./MapGraph"
 
 type Point = { x: number; y: number }
@@ -66,12 +67,19 @@ export class MapCamera {
     // ワールド座標posが画面中央に来るようにカメラを向ける。animateがtrueならアニメーションさせる
     lookAt(pos: Point, animate: boolean) {
         this.pos = this.clampToBounds(pos)
-        this.apply(animate)
+        this.apply(animate ? `transform ${PAN_MS}ms ease-out` : "none")
     }
 
-    // 拡大縮小の中心は画面中央(cameraは画面いっぱいの大きさで、transform-originが中央)
-    private apply(animate: boolean) {
-        this.camera.style.transition = animate ? `transform ${PAN_MS}ms ease-out` : "none"
+    // 演出用。durationMSかけてワールド座標posを画面中央へゆっくり運び、運び終えたら解決する
+    async panTo(pos: Point, durationMS: number): Promise<void> {
+        this.pos = this.clampToBounds(pos)
+        this.apply(`transform ${durationMS}ms ease-in-out`)
+        await Awaits.sleep(durationMS)
+    }
+
+    // 拡大縮小の中心は画面中央(cameraは画面いっぱいの大きさで、transform-originが中央)。transitionはcameraのstyle.transitionにそのまま入れる
+    private apply(transition: string) {
+        this.camera.style.transition = transition
         this.camera.style.transform = `scale(${this.zoom}) translate(${-this.pos.x}px, ${-this.pos.y}px)`
     }
 
@@ -118,7 +126,7 @@ export class MapCamera {
             x: anchor.x - (center.x - screenCenter.x) / this.zoom,
             y: anchor.y - (center.y - screenCenter.y) / this.zoom,
         })
-        this.apply(false)
+        this.apply("none")
     }
 
     private handlePointerUp(e: PointerEvent) {

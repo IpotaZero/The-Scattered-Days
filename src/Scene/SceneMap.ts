@@ -1,8 +1,9 @@
+import { Awaits } from "@ipota/functions"
 import { App } from "../App"
 import { Dom } from "../Dom"
 import { playerData } from "../Data/PlayerData"
 import { mainEquipments, type MainEquipment } from "../Game/Equipment/PlayerEquipment"
-import { MapGraph, MapNode, MapNodeId } from "../Map/MapGraph"
+import { MapEdge, MapGraph, MapNode, MapNodeId } from "../Map/MapGraph"
 import { MapEquipMenu } from "../Map/MapEquipMenu"
 import { MapHud } from "../Map/MapHud"
 import { MapNavigation, type Direction } from "../Map/MapNavigation"
@@ -12,8 +13,10 @@ import { MapBee } from "../Map/MapBee"
 import { MapEdgeSeals } from "../Map/MapEdgeSeals"
 import { MapCamera } from "../Map/MapCamera"
 import { MapProps } from "../Map/MapProps"
+import { MapSight } from "../Map/MapSight"
 import { InputCode } from "../utils/InputCode"
 import { isSmartPhone } from "../utils/Functions/isSmartPhone"
+import { shakeElement } from "../utils/Functions/shakeElement"
 import { Scene } from "../utils/Scene/Scene"
 import { SvgFile } from "../utils/SvgFile"
 import type { Scenery } from "../World/Scenery"
@@ -27,6 +30,18 @@ const AREA_BGM_CROSSFADE_SECONDS = 1
 
 // 曲が切り替わったときに、右上へ曲名を出しておく時間(ms)
 const BGM_TITLE_MS = 5000
+
+// 解放の演出で、カメラを開いた辺の先のノードへ運ぶ(その間に線を濃くする)のと、選んでいるノードへ戻すのにかける時間
+const UNLOCK_PAN_MS = 1000
+
+// 解放の演出の一拍。地図が現れてから演出を始めるまでと、カメラが着いてから光らせるまでに置く
+const UNLOCK_BEAT_MS = 200
+
+// 解放の演出で、画面を光らせて揺らす時間。光が消えてから次へ移る
+const UNLOCK_FLASH_MS = 600
+
+// 解放の演出で、画面を揺らす大きさ(px)
+const UNLOCK_SHAKE_PX = 12
 
 export class SceneMap extends Scene {
     private selectedId: MapNodeId
@@ -43,12 +58,19 @@ export class SceneMap extends Scene {
     private requestedBgmSrc?: string
     // 右上に出ている曲名
     private bgmTitleEl?: HTMLElement
+    // 地図に描く解放の様子。前に地図を開いていたときの後で開いた辺は、解放の演出で見せるまで伏せておく
+    private readonly sight: MapSight
+    private props!: MapProps
+    private seals!: MapEdgeSeals
+    // 解放の演出の間はtrue。操作を受け付けない
+    private unlocking = false
 
     private constructor(private readonly graph: MapGraph) {
         super()
         // 前回いたノードから始める。マップの変更で消えた/未解放になったノードならスタート地点に戻す
         const saved = graph.nodes.find((node) => node.id === playerData.mapNodeId)
         this.selectedId = saved && graph.isUnlocked(saved, playerData) ? saved.id : graph.start.id
+        this.sight = new MapSight(graph, playerData)
     }
 
     // マップと、ノードの絵柄・小物・蜂のSVGの取得を待ってから生成する
@@ -66,9 +88,7 @@ export class SceneMap extends Scene {
                 <div class="map-seasons map-backdrop"></div>
                 <div class="map-grid map-backdrop"></div>
                 <div class="map-world">
-                    <svg class="map-edges">
-                        ${MapNodeViews.renderEdges(this.graph)}
-                    </svg>
+                    <svg class="map-edges"></svg>
                     <div class="map-nodes"></div>
                 </div>
                 <div class="texture-overlay map-backdrop"></div>
@@ -107,14 +127,22 @@ export class SceneMap extends Scene {
 
         const nodesEl = this.root.querySelector<HTMLElement>(".map-nodes")!
         // 塊のまわりの小物は、辺より手前・ノードより奥に置く
-        nodesEl.before(new MapProps(this.graph, playerData).el)
+        this.props = new MapProps(this.graph, this.sight)
+        nodesEl.before(this.props.el)
         // 条件のある辺には、条件の印を辺より手前・ノードより奥に並べる
-        nodesEl.before(new MapEdgeSeals(this.graph, playerData).el)
-        this.nodeViews = new MapNodeViews(this.graph, nodesEl, (id) => {
-            // スワイプ・ピンチの指を離した直後に発火するclickをタップ選択として扱わない
-            if (this.camera.dragged) return
-            this.handleNodeTap(id)
-        })
+        this.seals = new MapEdgeSeals(this.graph, this.sight, playerData)
+        nodesEl.before(this.seals.el)
+        this.nodeViews = new MapNodeViews(
+            this.graph,
+            this.sight,
+            this.root.querySelector<SVGSVGElement>(".map-edges")!,
+            nodesEl,
+            (id) => {
+                // スワイプ・ピンチの指を離した直後に発火するclickをタップ選択として扱わない
+                if (this.camera.dragged) return
+                this.handleNodeTap(id)
+            },
+        )
         // 初期選択ノードにも見た目上selectedを反映しておく(そうしないと最初の移動まで枠が出ない)
         this.nodeViews.select(this.selectedId)
 
@@ -141,6 +169,7 @@ export class SceneMap extends Scene {
         this.tintSeason(this.graph.node(this.selectedId))
 
         this.crossfadeToSceneryBgm()
+        this.showUnlocks()
     }
 
     protected async onEnd(): Promise<void> {}
@@ -148,6 +177,8 @@ export class SceneMap extends Scene {
     update(): void {
         playerData.recoverLivesOverTime()
         this.hud.updateLives()
+
+        if (this.unlocking) return
 
         if (this.equipMenu) {
             this.equipMenu.update()
@@ -244,6 +275,57 @@ export class SceneMap extends Scene {
 
         el.animate([{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], {
             duration: BGM_TITLE_MS,
+            easing: "ease-out",
+        }).addEventListener("finish", () => el.remove())
+    }
+
+    // 解放の演出。前に地図を開いていたときの後で開いた辺(MapSight.unseen)を一本ずつ見せ、そのたびにカメラを選んでいるノードへ戻す。
+    // 演出の間は地図に触れられない(map.cssの.unlocking)
+    private async showUnlocks() {
+        const edges = this.sight.unseen()
+        if (edges.length === 0) return
+
+        this.unlocking = true
+        this.root.classList.add("unlocking")
+
+        const origin = this.graph.node(this.selectedId)
+        await Awaits.sleep(UNLOCK_BEAT_MS)
+        for (const edge of edges) {
+            await this.showUnlock(edge)
+            await this.camera.panTo(origin, UNLOCK_PAN_MS)
+        }
+
+        this.root.classList.remove("unlocking")
+        this.unlocking = false
+    }
+
+    // 線を濃くしながら、カメラをedgeの先のノードへ運ぶ。
+    // そのノードがこれで初めて行けるようになったなら、一拍おいて画面を光らせて揺らし、ノードの絵柄とまわりの小物を見せる
+    private async showUnlock(edge: MapEdge) {
+        const unlocksNode = !this.sight.isUnlocked(edge.to)
+        this.sight.show(edge)
+        this.nodeViews.fadeEdge(edge, UNLOCK_PAN_MS)
+        await this.camera.panTo(edge.to, UNLOCK_PAN_MS)
+        if (!unlocksNode) return
+
+        await Awaits.sleep(UNLOCK_BEAT_MS)
+        App.se.unlock.play()
+        this.flash()
+        shakeElement(this.root, UNLOCK_FLASH_MS, UNLOCK_SHAKE_PX)
+        this.nodeViews.refresh()
+        this.props.refresh()
+        this.seals.refresh()
+        await Awaits.sleep(UNLOCK_FLASH_MS)
+    }
+
+    // 画面を紙色に光らせ、UNLOCK_FLASH_MSかけて消す
+    private flash() {
+        const el = document.createElement("div")
+        el.className = "map-unlock-flash"
+        this.root.appendChild(el)
+
+        el.animate([{ opacity: 0.8 }, { opacity: 0 }], {
+            duration: UNLOCK_FLASH_MS,
             easing: "ease-out",
         }).addEventListener("finish", () => el.remove())
     }
