@@ -24,7 +24,7 @@ export class SceneTitle extends Scene {
             <div class="title-content">
                 <div class="title-top">
                     <div class="title-copyright">&copy; ososikirackets</div>
-                    <div class="title-version">ver. 1.0.1</div>
+                    <div class="title-version">ver. 1.1.0</div>
                 </div>
                 <div class="title-logo">
                     <span class="title-logo-line">The</span>
