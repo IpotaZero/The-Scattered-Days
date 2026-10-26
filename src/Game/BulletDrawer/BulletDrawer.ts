@@ -63,8 +63,6 @@ export class BulletDrawer {
 
             case "arrow":
             case "line":
-                return bullet.r * 3
-
             case "ball":
                 return bullet.r + 16
 
@@ -546,16 +544,18 @@ export class BulletDrawer {
         return canvas
     }
 
-    // 今の path を、弾の色の太さ3の線で描き、その上に太さ2の白い芯を描く。
-    // 線と芯は弾の色の光(shadowBlur = r)をまとう。lite のときは光を省く
+    // 今の path を、端を丸めた弾の色の線で描き、その上に一回り細い白い芯を重ねる。
+    // 白い芯からはみ出た分が弾の色の縁になる。線と芯は半径によらない太さの弾の色の光をまとう。lite のときは光を省く
     private strokeGlowing(ctx: CanvasRenderingContext2D, bullet: Look) {
         if (!this.lite) {
             ctx.shadowColor = bullet.color
-            ctx.shadowBlur = bullet.r
+            ctx.shadowBlur = 10
         }
 
+        ctx.lineCap = "round"
+
         ctx.strokeStyle = bullet.color
-        ctx.lineWidth = 3
+        ctx.lineWidth = 4
         ctx.stroke()
 
         // 白い芯
