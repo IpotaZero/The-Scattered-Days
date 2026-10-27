@@ -309,7 +309,7 @@ export class SceneMap extends Scene {
         if (!unlocksNode) return
 
         await Awaits.sleep(UNLOCK_BEAT_MS)
-        App.se.unlock.play()
+        App.se.bulletSuzu.play()
         this.flash()
         shakeElement(this.root, UNLOCK_FLASH_MS, UNLOCK_SHAKE_PX)
         this.nodeViews.refresh()
