@@ -1,0 +1,201 @@
+/* 戦闘画面のキャンバス外に敷く景色(GameBackdrop.ts)。
+   色は base.css の4色だけを使う。場所ごとの色と漂うものは css/scenery.css の変数で決まる。
+   キャンバスより目立たないよう、どれも暗く・ゆっくり動かす。 */
+
+.game-backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+
+    /* 上の黒から地平線(下)へ、4段の帯でほんのわずかずつ空の色(--sky)を混ぜていく。どの段もほぼ黒で、目立たせない。
+       紙や金のような明るい空の色でも段の差が目立たないよう、混ぜる量は控えめ(3%ずつ)にし、
+       段と段の境目は12%幅でゆっくりぼかす */
+    background: linear-gradient(
+        180deg,
+        black 0% 18%,
+        color-mix(in srgb, var(--sky) 3%, black) 30% 42%,
+        color-mix(in srgb, var(--sky) 6%, black) 55% 67%,
+        color-mix(in srgb, var(--sky) 9%, black) 80% 100%
+    );
+}
+
+/* スマホではキャンバスにほぼ隠れて見えないので、動きを止めて合成の負荷をなくす(GameBackdrop.ts) */
+.game-backdrop.smartphone * {
+    animation-play-state: paused;
+}
+
+/* 右上の日や月の光(--light)。枝のシルエットをこの明るみに重ねて見せる。
+   ぼんやり広がる光ではなく、月暈(つきがさ)のような3重の輪にし、輪の縁だけを少しぼかす */
+.backdrop-light {
+    position: absolute;
+    top: -25vmin;
+    right: -15vmin;
+    width: 80vmin;
+    height: 80vmin;
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        color-mix(in srgb, var(--light) 6%, transparent) 0% 16%,
+        color-mix(in srgb, var(--light) 3.5%, transparent) 18% 30%,
+        color-mix(in srgb, var(--light) 1.5%, transparent) 32% 46%,
+        transparent 48%
+    );
+    opacity: var(--light-strength);
+}
+
+/* 草も枝も、地よりさらに暗いほぼ黒で描いてシルエットにする */
+.backdrop-grass,
+.backdrop-branch {
+    color: color-mix(in srgb, var(--forest) 8%, black);
+}
+
+.backdrop-grass {
+    position: absolute;
+    left: -2%;
+    width: 104%;
+    bottom: 0;
+    transform-origin: bottom center;
+    animation: backdrop-sway-skew 9s ease-in-out infinite;
+}
+
+.backdrop-grass-back {
+    height: 22vh;
+    /* 奥の草だけは一番下の帯よりわずかに明るくして、手前の草と重なりを分ける */
+    color: color-mix(in srgb, var(--forest) 28%, black);
+    animation-delay: -4s;
+}
+
+.backdrop-grass-front {
+    height: 26vh;
+}
+
+@keyframes backdrop-sway-skew {
+    0%,
+    100% {
+        transform: skewX(-1.2deg);
+    }
+    50% {
+        transform: skewX(1.2deg);
+    }
+}
+
+/* 上の隅から垂れ下がる枝。付け根(角)を軸にゆっくり揺らす */
+.backdrop-branch {
+    position: absolute;
+    top: 0;
+    width: 45vmin;
+    height: auto;
+    aspect-ratio: 400 / 260;
+    overflow: visible;
+    animation: backdrop-sway-rotate 11s ease-in-out infinite;
+}
+
+.backdrop-branch-left {
+    left: 0;
+    width: 32vmin;
+    transform-origin: top left;
+    animation-delay: -5s;
+}
+
+/* 右側は左上から垂れる枝をSVG内で左右反転して使う(GameBackdrop.ts) */
+.backdrop-branch-right {
+    right: 0;
+    transform-origin: top right;
+}
+
+@keyframes backdrop-sway-rotate {
+    0%,
+    100% {
+        transform: rotate(-1.5deg);
+    }
+    50% {
+        transform: rotate(1.5deg);
+    }
+}
+
+/* 漂うもの。色・大きさ・ぼかし・動き方は場所ごとの変数(css/scenery.css)で決まる。
+   位置(--x, --y)・ゆらぎ(--drift)・周期の倍率(--pace)は要素ごとにばらつかせてある(GameBackdrop.ts) */
+.backdrop-motes {
+    position: absolute;
+    inset: 0;
+}
+
+.backdrop-mote {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--mote-size);
+    height: var(--mote-size);
+    border-radius: 50%;
+
+    background: var(--mote);
+    filter: blur(var(--mote-blur));
+    opacity: 0;
+
+    animation-name: var(--mote-motion);
+    animation-duration: calc(var(--mote-period) * var(--pace));
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-delay: var(--delay);
+}
+
+/* 上から舞い降りる(雪・葉) */
+@keyframes backdrop-fall {
+    0% {
+        transform: translate(0, calc(-1 * var(--y) - 2rem));
+        opacity: 0;
+    }
+    10%,
+    90% {
+        opacity: var(--mote-opacity);
+    }
+    100% {
+        transform: translate(var(--drift), calc(100dvh - var(--y) + 2rem));
+        opacity: 0;
+    }
+}
+
+/* 下から立ちのぼる(花粉・陽炎・火の粉) */
+@keyframes backdrop-rise {
+    0% {
+        transform: translate(0, calc(100dvh - var(--y) + 2rem));
+        opacity: 0;
+    }
+    10%,
+    90% {
+        opacity: var(--mote-opacity);
+    }
+    100% {
+        transform: translate(var(--drift), calc(-1 * var(--y) - 2rem));
+        opacity: 0;
+    }
+}
+
+/* 左から右へ吹き流される(風に飛ぶ花びら・砂・霧) */
+@keyframes backdrop-blow {
+    0% {
+        transform: translate(calc(-1 * var(--x) - 4rem), 0);
+        opacity: 0;
+    }
+    10%,
+    90% {
+        opacity: var(--mote-opacity);
+    }
+    100% {
+        transform: translate(calc(100vw - var(--x) + 4rem), var(--drift));
+        opacity: 0;
+    }
+}
+
+/* その場で瞬く(露・星) */
+@keyframes backdrop-twinkle {
+    0%,
+    100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: var(--mote-opacity);
+    }
+}
