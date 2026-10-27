@@ -10,6 +10,7 @@
         "build": "npx vite build",
         "build:watch": "npx vite build --watch",
         "package:itch": "npm run build && node scripts/package-itch.mjs",
+        "deploy:itch": "npm run package:itch && butler push release/itch/The-Scattered-Days.zip ososikirackets/the-scattered-days:html5",
         "map": "node scripts/map.mjs",
         "deploy": "node scripts/deploy.mjs"
     }
