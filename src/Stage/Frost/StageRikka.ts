@@ -108,8 +108,8 @@ class EnemyMaster extends Enemy {
                 me.speed = 4 + 4 * (i / 3)
                 return me
             })
-            .ex(13)
-            .g((me) => Behavior.reaccel(me, 30, 60, 60, 6))
+            .ex(4)
+            .g((me) => Behavior.reaccel(me, 60, 60, 60, 6))
             .fire(this.game.bullets)
     }
 }

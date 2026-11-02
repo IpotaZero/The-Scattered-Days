@@ -19,7 +19,7 @@ const FREEZE_FRAMES = 20
 
 const DROP_FRAMES = 150
 
-const SHARDS_PER_RING = 24
+const SHARDS_PER_RING = 8
 
 const RING_COUNT = 4
 const INNER_SPEED = 2
@@ -39,7 +39,7 @@ class EnemyPupil extends Enemy {
     private readonly path = Curves.lissajous(this.game.WIDTH * 0.25, this.game.HEIGHT * 0.05, 1, 2)
 
     constructor(game: Game) {
-        super(game, 3000, Size.MASTER, { renderer: new EnemyRendererCore() })
+        super(game, 1500, Size.MASTER, { renderer: new EnemyRendererCore() })
 
         this.scripts.add(() => this.enter())
     }

@@ -24,7 +24,7 @@ const DROP_FRAMES = 420
 const FALL_SPEED = 4
 const DROP_SPEED = 12
 
-const AREA_PER_SNOW = 9000
+const AREA_PER_SNOW = 18000
 
 export default class extends Stage {
     *G() {
@@ -107,7 +107,7 @@ class EnemyFrost extends Enemy {
             .color("#dff6ff")
             .p(this.p.clone())
             .speed(FALL_SPEED)
-            .duplicate(120)
+            .duplicate(10)
             .scatter({ p: 0.5, radian: [0, -T / 2], speed: [FALL_SPEED * 0.8, FALL_SPEED * 1.2] })
             .delete(120)
             .fire(this.game.bullets)
@@ -178,7 +178,7 @@ class EnemyFrost extends Enemy {
     private *ring() {
         yield* Array(270)
 
-        const count = 120
+        const count = 30
 
         yield* remodel(this)
             .format("diamond")
