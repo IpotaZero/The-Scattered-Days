@@ -1,3 +1,5 @@
+// 他のどのモジュールよりも先に評価され、アーケードモードならlocalStorageのセーブデータと設定を消す
+import "./Data/Arcade.js"
 import { App } from "./App.js"
 import { playerData } from "./Data/PlayerData.js"
 

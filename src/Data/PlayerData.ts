@@ -1,3 +1,4 @@
+import { Arcade } from "./Arcade"
 import {
     DEFAULT_LOADOUT,
     DEFAULT_OWNED_MAIN_EQUIPMENT_IDS,
@@ -8,9 +9,9 @@ import {
 
 const MAX_LIVES = 8
 
-// 残機が1回復するのにかかる時間(ms)。デバッグモード中は爆速になる
+// 残機が1回復するのにかかる時間(ms)。デバッグモード中とアーケードモードでは爆速になる
 const LIFE_RECOVERY_INTERVAL_MS = 120000
-const DEBUG_LIFE_RECOVERY_INTERVAL_MS = 5
+const FAST_LIFE_RECOVERY_INTERVAL_MS = 5
 
 // 残機を1つ回復するのに払う花粉
 export const LIFE_PRICE = 1000
@@ -223,7 +224,7 @@ export class PlayerData {
     }
 
     private lifeRecoveryIntervalMs(): number {
-        return this.debugMode ? DEBUG_LIFE_RECOVERY_INTERVAL_MS : LIFE_RECOVERY_INTERVAL_MS
+        return this.debugMode || Arcade.enabled ? FAST_LIFE_RECOVERY_INTERVAL_MS : LIFE_RECOVERY_INTERVAL_MS
     }
 
     // セーブデータを消し、初めて遊ぶときと同じ状態に戻す
