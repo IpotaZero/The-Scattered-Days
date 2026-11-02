@@ -1,0 +1,351 @@
+/* SceneTitle 専用のUI(バージョン表記・コピーライト・ロゴ・メニュー)。
+   ScenePreTitleもタイトルと同じ紙の色にして、切り替わりを目立たせない */
+
+.scene-pre-title,
+.scene-title {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.scene-pre-title {
+    flex-direction: column;
+    align-items: center;
+    gap: 3em;
+}
+
+/* 題辞。縦書きの句と、その下に小さく作者名。ゆっくり浮かび上がらせる */
+.pre-title-epigraph {
+    position: absolute;
+    writing-mode: vertical-rl;
+    /* 縦書きでは column が右から左へ並ぶ。句の左に作者名を置き、作者名は下に寄せる */
+    flex-direction: column;
+    gap: 1em;
+
+    opacity: 0;
+    animation: pre-title-epigraph-rise 3s ease-out 0.3s forwards;
+}
+
+.pre-title-haiku {
+    font-size: 1.3em;
+    letter-spacing: 0.3em;
+}
+
+.pre-title-poet {
+    align-self: flex-end;
+    font-size: 0.8em;
+    letter-spacing: 0.3em;
+    opacity: 0.6;
+}
+
+@keyframes pre-title-epigraph-rise {
+    from {
+        opacity: 0;
+        filter: blur(0.05em);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+/* 押されるまで待つ画面なので、急かさないようゆっくり明滅させる */
+.pre-title-message {
+    position: absolute;
+    letter-spacing: 0.3em;
+    max-width: 100%;
+    padding: 0 1em;
+    text-align: center;
+    animation: pre-title-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes pre-title-breathe {
+    0%,
+    100% {
+        opacity: 0.25;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* タイトルロゴ・バージョン表記・3Dモデルをまとめて1つの塊として扱う。
+   Stages選択時はこの要素ごとスライド+フェードで退場させる(中身を個別に指定しなくて済む) */
+.title-content {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    transition:
+        transform 0.5s ease-out,
+        opacity 0.5s ease-out;
+}
+
+.title-top {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.title-version,
+.title-copyright {
+    font-family: "Courier New", monospace;
+    font-size: 0.7em;
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+}
+
+.title-fullscreen-toggle {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+
+    width: 1.6em;
+    height: 1.6em;
+
+    background: none;
+    border: none;
+    color: var(--forest);
+    opacity: 0.6;
+    font-size: 0.9em;
+
+    cursor: pointer;
+}
+
+.title-logo {
+    position: absolute;
+    left: 0;
+    /* 左下のメニュー(#root)と被らないよう、ボタン自体の高さとは独立した
+       固定量(rem = ルートフォントサイズ基準)だけ底から離す */
+    bottom: 7rem;
+    padding: 0 0.15em;
+
+    flex-direction: column;
+    align-items: flex-start;
+
+    font-weight: 100;
+    /* 幅が狭い(スマホ)・高さが低い(PCの横長ウィンドウ)のどちらでもはみ出さないよう、
+       小さいほうの辺(vmin)を基準に縮小する */
+    font-size: clamp(3rem, 21vmin, 8rem);
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+
+    color: var(--forest);
+    max-width: 100%;
+}
+
+/* スマホ以外(マウスなど細かく指せるポインタを持つ端末)の上書き。
+   上の.title-logoがスマホ用の既定値で、PCでだけ変えたい項目をここに並べる。
+   PCではメニューが右下に離れるので、ロゴだけ底へ近づく */
+@media (hover: hover) and (pointer: fine) {
+    .title-logo {
+        bottom: 3rem;
+    }
+}
+
+/* 1行ずつ静かに浮かび上がらせる。装飾は真ん中の行の金色だけに絞る */
+.title-logo-line {
+    font-size: inherit;
+    opacity: 0;
+    animation: title-logo-rise 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+
+    &:nth-child(2) {
+        color: var(--gold);
+        animation-delay: 0.25s;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.5s;
+    }
+}
+
+@keyframes title-logo-rise {
+    from {
+        opacity: 0;
+        transform: translateY(0.12em);
+        filter: blur(0.04em);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+.title-menu {
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+    .menu-scroll-container {
+        gap: 1em;
+    }
+
+    .option-row {
+        width: 100%;
+        height: fit-content;
+        gap: 0.3em;
+    }
+
+    .option {
+        width: 100%;
+        text-align: center;
+        height: 100%;
+        padding: 0.4em 0 0.5em;
+
+        /* 細い罫線だけの控えめなボタン。選択中は墨色で塗りつぶし、金の下線を引く */
+        background: var(--paper-alpha);
+        border: 1px solid var(--forest);
+        border-radius: 0;
+        color: var(--forest);
+        letter-spacing: 0.3em;
+
+        transition:
+            background 0.1s ease-out,
+            color 0.1s ease-out;
+
+        &.selected {
+            background: var(--forest);
+            color: var(--paper);
+            box-shadow: 0 0.25em 0 -0.15em var(--gold);
+        }
+    }
+
+    .option-label {
+        padding-bottom: 0.1em;
+    }
+}
+
+/* #root(ルートメニュー)と設定メニュー(.settings-panel)を同じ箱に重ねる。
+   設定を開いている間は#rootを横へ退場させる。
+   状態判定(:has)もこの箱の中だけで完結するので追いやすい。 */
+.title-menu-stack {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: flex;
+    padding: 0.5em;
+    box-sizing: border-box;
+
+    #root {
+        position: absolute;
+        bottom: 2em;
+
+        display: flex;
+        width: 16em;
+        max-width: calc(100% - 2em);
+        right: 1em;
+
+        transition:
+            transform 0.45s ease-out,
+            opacity 0.2s ease-out;
+
+        .menu-scroll-container {
+            display: flex;
+            width: 100%;
+            gap: 0.4em;
+        }
+    }
+
+    /* SettingsMenu.tsが作るパネル。どれか1枚だけがMenuのsetHiddenで表示される */
+    .settings-panel {
+        position: absolute;
+        left: 1em;
+        bottom: 2em;
+        width: min(24em, 100% - 2em);
+
+        flex-direction: column;
+
+        .menu-title {
+            letter-spacing: 0.2em;
+        }
+
+        .menu-scroll-container {
+            width: 100%;
+            gap: 0.35em;
+        }
+
+        /* .optionの余白に.option-labelの下余白0.1emを足し、1pxの透明な枠を持たせて、選択肢1行と同じ高さにする */
+        .menu-scroll-indicator {
+            padding: 0.25em 0.6em 0.4em;
+            border: 1px solid transparent;
+        }
+
+        .option {
+            padding: 0.25em 0.6em 0.3em;
+            letter-spacing: 0.1em;
+            font-size: 0.8em;
+
+            /* 入力待ち中など、選べない行は丸ごと薄くする(menu.cssの既定はspanごとに重ねて薄くなりすぎる) */
+            &.disabled {
+                opacity: 0.35;
+
+                span {
+                    opacity: 1;
+                }
+            }
+        }
+
+        .option-label {
+            width: 100%;
+        }
+
+        /* 音量の行: 左右の矢印ボタンは文字幅だけ取り、残りを名前とゲージに回す */
+        .option-row:has(.settings-arrow) {
+            gap: 0.3em;
+        }
+
+        .option:has(.settings-arrow) {
+            width: auto;
+            flex: none;
+            padding: 0.25em 0.5em 0.3em;
+        }
+    }
+
+    &:has(.settings-panel:not(.fadeout)) #root {
+        transform: translateX(-30vw);
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* 名前を左、値(音量ゲージ・割り当てキー)を右に寄せた1行 */
+.settings-row {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+}
+
+/* ■□を詰めて、狭い画面でも矢印と同じ行に収まるようにする */
+.title-menu-stack .settings-panel .settings-gauge {
+    letter-spacing: 0;
+    font-size: 8pt;
+}
+
+/* 割り当てキーは1行に収め、はみ出した分は…で省略する。text-overflowはflexでは効かないのでblockにする */
+.title-menu-stack .settings-panel .settings-keys {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    font-size: 12pt;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* キーが長くてもアクション名(キャンセルなど)の方は縮めたり折り返したりしない */
+.title-menu-stack .settings-panel .settings-row:has(.settings-keys) > span:first-child {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* 設定を開いている間、タイトルロゴを左へスライドさせながら透明にする */
+.scene-title:has(.title-menu-stack .settings-panel:not(.fadeout)) .title-content {
+    transform: translateX(-30vw);
+    opacity: 0;
+    pointer-events: none;
+}
